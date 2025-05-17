@@ -1,0 +1,4 @@
+name: Torque
+version: "${version}"
+main: ca.bkaw.torque.paper.TorquePaper
+api-version: "1.21"
