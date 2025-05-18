@@ -25,4 +25,20 @@ public class Vehicle {
             .map(type::cast)
             .findFirst();
     }
+
+    /**
+     * Add a component to the vehicle.
+     *
+     * @param component The component to add.
+     */
+    public void addComponent(@NotNull VehicleComponent component) {
+        this.components.add(component);
+    }
+
+    /**
+     * Called each tick.
+     */
+    public void tick() {
+        this.components.forEach(VehicleComponent::tick);
+    }
 }
