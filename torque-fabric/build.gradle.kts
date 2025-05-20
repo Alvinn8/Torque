@@ -5,7 +5,6 @@ plugins {
 }
 
 val minecraftVersion = property("minecraft_version") as String
-val yarnMappings = property("yarn_mappings") as String
 val fabricLoaderVersion = property("fabric_loader_version") as String
 
 version = property("version") as String
@@ -22,8 +21,8 @@ loom {
 dependencies {
     implementation(project(":torque"))
     minecraft("com.mojang:minecraft:$minecraftVersion")
-    mappings("net.fabricmc:yarn:$yarnMappings:v2")
     modImplementation("net.fabricmc:fabric-loader:$fabricLoaderVersion")
+    mappings(loom.officialMojangMappings())
 }
 
 tasks {
