@@ -1,5 +1,6 @@
 plugins {
     id("xyz.jpenilla.run-paper") version "2.3.1"
+    id("com.gradleup.shadow") version "8.3.5"
 }
 
 val minecraftVersion = property("minecraft_version") as String
@@ -17,20 +18,26 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":torque"))
     compileOnly("io.papermc.paper:paper-api:${paperApiVersion}")
 }
 
 tasks {
-  runServer {
-    minecraftVersion(minecraftVersion)
-  }
-}
-
-tasks.named<ProcessResources>("processResources") {
-    val props = mapOf("version" to version)
-    inputs.properties(props)
-    filteringCharset = "UTF-8"
-    filesMatching("plugin.yml") {
-        expand(props)
+    runServer {
+        minecraftVersion(minecraftVersion)
+    }
+    assemble {
+        dependsOn(shadowJar)
+    }
+    shadowJar {
+        archiveClassifier.set("")
+    }
+    processResources {
+        val props = mapOf("version" to version)
+        inputs.properties(props)
+        filteringCharset = "UTF-8"
+        filesMatching("plugin.yml") {
+            expand(props)
+        }
     }
 }

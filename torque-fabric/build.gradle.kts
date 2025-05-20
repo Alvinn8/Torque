@@ -1,5 +1,6 @@
 plugins {
     id("fabric-loom") version "1.10-SNAPSHOT"
+    id("com.gradleup.shadow") version "8.3.5"
     id("maven-publish")
 }
 
@@ -19,25 +20,33 @@ loom {
 }
 
 dependencies {
+    implementation(project(":torque"))
     minecraft("com.mojang:minecraft:$minecraftVersion")
     mappings("net.fabricmc:yarn:$yarnMappings:v2")
     modImplementation("net.fabricmc:fabric-loader:$fabricLoaderVersion")
 }
 
-tasks.named<ProcessResources>("processResources") {
-    inputs.property("version", version)
-    inputs.property("minecraft_version", minecraftVersion)
-    inputs.property("fabric_loader_version", fabricLoaderVersion)
-    filteringCharset = "UTF-8"
-
-    filesMatching("fabric.mod.json") {
-        expand(
-            mapOf(
-                "version" to version,
-                "minecraft_version" to minecraftVersion,
-                "fabric_loader_version" to fabricLoaderVersion
-            )
+tasks {
+    assemble {
+        dependsOn(shadowJar)
+    }
+    shadowJar {
+        archiveClassifier.set("")
+        dependencies {
+            include(project(":torque"))
+        }
+    }
+    processResources {
+        val props = mapOf(
+            "version" to version,
+            "minecraft_version" to minecraftVersion,
+            "fabric_loader_version" to fabricLoaderVersion
         )
+        inputs.properties(props)
+        filteringCharset = "UTF-8"
+        filesMatching("fabric.mod.json") {
+            expand(props)
+        }
     }
 }
 
