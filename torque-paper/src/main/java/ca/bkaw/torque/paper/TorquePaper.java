@@ -1,13 +1,23 @@
 package ca.bkaw.torque.paper;
 
+import ca.bkaw.torque.Torque;
+import ca.bkaw.torque.paper.platform.PaperPlatform;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class TorquePaper extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
+        PaperPlatform platform = new PaperPlatform();
+        Torque torque = new Torque(platform);
+        torque.setup();
 
+        // Command registration
+        PaperTorqueCommand command = new PaperTorqueCommand(platform);
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands ->
+            command.register(commands.registrar())
+        );
     }
 
     @Override

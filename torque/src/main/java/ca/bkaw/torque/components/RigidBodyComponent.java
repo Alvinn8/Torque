@@ -1,5 +1,6 @@
 package ca.bkaw.torque.components;
 
+import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import org.joml.Matrix3d;
 import org.joml.Quaterniond;
@@ -10,22 +11,24 @@ public class RigidBodyComponent implements VehicleComponent {
     // The position is at the center of mass.
 
     // Properties
-    private double mass; // unit: kilogram
-    private Matrix3d initialInertiaTensorInverse; // unit: (kg m^2)^-1
+    private final double mass; // unit: kilogram
+    private final Matrix3d initialInertiaTensorInverse; // unit: (kg m^2)^-1
 
     // Position and velocity
-    private Vector3d position; // unit: meter
-    private Vector3d velocity; // unit: meter/second
-    private Quaterniond orientation;
-    private Vector3d angularVelocity; // unit: radian/second
+    private World world;
+    private final Vector3d position; // unit: meter
+    private final Vector3d velocity; // unit: meter/second
+    private final Quaterniond orientation;
+    private final Vector3d angularVelocity; // unit: radian/second
 
     // Accumulated each frame
-    private Vector3d netForce; // unit: Newton
-    private Vector3d netTorque; // unit: Newton-meter
+    private final Vector3d netForce; // unit: Newton
+    private final Vector3d netTorque; // unit: Newton-meter
 
-    public RigidBodyComponent(double mass, Matrix3d initialInertiaTensor, Vector3d position, Quaterniond orientation) {
+    public RigidBodyComponent(double mass, Matrix3d initialInertiaTensor, World world, Vector3d position, Quaterniond orientation) {
         this.mass = mass;
         this.initialInertiaTensorInverse = initialInertiaTensor.invert();
+        this.world = world;
         this.position = position;
         this.velocity = new Vector3d();
         this.orientation = orientation;

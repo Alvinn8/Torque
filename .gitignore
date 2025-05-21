@@ -11,3 +11,6 @@ build
 
 # IntelliJ
 .idea
+
+# Test Servers
+run
