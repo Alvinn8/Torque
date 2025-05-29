@@ -2,9 +2,12 @@ package ca.bkaw.torque.paper;
 
 import ca.bkaw.torque.TorqueCommand;
 import ca.bkaw.torque.paper.platform.PaperPlatform;
+import ca.bkaw.torque.paper.platform.PaperPlayer;
 import ca.bkaw.torque.paper.platform.PaperWorld;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 
@@ -34,6 +37,17 @@ public class PaperTorqueCommand {
                                 new PaperWorld(location.getWorld()),
                                 new Vector3d(location.getX(), location.getY(), location.getZ())
                             );
+                            return 1;
+                        })
+                )
+                .then(
+                    Commands.literal("resourcepack")
+                        .executes(ctx -> {
+                            System.out.println(0);
+                            CommandSourceStack source = ctx.getSource();
+                            if (source.getSender() instanceof Player player) {
+                                this.handler().resourcePack(new PaperPlayer(player));
+                            }
                             return 1;
                         })
                 )

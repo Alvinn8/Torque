@@ -1,5 +1,7 @@
 package ca.bkaw.torque.platform;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * An identifier for a resource concisting of a namespace and a key.
  * <p>
@@ -16,5 +18,11 @@ public record Identifier(String namespace, String key) {
         if (!key.matches("[a-z0-9._/]+")) {
             throw new IllegalArgumentException("Invalid key: " + key);
         }
+    }
+
+    @Override
+    @NotNull
+    public String toString() {
+        return this.namespace + ":" + this.key;
     }
 }

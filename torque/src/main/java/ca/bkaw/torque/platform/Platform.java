@@ -1,6 +1,7 @@
 package ca.bkaw.torque.platform;
 
 import ca.bkaw.torque.TorqueCommand;
+import io.netty.channel.ChannelHandler;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -22,4 +23,28 @@ public interface Platform {
      * @return The item stack.
      */
     ItemStack createModelItem(@NotNull Identifier modelIdentifier);
+
+    /**
+     * Inject a channel handler into the server networking pipeline.
+     *
+     * @param channelHandler The channel handler to inject.
+     * @param handlerKey The key of the channel.
+     */
+    void injectChannelHandler(ChannelHandler channelHandler, Identifier handlerKey) throws ReflectiveOperationException;
+
+    /**
+     * Remove a channel handler from the server networking pipeline.
+     * <p>
+     * Existing connections will still have the channel handler.
+     *
+     * @param handlerKey The handler key.
+     */
+    void uninjectChannelHandler(Identifier handlerKey) throws ReflectiveOperationException;
+
+    /**
+     * Get the TCP port on which the server is listening to.
+     *
+     * @return The port.
+     */
+    int getPort();
 }

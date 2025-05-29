@@ -20,6 +20,7 @@ repositories {
 dependencies {
     implementation(project(":torque"))
     compileOnly("io.papermc.paper:paper-api:${paperApiVersion}")
+    compileOnly("io.netty:netty-transport:${project.property("netty_version")}")
 }
 
 tasks {

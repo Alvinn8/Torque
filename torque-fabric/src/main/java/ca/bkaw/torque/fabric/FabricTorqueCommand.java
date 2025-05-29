@@ -2,6 +2,7 @@ package ca.bkaw.torque.fabric;
 
 import ca.bkaw.torque.TorqueCommand;
 import ca.bkaw.torque.fabric.platform.FabricPlatform;
+import ca.bkaw.torque.fabric.platform.FabricPlayer;
 import ca.bkaw.torque.fabric.platform.FabricWorld;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -36,6 +37,13 @@ public class FabricTorqueCommand {
                                 new FabricWorld(ctx.getSource().getLevel()),
                                 new Vector3d(position.x(), position.y(), position.z())
                             );
+                            return 1;
+                        })
+                )
+                .then(
+                    Commands.literal("resourcepack")
+                        .executes(ctx -> {
+                            this.handler().resourcePack(new FabricPlayer(ctx.getSource().getPlayerOrException()));
                             return 1;
                         })
                 )

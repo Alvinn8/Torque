@@ -6,12 +6,12 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class TorquePaper extends JavaPlugin {
+    private Torque torque;
 
     @Override
     public void onEnable() {
         PaperPlatform platform = new PaperPlatform();
-        Torque torque = new Torque(platform);
-        torque.setup();
+        this.torque = new Torque(platform);
 
         // Command registration
         PaperTorqueCommand command = new PaperTorqueCommand(platform);

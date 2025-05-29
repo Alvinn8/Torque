@@ -4,6 +4,7 @@ import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.model.VehicleModel;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.ItemDisplay;
+import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.Vehicle;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +30,11 @@ public class TorqueCommand {
         this.torque.addVehicle(vehicle);
 
         ItemDisplay itemDisplay = world.spawmItemDisplay(position);
-        itemDisplay.setItem(this.torque.getPlatform().createModelItem(new Identifier("minecraft", "diamond")));
+        itemDisplay.setItem(this.torque.getPlatform().createModelItem(new Identifier("torque", "vehicle/car")));
+    }
+
+    public void resourcePack(Player player) {
+        System.out.println(1);
+        this.torque.getAssets().getSender().send(player, true, "To see Torque vehicles.");
     }
 }

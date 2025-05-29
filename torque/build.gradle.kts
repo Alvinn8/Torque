@@ -14,6 +14,8 @@ dependencies {
     compileOnly("org.joml:joml:${project.property("joml_version")}")
     compileOnly("com.google.code.gson:gson:${project.property("gson_version")}")
     compileOnly("it.unimi.dsi:fastutil:${project.property("fastutil_version")}")
+    compileOnly("io.netty:netty-buffer:${project.property("netty_version")}")
+    compileOnly("io.netty:netty-transport:${project.property("netty_version")}")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
