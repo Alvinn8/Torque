@@ -5,6 +5,7 @@ import ca.bkaw.torque.assets.model.Model;
 import ca.bkaw.torque.assets.model.ModelElementList;
 import ca.bkaw.torque.assets.send.BuiltInTcpResourcePackSender;
 import ca.bkaw.torque.assets.send.ResourcePackSender;
+import ca.bkaw.torque.platform.Identifier;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -99,13 +100,7 @@ public class TorqueAssets {
         if (this.resourcePack == null) {
             throw new IllegalStateException("Cannot create vehicle models now.");
         }
-        System.out.println("hi");
-        System.out.println(this.resourcePack.getPath("assets"));
-        System.out.println(Files.list(this.resourcePack.getPath("")).toList());
-        System.out.println(Files.list(this.resourcePack.getPath("assets/torque/models")).toList());
-        System.out.println(Files.list(this.resourcePack.getPath("assets/torque/models/vehicle")).toList());
         for (Path path : Files.list(this.resourcePack.getPath("assets/torque/models/vehicle")).filter(path -> path.toString().endsWith(".json")).toList()) {
-            System.out.println("path = " + path);
             JsonObject json;
             try (BufferedReader reader = Files.newBufferedReader(path)) {
                 json = JsonParser.parseReader(reader).getAsJsonObject();
@@ -115,6 +110,10 @@ public class TorqueAssets {
             if (elements == null) {
                 continue;
             }
+            // Treat elements with a leading dot as hidden elements.
+            elements.removeIf(el -> String.valueOf(el.getName()).startsWith("."));
+
+            // Scale down so it fits.
             elements.scale(new Vector3d(1.0 / 10), new Vector3d(8, 0, 8));
 
             String name = path.getFileName().toString();
@@ -124,20 +123,34 @@ public class TorqueAssets {
 
             Path primaryPath = directory.resolve("primary.json");
             Files.writeString(primaryPath, gson.toJson(model.getJson()));
-            System.out.println("Creating " + primaryPath);
 
-            // Create item model
-            JsonObject modelJson = new JsonObject();
-            JsonObject modelJson1 = new JsonObject();
-            modelJson1.addProperty("type", "minecraft:model");
-            modelJson1.addProperty("model", "torque:vehicle/" + name + "/primary");
-            modelJson.add("model", modelJson1);
-            Path path2 = this.resourcePack.getPath("assets/torque/items/vehicle/" + name + "/primary.json");
-            Files.createDirectories(path2.getParent());
-            Files.writeString(path2, gson.toJson(modelJson));
+            // Create an item model
+            this.createItemModel(new Identifier("torque", "vehicle/" + name + "/primary"));
 
             // Delete original to avoid errors in the client logs.
             Files.delete(path);
         }
+    }
+
+    /**
+     * Creates an item model JSON file that links to the specified model.
+     *
+     * @param identifier The identifier of the model.
+     * @throws IOException If an I/O error occurs
+     */
+    private void createItemModel(Identifier identifier) throws IOException {
+        if (this.resourcePack == null) {
+            throw new IllegalStateException("Cannot create item model now.");
+        }
+        
+        JsonObject json = new JsonObject();
+        JsonObject modelJson = new JsonObject();
+        modelJson.addProperty("type", "minecraft:model");
+        modelJson.addProperty("model", identifier.namespace() + ":" + identifier.key());
+        json.add("model", modelJson);
+        
+        Path itemPath = this.resourcePack.getPath("assets/" + identifier.namespace() + "/items/" + identifier.key() + ".json");
+        Files.createDirectories(itemPath.getParent());
+        Files.writeString(itemPath, gson.toJson(json));
     }
 }

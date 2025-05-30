@@ -30,11 +30,10 @@ public class TorqueCommand {
         this.torque.addVehicle(vehicle);
 
         ItemDisplay itemDisplay = world.spawmItemDisplay(position);
-        itemDisplay.setItem(this.torque.getPlatform().createModelItem(new Identifier("torque", "vehicle/car")));
+        itemDisplay.setItem(this.torque.getPlatform().createModelItem(new Identifier("torque", "vehicle/car/primary")));
     }
 
     public void resourcePack(Player player) {
-        System.out.println(1);
         this.torque.getAssets().getSender().send(player, true, "To see Torque vehicles.");
     }
 }

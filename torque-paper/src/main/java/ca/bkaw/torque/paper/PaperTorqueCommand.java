@@ -43,7 +43,6 @@ public class PaperTorqueCommand {
                 .then(
                     Commands.literal("resourcepack")
                         .executes(ctx -> {
-                            System.out.println(0);
                             CommandSourceStack source = ctx.getSource();
                             if (source.getSender() instanceof Player player) {
                                 this.handler().resourcePack(new PaperPlayer(player));

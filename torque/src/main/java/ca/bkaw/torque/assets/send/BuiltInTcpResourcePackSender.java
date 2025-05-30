@@ -38,7 +38,6 @@ public class BuiltInTcpResourcePackSender extends ChannelInboundHandlerAdapter i
 
     @Override
     public void send(@NotNull Player player, boolean required, @Nullable String prompt) {
-        System.out.println(2);
         int port = this.torque.getPlatform().getPort();
         TorqueAssets assets = this.torque.getAssets();
         byte[] sha1Hash = assets.getSha1Hash();

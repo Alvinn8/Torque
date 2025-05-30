@@ -9,6 +9,7 @@ import org.joml.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * A list of {@link ModelElement}s.
@@ -128,6 +129,21 @@ public class ModelElementList {
     public void add(@NotNull ModelElement element) {
         this.json.add(element.getJson());
         this.elements.add(element);
+    }
+
+    /**
+     * Remove elements that match the predicate.
+     *
+     * @param predicate The predicate.
+     */
+    public void removeIf(Predicate<ModelElement> predicate) {
+        for (int i = this.elements.size() - 1; i >= 0; i--) {
+            ModelElement element = this.getElement(i);
+            if (predicate.test(element)) {
+                this.elements.remove(i);
+                this.json.remove(i);
+            }
+        }
     }
 
     /**

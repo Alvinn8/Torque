@@ -1,6 +1,7 @@
 package ca.bkaw.torque.assets.model;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +37,19 @@ public class ModelElement {
         this(new JsonObject());
         this.setFrom(from);
         this.setTo(to);
+    }
+
+    /**
+     * Get the name of the element that is defined in the model.
+     *
+     * @return The name, or null.
+     */
+    public @Nullable String getName() {
+        JsonElement name = this.json.get("name");
+        if (name == null) {
+            return null;
+        }
+        return name.getAsString();
     }
 
     /**
