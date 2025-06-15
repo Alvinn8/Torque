@@ -20,7 +20,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class TorqueAssets {
     public static final UUID PACK_UUID = UUID.fromString("c73385d8-6493-4124-af7a-62dbd32eb0e5");
@@ -100,7 +102,12 @@ public class TorqueAssets {
         if (this.resourcePack == null) {
             throw new IllegalStateException("Cannot create vehicle models now.");
         }
-        for (Path path : Files.list(this.resourcePack.getPath("assets/torque/models/vehicle")).filter(path -> path.toString().endsWith(".json")).toList()) {
+
+        List<Path> files;
+        try (Stream<Path> stream = Files.list(this.resourcePack.getPath("assets/torque/models/vehicle"))) {
+            files = stream.filter(path -> path.toString().endsWith(".json")).toList();
+        }
+        for (Path path : files) {
             JsonObject json;
             try (BufferedReader reader = Files.newBufferedReader(path)) {
                 json = JsonParser.parseReader(reader).getAsJsonObject();

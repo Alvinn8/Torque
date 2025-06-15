@@ -20,6 +20,8 @@
     "torque.mixins.json"
   ],
 
+  "accessWidener" : "torque.accesswidener",
+
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
     "minecraft": "${minecraft_version}"

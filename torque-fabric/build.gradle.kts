@@ -16,6 +16,7 @@ loom {
             sourceSet(sourceSets["main"])
         }
     }
+    accessWidenerPath = file("src/main/resources/torque.accesswidener")
 }
 
 dependencies {
