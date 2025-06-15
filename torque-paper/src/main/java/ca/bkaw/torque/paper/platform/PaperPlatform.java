@@ -2,6 +2,7 @@ package ca.bkaw.torque.paper.platform;
 
 import ca.bkaw.torque.TorqueCommand;
 import ca.bkaw.torque.assets.send.BuiltInTcpResourcePackSender;
+import ca.bkaw.torque.paper.TorquePaper;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.ItemStack;
 import ca.bkaw.torque.platform.Platform;
@@ -17,7 +18,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 public class PaperPlatform implements Platform {
+    private final TorquePaper plugin;
     private @Nullable TorqueCommand torqueCommand;
+
+    public PaperPlatform(TorquePaper plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public void setup(@NotNull TorqueCommand torqueCommand) {
@@ -70,5 +76,10 @@ public class PaperPlatform implements Platform {
     @Override
     public int getPort() {
         return Bukkit.getPort();
+    }
+
+    @Override
+    public void runEachTick(@NotNull Runnable runnable) {
+        Bukkit.getScheduler().runTaskTimer(this.plugin, runnable, 1L, 1L);
     }
 }

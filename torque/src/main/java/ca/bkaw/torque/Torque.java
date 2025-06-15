@@ -2,12 +2,10 @@ package ca.bkaw.torque;
 
 import ca.bkaw.torque.assets.TorqueAssets;
 import ca.bkaw.torque.platform.Platform;
-import ca.bkaw.torque.vehicle.Vehicle;
+import ca.bkaw.torque.vehicle.VehicleManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -17,7 +15,7 @@ public class Torque {
     public static Logger LOGGER = Logger.getLogger("Torque");
     private final @NotNull Platform platform;
     private final @NotNull TorqueAssets assets;
-    private final List<Vehicle> vehicles = new ArrayList<>();
+    private final @NotNull VehicleManager vehicleManager;
 
     public Torque(@NotNull Platform platform) {
         this.platform = platform;
@@ -29,6 +27,7 @@ public class Torque {
             throw new RuntimeException("Failed to set up Torque assets.", e);
         }
         this.platform.setup(new TorqueCommand(this));
+        this.vehicleManager = new VehicleManager(this);
     }
 
     public @NotNull Platform getPlatform() {
@@ -39,7 +38,7 @@ public class Torque {
         return this.assets;
     }
 
-    public void addVehicle(@NotNull Vehicle vehicle) {
-        this.vehicles.add(vehicle);
+    public @NotNull VehicleManager getVehicleManager() {
+        return this.vehicleManager;
     }
 }

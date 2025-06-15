@@ -27,7 +27,7 @@ public class TorqueCommand {
         VehicleModel model = new VehicleModel();
         Vehicle vehicle = new Vehicle(model);
         vehicle.addComponent(new RigidBodyComponent(1500, new Matrix3d(), world, position, new Quaterniond()));
-        this.torque.addVehicle(vehicle);
+        this.torque.getVehicleManager().addVehicle(vehicle);
 
         ItemDisplay itemDisplay = world.spawmItemDisplay(position);
         itemDisplay.setItem(this.torque.getPlatform().createModelItem(new Identifier("torque", "vehicle/car/primary")));

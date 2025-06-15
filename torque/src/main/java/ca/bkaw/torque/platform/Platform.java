@@ -47,4 +47,11 @@ public interface Platform {
      * @return The port.
      */
     int getPort();
+
+    /**
+     * Run a runnable each server game tick.
+     *
+     * @param runnable The runnable to run each tick.
+     */
+    void runEachTick(@NotNull Runnable runnable);
 }

@@ -49,6 +49,8 @@ public class Vehicle {
      * Called each tick.
      */
     public void tick() {
-        this.components.forEach(VehicleComponent::tick);
+        for (VehicleComponent component : this.components) {
+            component.tick();
+        }
     }
 }

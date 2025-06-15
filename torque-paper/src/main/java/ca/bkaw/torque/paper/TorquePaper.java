@@ -10,7 +10,7 @@ public final class TorquePaper extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        PaperPlatform platform = new PaperPlatform();
+        PaperPlatform platform = new PaperPlatform(this);
         this.torque = new Torque(platform);
 
         // Command registration
