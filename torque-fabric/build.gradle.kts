@@ -6,6 +6,7 @@ plugins {
 
 val minecraftVersion = property("minecraft_version") as String
 val fabricLoaderVersion = property("fabric_loader_version") as String
+val fabricApiVersion = property("fabric_api_version") as String
 
 version = property("version") as String
 group = property("maven_group") as String
@@ -23,6 +24,7 @@ dependencies {
     implementation(project(":torque"))
     minecraft("com.mojang:minecraft:$minecraftVersion")
     modImplementation("net.fabricmc:fabric-loader:$fabricLoaderVersion")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
     mappings(loom.officialMojangMappings())
 }
 

@@ -4,8 +4,6 @@
     "package": "ca.bkaw.torque.fabric.mixin",
     "compatibilityLevel": "JAVA_21",
     "mixins": [
-        "CommandsMixin",
-        "MinecraftServerMixin",
         "ServerConnectionListenerMixin"
     ],
     "injectors": {
