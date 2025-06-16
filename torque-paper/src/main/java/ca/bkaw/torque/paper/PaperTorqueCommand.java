@@ -4,6 +4,7 @@ import ca.bkaw.torque.TorqueCommand;
 import ca.bkaw.torque.paper.platform.PaperPlatform;
 import ca.bkaw.torque.paper.platform.PaperPlayer;
 import ca.bkaw.torque.paper.platform.PaperWorld;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Location;
@@ -39,6 +40,17 @@ public class PaperTorqueCommand {
                             );
                             return 1;
                         })
+                )
+                .then(
+                    Commands.literal("test")
+                        .then(
+                            Commands.argument("number", IntegerArgumentType.integer(1, 100))
+                                .executes(ctx -> {
+                                    int number = IntegerArgumentType.getInteger(ctx, "number");
+                                    this.handler().test(number);
+                                    return 1;
+                                })
+                        )
                 )
                 .then(
                     Commands.literal("resourcepack")

@@ -9,7 +9,7 @@ import org.joml.Vector3d;
 
 public record FabricWorld(ServerLevel level) implements World {
     @Override
-    public ItemDisplay spawmItemDisplay(Vector3d position) {
+    public ItemDisplay spawnItemDisplay(Vector3d position) {
         Display.ItemDisplay entity = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, this.level);
         entity.setPos(position.x(), position.y(), position.z());
         this.level.addFreshEntity(entity);

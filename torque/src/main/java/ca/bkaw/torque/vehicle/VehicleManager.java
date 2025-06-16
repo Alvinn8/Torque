@@ -13,13 +13,17 @@ public class VehicleManager {
         torque.getPlatform().runEachTick(this::tick);
     }
 
-    public void addVehicle(@NotNull Vehicle vehicle) {
-        this.vehicles.add(vehicle);
-    }
-
     private void tick() {
         for (Vehicle vehicle : this.vehicles) {
             vehicle.tick();
         }
+    }
+
+    public void addVehicle(@NotNull Vehicle vehicle) {
+        this.vehicles.add(vehicle);
+    }
+
+    public List<Vehicle> getVehicles() {
+        return this.vehicles;
     }
 }

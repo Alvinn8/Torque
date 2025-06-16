@@ -5,6 +5,7 @@ import ca.bkaw.torque.fabric.platform.FabricPlatform;
 import ca.bkaw.torque.fabric.platform.FabricPlayer;
 import ca.bkaw.torque.fabric.platform.FabricWorld;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.phys.Vec3;
@@ -39,6 +40,17 @@ public class FabricTorqueCommand {
                             );
                             return 1;
                         })
+                )
+                .then(
+                    Commands.literal("test")
+                        .then(
+                            Commands.argument("number", IntegerArgumentType.integer(1, 100))
+                                .executes(ctx -> {
+                                    int number = IntegerArgumentType.getInteger(ctx, "number");
+                                    this.handler().test(number);
+                                    return 1;
+                                })
+                        )
                 )
                 .then(
                     Commands.literal("resourcepack")

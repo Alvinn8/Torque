@@ -12,5 +12,5 @@ public interface World {
      * @param position The position in the world to spawn the item display.
      * @return The item display entity.
      */
-    ItemDisplay spawmItemDisplay(Vector3d position);
+    ItemDisplay spawnItemDisplay(Vector3d position);
 }

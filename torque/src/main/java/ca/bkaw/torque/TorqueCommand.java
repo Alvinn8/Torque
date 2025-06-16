@@ -9,7 +9,8 @@ import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.Vehicle;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3d;
-import org.joml.Quaterniond;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3d;
 
 /**
@@ -26,11 +27,21 @@ public class TorqueCommand {
     public void summon(World world, Vector3d position) {
         VehicleModel model = new VehicleModel();
         Vehicle vehicle = new Vehicle(model);
-        vehicle.addComponent(new RigidBodyComponent(1500, new Matrix3d(), world, position, new Quaterniond()));
+        vehicle.addComponent(new RigidBodyComponent(1500, new Matrix3d(), world, position, new Quaternionf()));
         this.torque.getVehicleManager().addVehicle(vehicle);
 
-        ItemDisplay itemDisplay = world.spawmItemDisplay(position);
+        ItemDisplay itemDisplay = world.spawnItemDisplay(position);
         itemDisplay.setItem(this.torque.getPlatform().createModelItem(new Identifier("torque", "vehicle/car/primary")));
+        itemDisplay.setTransformation(new Matrix4f().translate(0, 5, 0).scale(10));
+    }
+
+    public void test(int number) {
+        Vehicle vehicle = this.torque.getVehicleManager().getVehicles().get(0);
+        if (vehicle != null) {
+            vehicle.getComponent(RigidBodyComponent.class).ifPresent(
+                rbc -> rbc.addForce(new Vector3d(1, 0, 0), new Vector3d(1, 0, 0))
+            );
+        }
     }
 
     public void resourcePack(Player player) {

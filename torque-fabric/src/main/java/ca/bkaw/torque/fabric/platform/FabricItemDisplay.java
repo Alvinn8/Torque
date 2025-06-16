@@ -5,6 +5,7 @@ import ca.bkaw.torque.platform.ItemStack;
 import com.mojang.math.Transformation;
 import net.minecraft.world.entity.Display;
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
 
 public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDisplay {
     @Override
@@ -15,5 +16,10 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
     @Override
     public void setTransformation(Matrix4f affineTransformMatrix) {
         this.entity.setTransformation(new Transformation(affineTransformMatrix));
+    }
+
+    @Override
+    public void setPosition(Vector3d position) {
+        this.entity.setPos(position.x(), position.y(), position.z());
     }
 }

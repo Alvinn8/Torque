@@ -3,7 +3,7 @@ package ca.bkaw.torque.components;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import org.joml.Matrix3d;
-import org.joml.Quaterniond;
+import org.joml.Quaternionf;
 import org.joml.Vector3d;
 
 public class RigidBodyComponent implements VehicleComponent {
@@ -18,14 +18,14 @@ public class RigidBodyComponent implements VehicleComponent {
     private World world;
     private final Vector3d position; // unit: meter
     private final Vector3d velocity; // unit: meter/second
-    private final Quaterniond orientation;
+    private final Quaternionf orientation;
     private final Vector3d angularVelocity; // unit: radian/second
 
     // Accumulated each frame
     private final Vector3d netForce; // unit: Newton
     private final Vector3d netTorque; // unit: Newton-meter
 
-    public RigidBodyComponent(double mass, Matrix3d initialInertiaTensor, World world, Vector3d position, Quaterniond orientation) {
+    public RigidBodyComponent(double mass, Matrix3d initialInertiaTensor, World world, Vector3d position, Quaternionf orientation) {
         this.mass = mass;
         this.initialInertiaTensorInverse = initialInertiaTensor.invert();
         this.world = world;
@@ -66,5 +66,17 @@ public class RigidBodyComponent implements VehicleComponent {
         Vector3d localPoint = new Vector3d(point).sub(this.position); // unit: meter
         Vector3d torque = localPoint.cross(force); // unit: Newton-meter
         this.netTorque.add(torque);
+    }
+
+    public World getWorld() {
+        return this.world;
+    }
+
+    public Vector3d getPosition() {
+        return this.position;
+    }
+
+    public Quaternionf getOrientation() {
+        return this.orientation;
     }
 }
