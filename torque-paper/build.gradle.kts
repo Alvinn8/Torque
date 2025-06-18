@@ -26,6 +26,7 @@ dependencies {
 tasks {
     runServer {
         minecraftVersion(minecraftVersion)
+        jvmArgs("-XX:+AllowEnhancedClassRedefinition")
     }
     assemble {
         dependsOn(shadowJar)

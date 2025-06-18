@@ -29,6 +29,9 @@ dependencies {
 }
 
 tasks {
+    runServer {
+        jvmArgs("-XX:+AllowEnhancedClassRedefinition")
+    }
     assemble {
         dependsOn(shadowJar)
     }
