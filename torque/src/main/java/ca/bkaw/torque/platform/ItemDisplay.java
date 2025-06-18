@@ -27,4 +27,6 @@ public interface ItemDisplay {
      * @param position The coordinates in the world to set the position to.
      */
     void setPosition(Vector3d position);
+
+    void setStartInterpolation(int ticks);
 }

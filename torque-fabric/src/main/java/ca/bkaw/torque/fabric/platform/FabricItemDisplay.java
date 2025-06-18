@@ -22,4 +22,9 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
     public void setPosition(Vector3d position) {
         this.entity.setPos(position.x(), position.y(), position.z());
     }
+
+    @Override
+    public void setStartInterpolation(int ticks) {
+        this.entity.setTransformationInterpolationDelay(ticks);
+    }
 }

@@ -8,6 +8,7 @@ import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.vehicle.Vehicle;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 
@@ -38,16 +39,18 @@ public class VehicleRenderer {
         Seat seat = this.vehicle.getModel().getSeats().getFirst();
 
         Matrix4f transformation = this.primary.transformation;
-        // Note that transformations are applied in reverse order.
-        // Translate 0.5 up goes first.
+        Quaternionf quaternion = rigidBody.getOrientation();
         transformation.identity()
-            .rotate(rigidBody.getOrientation())
-            .translate(seat.getTranslation().negate(new Vector3f()))
+            .rotate(new Quaternionf().rotateAxis((float) Math.PI, 0, 1, 0))
+            .rotate(quaternion)
+            .translate(seat.getTranslation())
             .translate(this.vehicle.getModel().getTranslation())
             .scale((float) this.vehicle.getModel().getScale())
-            .translate(0.0f, 0.5f, 0.0f);
+            .translate(0.0f, 0.5f, 0.0f)
+        ;
         this.primary.display.setTransformation(transformation);
-        this.primary.display.setPosition(rigidBody.getPosition().sub(seat.getTranslation(), new Vector3d()));
+        this.primary.display.setPosition(rigidBody.getPosition().sub(seat.getTranslation().rotate(quaternion, new Vector3f()), new Vector3d()));
+        this.primary.display.setStartInterpolation(0);
     }
 
     public Object getVehicle() {

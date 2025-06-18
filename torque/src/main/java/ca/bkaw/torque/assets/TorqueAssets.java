@@ -139,11 +139,12 @@ public class TorqueAssets {
                     boolean isDriver = tags.contains("driver");
                     // Use the middle as the seat position, however vertically we want to use the lowest point.
                     Vector3d seatPosition = element.getMiddle();
-                    seatPosition.y = Math.min(element.getFrom().y, element.getTo().y) + Seat.VERTICAL_OFFSET;
+                    seatPosition.y = Math.min(element.getFrom().y, element.getTo().y);
+                    seatPosition.div(16); // Convert from model units ("pixels") to blocks.
+                    seatPosition.add(0, Seat.VERTICAL_OFFSET, 0);
 
                     seats.add(new Seat(
-                        // Convert from model units ("pixels") to blocks.
-                        new Vector3f(seatPosition.div(16.0)),
+                        new Vector3f(seatPosition),
                         isDriver
                     ));
                 }

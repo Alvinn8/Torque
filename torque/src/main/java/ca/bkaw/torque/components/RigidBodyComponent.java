@@ -80,6 +80,9 @@ public class RigidBodyComponent implements VehicleComponent {
     }
 
     public Quaternionf getOrientation() {
+        if (false) {
+            this.orientation.rotateAxis(0.025f, 0, 1, 0);
+        }
         return this.orientation;
     }
 }
