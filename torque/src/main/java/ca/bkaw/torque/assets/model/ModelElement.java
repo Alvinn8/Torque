@@ -7,6 +7,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 /**
  * A wrapper around an element in a {@link Model}.
  */
@@ -14,9 +18,11 @@ public class ModelElement {
     public static final String FROM = "from";
     public static final String TO = "to";
     public static final String ROTATION = "rotation";
+    public static final Pattern TAG_PATTERN = Pattern.compile("#(?<tag>[a-zA-Z0-9_]+)");
 
     private final JsonObject json;
     private @Nullable ModelElementRotation rotation;
+    private @Nullable Set<String> tags;
 
     /**
      * Create a new wrapper around the element json.
@@ -50,6 +56,21 @@ public class ModelElement {
             return null;
         }
         return name.getAsString();
+    }
+
+    public @NotNull Set<String> getTags() {
+        if (this.tags != null) {
+            return this.tags;
+        }
+        String name = this.getName();
+        if (name == null) {
+            return Set.of();
+        }
+        // Match hashtag followed by alphanumeric characters or underscores and collect them in a set.
+        this.tags = TAG_PATTERN.matcher(name).results()
+            .map(match -> match.group("tag"))
+            .collect(Collectors.toSet());
+        return this.tags;
     }
 
     /**

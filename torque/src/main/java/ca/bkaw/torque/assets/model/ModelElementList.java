@@ -3,6 +3,7 @@ package ca.bkaw.torque.assets.model;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.joml.Vector3d;
 
@@ -15,8 +16,8 @@ import java.util.function.Predicate;
  * A list of {@link ModelElement}s.
  */
 public class ModelElementList {
-    private final JsonArray json;
-    private final List<ModelElement> elements;
+    private final @NotNull JsonArray json;
+    private final List<@Nullable ModelElement> elements;
 
     public ModelElementList(@NotNull JsonArray json) {
         this.json = json;
@@ -58,7 +59,7 @@ public class ModelElementList {
     public Vector3d getMiddle() {
         Vector3d min = new Vector3d(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE);
         Vector3d max = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        for (ModelElement element : this.elements) {
+        for (ModelElement element : this.getElements()) {
             Vector3d elementMiddle = element.getMiddle();
             if (elementMiddle.x > min.x) min.x = elementMiddle.x;
             if (elementMiddle.y > min.y) min.y = elementMiddle.y;
@@ -79,11 +80,42 @@ public class ModelElementList {
      * @return The vector elements were moved by.
      */
     @NotNull
-    public Vector3d center() {
+    public Vector3d centerGeometrically() {
         Vector3d middle = this.getMiddle();
         Vector3d diff = new Vector3d(8, 8, 8).sub(middle);
         this.move(diff);
         return diff;
+    }
+
+    /**
+     * Get the size of the model, measured in blocks (one block = 16x16x16 units in the
+     * model). The game allows a maximum block size of 3. If a model has a block size
+     * above 3, it will not render in game.
+     * <p>
+     * The block size is not an accurate measurement of the visual model size. This is because
+     * rotated elements that appear to be outside the block size may still count as inside.
+     * <p>
+     * When the model is scaled, the block size is also scaled accordingly.
+     *
+     * @return The block size of the model.
+     */
+    public double getBlockSize() {
+        double size = 0;
+
+        for (ModelElement element : this.getElements()) {
+            Vector3d from = element.getFrom();
+            Vector3d to = element.getTo();
+            for (Vector3d vector : List.of(from, to)) {
+                Vector3d fromMiddle = vector.sub(8, 8, 8).absolute();
+                if (fromMiddle.x > size) size = fromMiddle.x;
+                if (fromMiddle.y > size) size = fromMiddle.y;
+                if (fromMiddle.z > size) size = fromMiddle.z;
+            }
+        }
+
+        // The size is in units ("pixels"), but we want it in blocks.
+        // It measures from the center to the edge, so we multiply by 2 to get the full size.
+        return 2.0 * size / 16.0;
     }
 
     /**

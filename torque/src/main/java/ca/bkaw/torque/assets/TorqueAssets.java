@@ -2,9 +2,12 @@ package ca.bkaw.torque.assets;
 
 import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.assets.model.Model;
+import ca.bkaw.torque.assets.model.ModelElement;
 import ca.bkaw.torque.assets.model.ModelElementList;
 import ca.bkaw.torque.assets.send.BuiltInTcpResourcePackSender;
 import ca.bkaw.torque.assets.send.ResourcePackSender;
+import ca.bkaw.torque.model.Seat;
+import ca.bkaw.torque.model.VehicleModel;
 import ca.bkaw.torque.platform.Identifier;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -12,6 +15,7 @@ import com.google.gson.JsonParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +24,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -35,6 +41,8 @@ public class TorqueAssets {
     private final @NotNull Path resourcePackPath;
     private byte @Nullable[] sha1;
     private final ResourcePackSender sender;
+
+    private final List<VehicleModel> vehicleModels = new ArrayList<>();
 
     private TorqueAssets(@NotNull Torque torque, @NotNull ResourcePack resourcePack, @NotNull Path resourcePackPath) {
         this.torque = torque;
@@ -103,6 +111,8 @@ public class TorqueAssets {
             throw new IllegalStateException("Cannot create vehicle models now.");
         }
 
+        this.vehicleModels.clear();
+
         List<Path> files;
         try (Stream<Path> stream = Files.list(this.resourcePack.getPath("assets/torque/models/vehicle"))) {
             files = stream.filter(path -> path.toString().endsWith(".json")).toList();
@@ -117,11 +127,41 @@ public class TorqueAssets {
             if (elements == null) {
                 continue;
             }
+
+            // Center geometrically to maximize the space used.
+            Vector3d centerDiff = elements.centerGeometrically();
+
+            // Find tagged elements
+            List<Seat> seats = new ArrayList<>();
+            for (ModelElement element : elements.getElements()) {
+                Set<String> tags = element.getTags();
+                if (tags.contains("seat")) {
+                    boolean isDriver = tags.contains("driver");
+                    // Use the middle as the seat position, however vertically we want to use the lowest point.
+                    Vector3d seatPosition = element.getMiddle();
+                    seatPosition.y = Math.min(element.getFrom().y, element.getTo().y) + Seat.VERTICAL_OFFSET;
+
+                    seats.add(new Seat(
+                        // Convert from model units ("pixels") to blocks.
+                        new Vector3f(seatPosition.div(16.0)),
+                        isDriver
+                    ));
+                }
+            }
+
             // Treat elements with a leading dot as hidden elements.
             elements.removeIf(el -> String.valueOf(el.getName()).startsWith("."));
 
+            // The game only allows a block size of 3.
             // Scale down so it fits.
-            elements.scale(new Vector3d(1.0 / 10), new Vector3d(8, 0, 8));
+            double originalBlockSize = elements.getBlockSize();
+            System.out.println("originalBlockSize = " + originalBlockSize);
+            double scale = 1.0;
+            if (originalBlockSize > 3.0) {
+                scale = 3.0 / originalBlockSize;
+                System.out.println("scale = " + scale);
+                elements.scale(new Vector3d(scale), new Vector3d(8, 0, 8));
+            }
 
             String name = path.getFileName().toString();
             name = name.substring(0, name.length() - ".json".length());
@@ -136,6 +176,16 @@ public class TorqueAssets {
 
             // Delete original to avoid errors in the client logs.
             Files.delete(path);
+
+            VehicleModel vehicleModel = new VehicleModel(
+                // The vehicle model should scale up to the original size.
+                1.0 / scale,
+                // The vehicle should be moved back vertically so that it is grounded at right level.
+                // Convert model units ("pixels") to blocks by dividing by 16.
+                new Vector3f(0, (float) -centerDiff.y / 16.0f, 0),
+                seats
+            );
+            this.vehicleModels.add(vehicleModel);
         }
     }
 
@@ -159,5 +209,9 @@ public class TorqueAssets {
         Path itemPath = this.resourcePack.getPath("assets/" + identifier.namespace() + "/items/" + identifier.key() + ".json");
         Files.createDirectories(itemPath.getParent());
         Files.writeString(itemPath, gson.toJson(json));
+    }
+
+    public List<VehicleModel> getVehicleModels() {
+        return this.vehicleModels;
     }
 }

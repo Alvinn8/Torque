@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 public class Torque {
     public static Logger LOGGER = Logger.getLogger("Torque");
     private final @NotNull Platform platform;
-    private final @NotNull TorqueAssets assets;
+    private @NotNull TorqueAssets assets;
     private final @NotNull VehicleManager vehicleManager;
 
     public Torque(@NotNull Platform platform) {
@@ -40,5 +40,15 @@ public class Torque {
 
     public @NotNull VehicleManager getVehicleManager() {
         return this.vehicleManager;
+    }
+
+    public void reload() {
+        try {
+            this.assets = TorqueAssets.load(this);
+            this.assets.createVehicleModels();
+            this.assets.save();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to set up Torque assets.", e);
+        }
     }
 }

@@ -1516,6 +1516,21 @@
 				"up": {"uv": [0, 0, 2, 16], "texture": "#missing"},
 				"down": {"uv": [0, 0, 2, 16], "texture": "#missing"}
 			}
+		},
+		{
+			"name": ".#seat #driver",
+			"from": [2.5, 8, 2],
+			"to": [4.5, 10, 4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [2.5, 8, 2]},
+			"color": 8,
+			"faces": {
+				"north": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"east": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"south": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"west": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"up": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"down": {"uv": [0, 0, 2, 2], "texture": "#missing"}
+			}
 		}
 	],
 	"display": {
@@ -1665,6 +1680,7 @@
 			]
 		},
 		110,
-		111
+		111,
+		112
 	]
 }

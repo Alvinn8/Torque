@@ -40,6 +40,9 @@ public class RigidBodyComponent implements VehicleComponent {
     @Override
     public void tick() {
         final double deltaTime = 1 / 20.0; // one tick, unit: second
+        if (this.netForce.lengthSquared() > 0.01) {
+            System.out.println("Net force: " + this.netForce.length() + " N");
+        }
 
         // Apply linear motion.
         Vector3d acceleration = this.netForce.div(this.mass); // unit: meter/second^2

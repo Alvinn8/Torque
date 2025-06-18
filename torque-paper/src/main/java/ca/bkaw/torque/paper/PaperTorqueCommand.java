@@ -62,6 +62,13 @@ public class PaperTorqueCommand {
                             return 1;
                         })
                 )
+                .then(
+                    Commands.literal("reload")
+                        .executes(ctx -> {
+                            this.handler().reload();
+                            return 1;
+                        })
+                )
                 .build()
         );
     }

@@ -58,6 +58,12 @@ public class FabricTorqueCommand {
                             this.handler().resourcePack(new FabricPlayer(ctx.getSource().getPlayerOrException()));
                             return 1;
                         })
+                ).then(
+                    Commands.literal("reload")
+                        .executes(ctx -> {
+                            this.handler().reload();
+                            return 1;
+                        })
                 )
         );
     }

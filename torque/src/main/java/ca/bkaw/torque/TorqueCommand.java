@@ -2,14 +2,11 @@ package ca.bkaw.torque;
 
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.model.VehicleModel;
-import ca.bkaw.torque.platform.Identifier;
-import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.Vehicle;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3d;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 
@@ -25,26 +22,39 @@ public class TorqueCommand {
     }
 
     public void summon(World world, Vector3d position) {
-        VehicleModel model = new VehicleModel();
-        Vehicle vehicle = new Vehicle(model);
+        VehicleModel vehicleModel = this.torque.getAssets().getVehicleModels().getFirst();
+        Vehicle vehicle = new Vehicle(vehicleModel);
         vehicle.addComponent(new RigidBodyComponent(1500, new Matrix3d(), world, position, new Quaternionf()));
         this.torque.getVehicleManager().addVehicle(vehicle);
 
-        ItemDisplay itemDisplay = world.spawnItemDisplay(position);
-        itemDisplay.setItem(this.torque.getPlatform().createModelItem(new Identifier("torque", "vehicle/car/primary")));
-        itemDisplay.setTransformation(new Matrix4f().translate(0, 5, 0).scale(10));
+        this.torque.getVehicleManager().startRendering(vehicle);
     }
 
     public void test(int number) {
-        Vehicle vehicle = this.torque.getVehicleManager().getVehicles().get(0);
-        if (vehicle != null) {
-            vehicle.getComponent(RigidBodyComponent.class).ifPresent(
-                rbc -> rbc.addForce(new Vector3d(1, 0, 0), new Vector3d(1, 0, 0))
-            );
+        switch (number) {
+            case 1 -> {
+                Vehicle vehicle = this.torque.getVehicleManager().getVehicles().get(0);
+                if (vehicle != null) {
+                    System.out.println(vehicle);
+                    vehicle.getComponent(RigidBodyComponent.class).ifPresent(
+                        rbc -> {
+                            rbc.addForce(new Vector3d(1000, 0, 0), rbc.getPosition().add(1, 0, 0));
+                        }
+                    );
+                }
+            }
+            case 2 -> {
+                Vehicle vehicle = this.torque.getVehicleManager().getVehicles().get(0);
+                if (vehicle != null) {}
+            }
         }
     }
 
     public void resourcePack(Player player) {
         this.torque.getAssets().getSender().send(player, true, "To see Torque vehicles.");
+    }
+
+    public void reload() {
+        this.torque.reload();
     }
 }
