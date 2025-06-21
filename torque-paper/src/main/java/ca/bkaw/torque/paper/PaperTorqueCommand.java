@@ -47,7 +47,12 @@ public class PaperTorqueCommand {
                             Commands.argument("number", IntegerArgumentType.integer(1, 100))
                                 .executes(ctx -> {
                                     int number = IntegerArgumentType.getInteger(ctx, "number");
-                                    this.handler().test(number);
+                                    if (ctx.getSource().getSender() instanceof Player player) {
+                                        this.handler().test(
+                                            new PaperPlayer(player),
+                                            number
+                                        );
+                                    }
                                     return 1;
                                 })
                         )

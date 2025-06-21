@@ -1,5 +1,6 @@
 package ca.bkaw.torque.vehicle;
 
+import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.model.VehicleModel;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,10 +12,12 @@ import java.util.Optional;
  * A loaded vehicle in the world. Components perform all logic.
  */
 public class Vehicle {
+    private final @NotNull Torque torque;
     private final List<VehicleComponent> components = new ArrayList<>();
     private final @NotNull VehicleModel model;
 
-    public Vehicle(@NotNull VehicleModel model) {
+    public Vehicle(@NotNull Torque torque, @NotNull VehicleModel model) {
+        this.torque = torque;
         this.model = model;
     }
 
@@ -39,6 +42,10 @@ public class Vehicle {
      */
     public void addComponent(@NotNull VehicleComponent component) {
         this.components.add(component);
+    }
+
+    public @NotNull Torque getTorque() {
+        return this.torque;
     }
 
     public @NotNull VehicleModel getModel() {

@@ -30,7 +30,7 @@ dependencies {
 
 tasks {
     runServer {
-        jvmArgs("-XX:+AllowEnhancedClassRedefinition")
+        jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-Ddisable.watchdog=true")
     }
     assemble {
         dependsOn(shadowJar)

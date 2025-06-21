@@ -1,9 +1,10 @@
 package ca.bkaw.torque.model;
 
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 public class Seat {
-    public static final double VERTICAL_OFFSET = 0.6; // unit: blocks (meters)
+    public static final double VERTICAL_OFFSET = 0.7; // unit: blocks (meters)
 
     /**
      * The translation from the vehicle's center of mass to the position that the
@@ -18,7 +19,7 @@ public class Seat {
         this.driver = driver;
     }
 
-    public Vector3f getTranslation() {
+    public Vector3fc getTranslation() {
         if (false) {
             double periodTime = 5000f; // unit: milliseconds
             float s = 0.8f * (float) Math.sin(System.currentTimeMillis() * 2.0 * Math.PI / periodTime);

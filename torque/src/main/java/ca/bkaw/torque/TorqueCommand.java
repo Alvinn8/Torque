@@ -1,6 +1,8 @@
 package ca.bkaw.torque;
 
 import ca.bkaw.torque.components.RigidBodyComponent;
+import ca.bkaw.torque.components.SeatsComponent;
+import ca.bkaw.torque.components.TestDriveComponent;
 import ca.bkaw.torque.model.VehicleModel;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
@@ -23,29 +25,35 @@ public class TorqueCommand {
 
     public void summon(World world, Vector3d position) {
         VehicleModel vehicleModel = this.torque.getAssets().getVehicleModels().getFirst();
-        Vehicle vehicle = new Vehicle(vehicleModel);
+        Vehicle vehicle = new Vehicle(this.torque, vehicleModel);
         vehicle.addComponent(new RigidBodyComponent(1500, new Matrix3d(), world, position, new Quaternionf()));
+        vehicle.addComponent(new SeatsComponent(vehicle));
+        vehicle.addComponent(new TestDriveComponent(vehicle));
         this.torque.getVehicleManager().addVehicle(vehicle);
 
         this.torque.getVehicleManager().startRendering(vehicle);
     }
 
-    public void test(int number) {
+    public void test(Player player, int number) {
         switch (number) {
             case 1 -> {
                 Vehicle vehicle = this.torque.getVehicleManager().getVehicles().get(0);
                 if (vehicle != null) {
-                    System.out.println(vehicle);
                     vehicle.getComponent(RigidBodyComponent.class).ifPresent(
                         rbc -> {
-                            rbc.addForce(new Vector3d(1000, 0, 0), rbc.getPosition().add(1, 0, 0));
+                            rbc.addForce(new Vector3d(1000, 0, 0), rbc.getPosition().add(1, 0, 0, new Vector3d()));
                         }
                     );
                 }
             }
             case 2 -> {
                 Vehicle vehicle = this.torque.getVehicleManager().getVehicles().get(0);
-                if (vehicle != null) {}
+                if (vehicle != null) {
+                    vehicle.getComponent(SeatsComponent.class).ifPresent(seats -> {
+                        boolean success = seats.addPassenger(player);
+                        System.out.println("success = " + success);
+                    });
+                }
             }
         }
     }

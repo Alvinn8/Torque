@@ -4,7 +4,9 @@ import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import org.joml.Matrix3d;
 import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
 
 public class RigidBodyComponent implements VehicleComponent {
     // All vectors are stored in world coordinates.
@@ -12,7 +14,7 @@ public class RigidBodyComponent implements VehicleComponent {
 
     // Properties
     private final double mass; // unit: kilogram
-    private final Matrix3d initialInertiaTensorInverse; // unit: (kg m^2)^-1
+    private final Matrix3d localInertiaTensorInverse; // unit: (kg m^2)^-1, local to the unrotated vehicle's coordinate system
 
     // Position and velocity
     private World world;
@@ -25,9 +27,9 @@ public class RigidBodyComponent implements VehicleComponent {
     private final Vector3d netForce; // unit: Newton
     private final Vector3d netTorque; // unit: Newton-meter
 
-    public RigidBodyComponent(double mass, Matrix3d initialInertiaTensor, World world, Vector3d position, Quaternionf orientation) {
+    public RigidBodyComponent(double mass, Matrix3d localInertiaTensor, World world, Vector3d position, Quaternionf orientation) {
         this.mass = mass;
-        this.initialInertiaTensorInverse = initialInertiaTensor.invert();
+        this.localInertiaTensorInverse = localInertiaTensor.invert();
         this.world = world;
         this.position = position;
         this.velocity = new Vector3d();
@@ -40,9 +42,6 @@ public class RigidBodyComponent implements VehicleComponent {
     @Override
     public void tick() {
         final double deltaTime = 1 / 20.0; // one tick, unit: second
-        if (this.netForce.lengthSquared() > 0.01) {
-            System.out.println("Net force: " + this.netForce.length() + " N");
-        }
 
         // Apply linear motion.
         Vector3d acceleration = this.netForce.div(this.mass); // unit: meter/second^2
@@ -75,13 +74,13 @@ public class RigidBodyComponent implements VehicleComponent {
         return this.world;
     }
 
-    public Vector3d getPosition() {
+    public Vector3dc getPosition() {
         return this.position;
     }
 
-    public Quaternionf getOrientation() {
+    public Quaternionfc getOrientation() {
         if (false) {
-            this.orientation.rotateAxis(0.025f, 0, 1, 0);
+            this.orientation.rotateAxis(0.05f, 0, 1, 0);
         }
         return this.orientation;
     }

@@ -4,6 +4,7 @@ import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.ItemStack;
 import com.mojang.math.Transformation;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Entity;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
 
@@ -24,7 +25,22 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
     }
 
     @Override
+    public void setTeleportDuration(int ticks) {
+        this.entity.setPosRotInterpolationDuration(ticks);
+    }
+
+    @Override
+    public void setInterpolationDuration(int ticks) {
+        this.entity.setTransformationInterpolationDuration(ticks);
+    }
+
+    @Override
     public void setStartInterpolation(int ticks) {
         this.entity.setTransformationInterpolationDelay(ticks);
+    }
+
+    @Override
+    public void remove() {
+        this.entity.remove(Entity.RemovalReason.KILLED);
     }
 }

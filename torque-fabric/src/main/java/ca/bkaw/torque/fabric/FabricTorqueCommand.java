@@ -47,7 +47,10 @@ public class FabricTorqueCommand {
                             Commands.argument("number", IntegerArgumentType.integer(1, 100))
                                 .executes(ctx -> {
                                     int number = IntegerArgumentType.getInteger(ctx, "number");
-                                    this.handler().test(number);
+                                    this.handler().test(
+                                        new FabricPlayer(ctx.getSource().getPlayerOrException()),
+                                        number
+                                    );
                                     return 1;
                                 })
                         )

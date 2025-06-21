@@ -1,4 +1,5 @@
 {
+	"format_version": "1.21.6",
 	"credit": "Made with Blockbench",
 	"textures": {
 		"0": "block/white_concrete",
@@ -88,6 +89,7 @@
 			}
 		},
 		{
+			"name": ".cube",
 			"from": [-4.0192, 4.8828, -10.78],
 			"to": [-2.5168, 18.0288, 25.6532],
 			"rotation": {"angle": 0, "axis": "y", "origin": [8, 9.39, 8]},
@@ -1518,10 +1520,55 @@
 			}
 		},
 		{
-			"name": ".#seat #driver",
-			"from": [2.5, 8, 2],
-			"to": [4.5, 10, 4],
+			"name": "#seat #driver",
+			"from": [-1.35, 8, 2],
+			"to": [8, 30, 4],
 			"rotation": {"angle": 0, "axis": "y", "origin": [2.5, 8, 2]},
+			"color": 8,
+			"faces": {
+				"north": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"east": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"south": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"west": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"up": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"down": {"uv": [0, 0, 2, 2], "texture": "#missing"}
+			}
+		},
+		{
+			"name": ".#seat",
+			"from": [13.5, 8, 2],
+			"to": [15.5, 10, 4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [13.5, 8, 2]},
+			"color": 8,
+			"faces": {
+				"north": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"east": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"south": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"west": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"up": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"down": {"uv": [0, 0, 2, 2], "texture": "#missing"}
+			}
+		},
+		{
+			"name": ".#seat",
+			"from": [13.5, 8, 17],
+			"to": [15.5, 10, 19],
+			"rotation": {"angle": 0, "axis": "y", "origin": [13.5, 8, 17]},
+			"color": 8,
+			"faces": {
+				"north": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"east": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"south": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"west": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"up": {"uv": [0, 0, 2, 2], "texture": "#missing"},
+				"down": {"uv": [0, 0, 2, 2], "texture": "#missing"}
+			}
+		},
+		{
+			"name": ".#seat",
+			"from": [2.5, 8, 17],
+			"to": [4.5, 10, 19],
+			"rotation": {"angle": 0, "axis": "y", "origin": [2.5, 8, 17]},
 			"color": 8,
 			"faces": {
 				"north": {"uv": [0, 0, 2, 2], "texture": "#missing"},
@@ -1681,6 +1728,9 @@
 		},
 		110,
 		111,
-		112
+		112,
+		113,
+		114,
+		115
 	]
 }

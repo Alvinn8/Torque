@@ -24,4 +24,24 @@ public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements 
             TeleportFlag.EntityState.RETAIN_PASSENGERS
         );
     }
+
+    @Override
+    public void setTeleportDuration(int ticks) {
+        this.entity.setTeleportDuration(ticks);
+    }
+
+    @Override
+    public void setInterpolationDuration(int ticks) {
+        this.entity.setInterpolationDuration(ticks);
+    }
+
+    @Override
+    public void setStartInterpolation(int ticks) {
+        this.entity.setInterpolationDelay(ticks);
+    }
+
+    @Override
+    public void remove() {
+        this.entity.remove();
+    }
 }

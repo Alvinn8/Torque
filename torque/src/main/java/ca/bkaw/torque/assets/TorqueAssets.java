@@ -36,7 +36,6 @@ public class TorqueAssets {
     public static final int PACK_FORMAT = 55;
     private static final Gson gson = new Gson();
 
-    private final @NotNull Torque torque;
     private @Nullable ResourcePack resourcePack;
     private final @NotNull Path resourcePackPath;
     private byte @Nullable[] sha1;
@@ -45,7 +44,6 @@ public class TorqueAssets {
     private final List<VehicleModel> vehicleModels = new ArrayList<>();
 
     private TorqueAssets(@NotNull Torque torque, @NotNull ResourcePack resourcePack, @NotNull Path resourcePackPath) {
-        this.torque = torque;
         this.resourcePack = resourcePack;
         this.resourcePackPath = resourcePackPath;
         try {
@@ -156,11 +154,9 @@ public class TorqueAssets {
             // The game only allows a block size of 3.
             // Scale down so it fits.
             double originalBlockSize = elements.getBlockSize();
-            System.out.println("originalBlockSize = " + originalBlockSize);
             double scale = 1.0;
             if (originalBlockSize > 3.0) {
                 scale = 3.0 / originalBlockSize;
-                System.out.println("scale = " + scale);
                 elements.scale(new Vector3d(scale), new Vector3d(8, 0, 8));
             }
 

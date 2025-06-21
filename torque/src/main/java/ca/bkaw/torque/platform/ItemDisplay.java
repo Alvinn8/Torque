@@ -28,5 +28,29 @@ public interface ItemDisplay {
      */
     void setPosition(Vector3d position);
 
+    /**
+     * Set the interpolation duration for teleportation.
+     *
+     * @param ticks The number of ticks to interpolate.
+     */
+    void setTeleportDuration(int ticks);
+
+    /**
+     * Set the interpolation duration for transformations.
+     *
+     * @param ticks The number of ticks to interpolate.
+     */
+    void setInterpolationDuration(int ticks);
+
+    /**
+     * Tell the client to start interpolating after the given number of ticks.
+     *
+     * @param ticks The number of ticks.
+     */
     void setStartInterpolation(int ticks);
+
+    /**
+     * Remove the entity from the world.
+     */
+    void remove();
 }

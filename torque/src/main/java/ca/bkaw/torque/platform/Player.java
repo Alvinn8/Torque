@@ -1,6 +1,8 @@
 package ca.bkaw.torque.platform;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
@@ -23,4 +25,31 @@ public interface Player {
      * @return The IP address, or null if unknown.
      */
     @Nullable InetSocketAddress getAddress();
+
+    /**
+     * Get the player's movement input.
+     *
+     * @param input The input object to fill with the player's input.
+     */
+    void getInput(@NotNull Input input);
+
+    /**
+     * Mount the player to an entity.
+     *
+     * @param entity The entity to mount.
+     */
+    void mountVehicle(ItemDisplay entity);
+
+    /**
+     * Dismount from the vehicle if the player is in one.
+     */
+    void dismountVehicle();
+
+    /**
+     * Get the player's current position in the world.
+     *
+     * @return The position.
+     */
+    @NotNull Vector3d getPosition();
+
 }

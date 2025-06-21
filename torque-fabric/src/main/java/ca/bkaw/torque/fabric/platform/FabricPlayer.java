@@ -1,10 +1,15 @@
 package ca.bkaw.torque.fabric.platform;
 
+import ca.bkaw.torque.platform.Input;
+import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.Player;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
 
 import java.net.InetSocketAddress;
 import java.util.HexFormat;
@@ -28,5 +33,34 @@ public record FabricPlayer(ServerPlayer entity) implements Player {
             return address;
         }
         return null;
+    }
+
+
+    @Override
+    public void getInput(@NotNull Input input) {
+        var source = this.entity.getLastClientInput();
+        input.forward = source.forward();
+        input.backward = source.backward();
+        input.left = source.left();
+        input.right = source.right();
+        input.jump = source.jump();
+        input.shift = source.shift();
+        input.sprint = source.sprint();
+    }
+
+    @Override
+    public void mountVehicle(ItemDisplay entity) {
+        this.entity.startRiding(((FabricItemDisplay) entity).entity(), true);
+    }
+
+    @Override
+    public void dismountVehicle() {
+        this.entity.stopRiding();
+    }
+
+    @Override
+    public @NotNull Vector3d getPosition() {
+        Vec3 position = this.entity.position();
+        return new Vector3d(position.x(), position.y(), position.z());
     }
 }
