@@ -1,11 +1,18 @@
 package ca.bkaw.torque.components;
 
+import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.Input;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
+import ca.bkaw.torque.vehicle.VehicleComponentType;
 import org.joml.Vector3d;
 
 public class TestDriveComponent implements VehicleComponent {
+    public  static final VehicleComponentType TYPE = VehicleComponentType.create(
+        new Identifier("torque", "test_drive"),
+        TestDriveComponent::new
+    );
+
     private final Vehicle vehicle;
 
     public TestDriveComponent(Vehicle vehicle) {

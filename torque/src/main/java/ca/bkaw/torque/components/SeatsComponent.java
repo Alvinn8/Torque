@@ -1,10 +1,12 @@
 package ca.bkaw.torque.components;
 
 import ca.bkaw.torque.model.Seat;
+import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.Input;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
+import ca.bkaw.torque.vehicle.VehicleComponentType;
 import ca.bkaw.torque.vehicle.VehicleManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +21,11 @@ import java.util.Map;
  * The component that keeps track of the passengers in the vehicle.
  */
 public class SeatsComponent implements VehicleComponent {
+    public static final VehicleComponentType TYPE = VehicleComponentType.create(
+        new Identifier("torque", "seats"),
+        SeatsComponent::new
+    );
+
     private final @NotNull Vehicle vehicle;
     private final Map<Seat, PassengerData> passengerData = new HashMap<>();
 

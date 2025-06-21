@@ -1,8 +1,12 @@
 package ca.bkaw.torque.vehicle;
 
 import ca.bkaw.torque.Torque;
+import ca.bkaw.torque.components.RigidBodyComponent;
+import ca.bkaw.torque.components.SeatsComponent;
+import ca.bkaw.torque.components.TestDriveComponent;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.render.VehicleRenderer;
+import ca.bkaw.torque.util.Registry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,13 +17,28 @@ import java.util.Map;
 
 public class VehicleManager {
     private final @NotNull Torque torque;
+
+    // Registries
+    private final Registry<VehicleComponentType> componentTypeRegistry
+        = new Registry<>(VehicleComponentType::identifier);
+
+    // Loaded vehicles
     private final List<Vehicle> vehicles = new ArrayList<>();
     private final List<VehicleRenderer> vehicleRenderers = new ArrayList<>();
     private final Map<Player, Vehicle> currentVehicleMap = new HashMap<>();
 
     public VehicleManager(Torque torque) {
         this.torque = torque;
+        this.registerBuiltIns();
         torque.getPlatform().runEachTick(this::tick);
+    }
+
+    private void registerBuiltIns() {
+        this.componentTypeRegistry.register(
+            RigidBodyComponent.TYPE,
+            SeatsComponent.TYPE,
+            TestDriveComponent.TYPE
+        );
     }
 
     private void tick() {
