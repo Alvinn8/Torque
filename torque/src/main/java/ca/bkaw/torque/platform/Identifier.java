@@ -12,12 +12,46 @@ import org.jetbrains.annotations.NotNull;
  */
 public record Identifier(String namespace, String key) {
     public Identifier {
-        if (!namespace.matches("[a-z0-9._]+")) {
+        if (!validNamespace(namespace)) {
             throw new IllegalArgumentException("Invalid namespace: " + namespace);
         }
-        if (!key.matches("[a-z0-9._/]+")) {
+        if (!validKey(key)) {
             throw new IllegalArgumentException("Invalid key: " + key);
         }
+    }
+
+    /**
+     * Check the string is a valid namespace.
+     *
+     * @param namespace The namespace to check.
+     * @return True if the namespace is valid, false otherwise.
+     */
+    public static boolean validNamespace(String namespace) {
+        return namespace.matches("[a-z0-9._]+");
+    }
+
+    /**
+     * Check the string is a valid key.
+     *
+     * @param key The key to check.
+     * @return True if the key is valid, false otherwise.
+     */
+    public static boolean validKey(String key) {
+        return key.matches("[a-z0-9._/]+");
+    }
+
+    /**
+     * Create an identifier from a string.
+     *
+     * @param identifier The identifier string in the format "namespace:key".
+     * @return The Identifier.
+     */
+    public static Identifier fromString(String identifier) {
+        String[] parts = identifier.split(":");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid identifier: " + identifier);
+        }
+        return new Identifier(parts[0], parts[1]);
     }
 
     @Override

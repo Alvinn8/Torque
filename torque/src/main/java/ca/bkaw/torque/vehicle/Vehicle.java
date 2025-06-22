@@ -13,12 +13,12 @@ import java.util.Optional;
  */
 public class Vehicle {
     private final @NotNull Torque torque;
+    private final @NotNull VehicleType type;
     private final List<VehicleComponent> components = new ArrayList<>();
-    private final @NotNull VehicleModel model;
 
-    public Vehicle(@NotNull Torque torque, @NotNull VehicleModel model) {
+    public Vehicle(@NotNull Torque torque, @NotNull VehicleType type) {
         this.torque = torque;
-        this.model = model;
+        this.type = type;
     }
 
     /**
@@ -48,8 +48,8 @@ public class Vehicle {
         return this.torque;
     }
 
-    public @NotNull VehicleModel getModel() {
-        return this.model;
+    public @NotNull VehicleType getType() {
+        return this.type;
     }
 
     /**
@@ -57,7 +57,7 @@ public class Vehicle {
      */
     public void tick() {
         for (VehicleComponent component : this.components) {
-            component.tick();
+            component.tick(this);
         }
     }
 }

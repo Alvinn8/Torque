@@ -1,6 +1,8 @@
 package ca.bkaw.torque.util;
 
 import ca.bkaw.torque.platform.Identifier;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,5 +29,21 @@ public class Registry<T> {
         for (T value : values) {
             this.register(value);
         }
+    }
+
+    /**
+     * Empty the registry, removing all registered values.
+     */
+    public void clear() {
+        this.map.clear();
+    }
+
+    @Contract("null -> null")
+    @Nullable
+    public T get(@Nullable Identifier identifier) {
+        if (identifier == null) {
+            return null;
+        }
+        return this.map.get(identifier);
     }
 }

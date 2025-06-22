@@ -1,11 +1,13 @@
 package ca.bkaw.torque;
 
+import ca.bkaw.torque.assets.ResourcePack;
 import ca.bkaw.torque.assets.TorqueAssets;
 import ca.bkaw.torque.platform.Platform;
 import ca.bkaw.torque.vehicle.VehicleManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.logging.Logger;
 
 /**
@@ -19,15 +21,9 @@ public class Torque {
 
     public Torque(@NotNull Platform platform) {
         this.platform = platform;
-        try {
-            this.assets = TorqueAssets.load(this);
-            this.assets.createVehicleModels();
-            this.assets.save();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to set up Torque assets.", e);
-        }
         this.platform.setup(new TorqueCommand(this));
         this.vehicleManager = new VehicleManager(this);
+        this.reload();
     }
 
     public @NotNull Platform getPlatform() {
@@ -43,10 +39,18 @@ public class Torque {
     }
 
     public void reload() {
-        try {
-            this.assets = TorqueAssets.load(this);
+        String assetsOverride = System.getProperty("torque.assets");
+        try (ResourcePack jarResources = assetsOverride != null
+            ? ResourcePack.loadDirectory(Path.of(assetsOverride))
+            : TorqueAssets.getJarResources(Torque.class)
+        ) {
+            this.assets = TorqueAssets.createPack(this);
+            this.assets.includeAssets(jarResources);
             this.assets.createVehicleModels();
             this.assets.save();
+            this.vehicleManager.saveAll();
+            this.vehicleManager.getVehicleTypeRegistry().clear();
+            this.vehicleManager.registerVehicleTypes(jarResources);
         } catch (IOException e) {
             throw new RuntimeException("Failed to set up Torque assets.", e);
         }

@@ -9,6 +9,7 @@ import ca.bkaw.torque.assets.send.ResourcePackSender;
 import ca.bkaw.torque.model.Seat;
 import ca.bkaw.torque.model.VehicleModel;
 import ca.bkaw.torque.platform.Identifier;
+import ca.bkaw.torque.util.Registry;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -41,7 +42,7 @@ public class TorqueAssets {
     private byte @Nullable[] sha1;
     private final ResourcePackSender sender;
 
-    private final List<VehicleModel> vehicleModels = new ArrayList<>();
+    private final Registry<VehicleModel> vehicleModelRegistry = new Registry<>(VehicleModel::getIdentifier);
 
     private TorqueAssets(@NotNull Torque torque, @NotNull ResourcePack resourcePack, @NotNull Path resourcePackPath) {
         this.resourcePack = resourcePack;
@@ -53,27 +54,38 @@ public class TorqueAssets {
         }
     }
 
-    public static TorqueAssets load(Torque torque) throws IOException {
+    public static TorqueAssets createPack(Torque torque) throws IOException {
         // Create resource pack zip
         Path resourcePackPath = Path.of("torque_resource_pack.zip");
         Files.deleteIfExists(resourcePackPath);
         ResourcePack resourcePack = ResourcePack.loadZip(resourcePackPath);
         resourcePack.create(DESCRIPTION, PACK_FORMAT);
 
-        // Read the torque jar file to get the assets from it.
+        return new TorqueAssets(torque, resourcePack, resourcePackPath);
+    }
+
+    public static ResourcePack getJarResources(Class<?> clazz) throws IOException {
+        // Read the jar file to get the resources from it.
         Path jarPath;
         try {
-            jarPath = Path.of(TorqueAssets.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            jarPath = Path.of(clazz.getProtectionDomain().getCodeSource().getLocation().toURI());
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to find torque jar file.", e);
         }
+        return ResourcePack.loadZip(jarPath);
+    }
 
-        // Merge torque resources in to resource pack
-        try (ResourcePack jarResources = ResourcePack.loadZip(jarPath)) {
-            resourcePack.include(jarResources, path -> path.startsWith("assets/"));
+    /**
+     * Include the assets folder from the specified resource pack.
+     *
+     * @param assets The resource pack to include assets from.
+     * @throws IOException If an I/O error occurs.
+     */
+    public void includeAssets(ResourcePack assets) throws IOException {
+        if (this.resourcePack == null) {
+            throw new IllegalStateException("Already saved");
         }
-
-        return new TorqueAssets(torque, resourcePack, resourcePackPath);
+        this.resourcePack.include(assets, path -> path.startsWith("assets"));
     }
 
     public void save() throws IOException {
@@ -109,13 +121,19 @@ public class TorqueAssets {
             throw new IllegalStateException("Cannot create vehicle models now.");
         }
 
-        this.vehicleModels.clear();
+        this.vehicleModelRegistry.clear();
 
         List<Path> files;
         try (Stream<Path> stream = Files.list(this.resourcePack.getPath("assets/torque/models/vehicle"))) {
-            files = stream.filter(path -> path.toString().endsWith(".json")).toList();
+            files = stream.filter(path -> Files.isRegularFile(path) && path.toString().endsWith(".json")).toList();
         }
         for (Path path : files) {
+            String key = path.getFileName().toString();
+            key = key.substring(0, key.length() - ".json".length());
+            if (!Identifier.validKey(key)) {
+                continue;
+            }
+
             JsonObject json;
             try (BufferedReader reader = Files.newBufferedReader(path)) {
                 json = JsonParser.parseReader(reader).getAsJsonObject();
@@ -175,6 +193,7 @@ public class TorqueAssets {
             Files.delete(path);
 
             VehicleModel vehicleModel = new VehicleModel(
+                new Identifier("torque", "vehicle/" + name),
                 // The vehicle model should scale up to the original size.
                 1.0 / scale,
                 // The vehicle should be moved back vertically so that it is grounded at right level.
@@ -182,7 +201,7 @@ public class TorqueAssets {
                 new Vector3f(0, (float) -centerDiff.y / 16.0f, 0),
                 seats
             );
-            this.vehicleModels.add(vehicleModel);
+            this.vehicleModelRegistry.register(vehicleModel);
         }
     }
 
@@ -208,7 +227,7 @@ public class TorqueAssets {
         Files.writeString(itemPath, gson.toJson(json));
     }
 
-    public List<VehicleModel> getVehicleModels() {
-        return this.vehicleModels;
+    public Registry<VehicleModel> getVehicleModelRegistry() {
+        return this.vehicleModelRegistry;
     }
 }

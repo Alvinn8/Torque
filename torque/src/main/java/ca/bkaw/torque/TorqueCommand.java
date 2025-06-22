@@ -4,9 +4,11 @@ import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
 import ca.bkaw.torque.components.TestDriveComponent;
 import ca.bkaw.torque.model.VehicleModel;
+import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.Vehicle;
+import ca.bkaw.torque.vehicle.VehicleType;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3d;
 import org.joml.Quaternionf;
@@ -24,14 +26,11 @@ public class TorqueCommand {
     }
 
     public void summon(World world, Vector3d position) {
-        VehicleModel vehicleModel = this.torque.getAssets().getVehicleModels().getFirst();
-        Vehicle vehicle = new Vehicle(this.torque, vehicleModel);
-        vehicle.addComponent(new RigidBodyComponent(1500, new Matrix3d(), world, position, new Quaternionf()));
-        vehicle.addComponent(new SeatsComponent(vehicle));
-        vehicle.addComponent(new TestDriveComponent(vehicle));
-        this.torque.getVehicleManager().addVehicle(vehicle);
-
-        this.torque.getVehicleManager().startRendering(vehicle);
+        VehicleType car = this.torque.getVehicleManager().getVehicleTypeRegistry().get(new Identifier("torque", "car"));
+        if (car == null) {
+            throw new IllegalArgumentException("Vehicle type 'torque:car' not found.");
+        }
+        this.torque.getVehicleManager().spawnVehicle(car, world, position);
     }
 
     public void test(Player player, int number) {
@@ -63,6 +62,10 @@ public class TorqueCommand {
     }
 
     public void reload() {
-        this.torque.reload();
+        try {
+            this.torque.reload();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

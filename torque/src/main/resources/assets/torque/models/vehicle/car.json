@@ -89,7 +89,6 @@
 			}
 		},
 		{
-			"name": ".cube",
 			"from": [-4.0192, 4.8828, -10.78],
 			"to": [-2.5168, 18.0288, 25.6532],
 			"rotation": {"angle": 0, "axis": "y", "origin": [8, 9.39, 8]},
@@ -1520,9 +1519,9 @@
 			}
 		},
 		{
-			"name": "#seat #driver",
+			"name": ".#seat #driver",
 			"from": [-1.35, 8, 2],
-			"to": [8, 30, 4],
+			"to": [8, 9, 4],
 			"rotation": {"angle": 0, "axis": "y", "origin": [2.5, 8, 2]},
 			"color": 8,
 			"faces": {

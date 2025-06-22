@@ -1,9 +1,12 @@
 package ca.bkaw.torque.components;
 
 import ca.bkaw.torque.model.Seat;
+import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.Input;
+import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.Player;
+import ca.bkaw.torque.render.VehicleRenderer;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
@@ -29,10 +32,6 @@ public class SeatsComponent implements VehicleComponent {
     private final @NotNull Vehicle vehicle;
     private final Map<Seat, PassengerData> passengerData = new HashMap<>();
 
-    public SeatsComponent(@NotNull Vehicle vehicle) {
-        this.vehicle = vehicle;
-    }
-
     public record PassengerData(Player passenger, long enteredAt, Input input) {
         public PassengerData(Player passenger) {
             this(passenger, System.currentTimeMillis(), new Input());
@@ -48,8 +47,22 @@ public class SeatsComponent implements VehicleComponent {
         }
     }
 
+    public SeatsComponent(@NotNull Vehicle vehicle, DataInput data) {
+        this.vehicle = vehicle;
+    }
+
     @Override
-    public void tick() {
+    public void save(Vehicle vehicle, DataOutput data) {
+        // Do not bother saving the passenger data. If there are passengers at this time,
+        // make them exit the vehicle.
+        for (PassengerData passengerData : this.passengerData.values()) {
+            passengerData.exitSeat();
+        }
+        this.passengerData.clear();
+    }
+
+    @Override
+    public void tick(Vehicle vehicle) {
         var iter = this.passengerData.entrySet().iterator();
         while (iter.hasNext()) {
             var entry = iter.next();
@@ -61,7 +74,7 @@ public class SeatsComponent implements VehicleComponent {
                 // If the passenger is holding shift, exit the seat
                 passengerData.exitSeat();
                 iter.remove();
-                VehicleManager vehicleManager = this.vehicle.getTorque().getVehicleManager();
+                VehicleManager vehicleManager = vehicle.getTorque().getVehicleManager();
                 vehicleManager.setCurrentVehicle(passengerData.passenger, null);
             }
         }
@@ -126,7 +139,7 @@ public class SeatsComponent implements VehicleComponent {
         Vector3f vehiclePosition = new Vector3f(rbc.getPosition());
         Quaternionfc vehicleOrientation = rbc.getOrientation();
 
-        for (Seat seat : this.vehicle.getModel().getSeats()) {
+        for (Seat seat : this.vehicle.getType().model().getSeats()) {
             if (this.getPassenger(seat) != null) {
                 continue; // Seat is already occupied
             }
@@ -168,6 +181,10 @@ public class SeatsComponent implements VehicleComponent {
         if (passenger != null) {
             this.passengerData.put(seat, new PassengerData(passenger));
             vehicleManager.setCurrentVehicle(passenger, this.vehicle);
+            VehicleRenderer vehicleRenderer = vehicleManager.getRenderer(this.vehicle);
+            if (vehicleRenderer != null) {
+                vehicleRenderer.passengerChanged(seat, passenger);
+            }
         }
     }
 

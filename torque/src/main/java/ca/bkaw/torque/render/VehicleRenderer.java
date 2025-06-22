@@ -6,6 +6,7 @@ import ca.bkaw.torque.components.SeatsComponent;
 import ca.bkaw.torque.model.Seat;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.ItemDisplay;
+import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.Vehicle;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +48,7 @@ public class VehicleRenderer {
         this.primary.display.setTeleportDuration(1);
         this.primary.display.setInterpolationDuration(1);
 
-        List<Seat> seats = vehicle.getModel().getSeats();
+        List<Seat> seats = vehicle.getType().model().getSeats();
         this.viewportSeat = seats.isEmpty() ? null : seats.getFirst();
     }
 
@@ -58,6 +59,19 @@ public class VehicleRenderer {
 
     public @NotNull Vehicle getVehicle() {
         return this.vehicle;
+    }
+
+    /**
+     * Get the primary entity of the vehicle.
+     * <p>
+     * The primary entity is where the vehicle is serialized, and is the entity that
+     * renders the primary vehicle part.
+     *
+     * @return The entity.
+     */
+    @NotNull
+    public ItemDisplay getPrimaryEntity() {
+        return this.primary.display;
     }
 
     private Vector3f getSeatTranslation(@NotNull Seat seat) {
@@ -83,8 +97,8 @@ public class VehicleRenderer {
         this.primary.transformation.identity()
             .translate(viewportTranslation)
             .rotate(this.vehicleOrientation)
-            .translate(this.vehicle.getModel().getTranslation())
-            .scale((float) this.vehicle.getModel().getScale())
+            .translate(this.vehicle.getType().model().getTranslation())
+            .scale((float) this.vehicle.getType().model().getScale())
             .translate(0.0f, 0.5f, 0.0f)
             .rotate(ROTATE_Y_180)
         ;
@@ -151,4 +165,9 @@ public class VehicleRenderer {
             }
         }
     }
+
+    public void passengerChanged(@NotNull Seat seat, @Nullable Player passenger) {
+
+    }
+
 }

@@ -1,10 +1,13 @@
 package ca.bkaw.torque.components;
 
+import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
+import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3d;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
@@ -35,32 +38,29 @@ public class RigidBodyComponent implements VehicleComponent {
     private final Vector3d netForce; // unit: Newton
     private final Vector3d netTorque; // unit: Newton-meter
 
-    public RigidBodyComponent(Vehicle vehicle) {
-        this.mass = 1500;
+    public RigidBodyComponent(Vehicle vehicle, DataInput data) {
+        this.mass = vehicle.getType().mass();
         this.localInertiaTensorInverse = new Matrix3d();
+        // The world is not serialized. Use the world of the entity.
         this.world = null;
-        this.position = new Vector3d();
-        this.velocity = new Vector3d();
-        this.orientation = new Quaternionf();
-        this.angularVelocity = new Vector3d();
-        this.netForce = new Vector3d();
-        this.netTorque = new Vector3d();
-    }
-
-    public RigidBodyComponent(double mass, Matrix3d localInertiaTensor, World world, Vector3d position, Quaternionf orientation) {
-        this.mass = mass;
-        this.localInertiaTensorInverse = localInertiaTensor.invert();
-        this.world = world;
-        this.position = position;
-        this.velocity = new Vector3d();
-        this.orientation = orientation;
-        this.angularVelocity = new Vector3d();
+        this.position = data.readVector3d("position", new Vector3d());
+        this.velocity = data.readVector3d("velocity", new Vector3d());
+        this.orientation = data.readQuaternionf("orientation", new Quaternionf());
+        this.angularVelocity = data.readVector3d("angular_velocity", new Vector3d());
         this.netForce = new Vector3d();
         this.netTorque = new Vector3d();
     }
 
     @Override
-    public void tick() {
+    public void save(Vehicle vehicle, DataOutput data) {
+        data.writeVector3d("position", this.position);
+        data.writeVector3d("velocity", this.velocity);
+        data.writeQuaternionf("orientation", this.orientation);
+        data.writeVector3d("angular_velocity", this.angularVelocity);
+    }
+
+    @Override
+    public void tick(Vehicle vehicle) {
         final double deltaTime = 1 / 20.0; // one tick, unit: second
 
         // Apply linear motion.
@@ -80,7 +80,7 @@ public class RigidBodyComponent implements VehicleComponent {
      * @param force The force vector in world coordinates. Unit: Newton.
      * @param point The point of application in world coordinates. Unit: meter.
      */
-    public void addForce(Vector3d force, Vector3d point) {
+    public void addForce(Vector3dc force, Vector3dc point) {
         this.netForce.add(force);
 
         // The point is provided in world coordinates, so we need to convert it to local
@@ -98,10 +98,22 @@ public class RigidBodyComponent implements VehicleComponent {
         return this.position;
     }
 
+    public Vector3d getVelocity() {
+        return this.velocity;
+    }
+
     public Quaternionfc getOrientation() {
         if (false) {
             this.orientation.rotateAxis(0.05f, 0, 1, 0);
         }
         return this.orientation;
+    }
+
+    public void setWorld(@NotNull World world) {
+        this.world = world;
+    }
+
+    public void setPosition(Vector3dc position) {
+        this.position.set(position);
     }
 }

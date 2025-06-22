@@ -53,4 +53,20 @@ public interface ItemDisplay {
      * Remove the entity from the world.
      */
     void remove();
+
+    /**
+     * Get the {@link DataInput} object that can be used to read persistent data stored
+     * in this entity.
+     *
+     * @return The data input.
+     */
+    DataInput getDataInput();
+
+    /**
+     * Get the {@link DataOutput} object that can be used to write persistent data on
+     * the entity.
+     *
+     * @return The data output.
+     */
+    DataOutput getDataOutput();
 }

@@ -21,10 +21,10 @@ import java.util.function.Predicate;
 public class ResourcePack implements AutoCloseable {
     private static final Gson GSON = new Gson();
 
-    private final FileSystem zipFileSystem;
-    private final Path root;
+    private final @Nullable FileSystem zipFileSystem;
+    private final @NotNull Path root;
 
-    private ResourcePack(FileSystem zipFileSystem, Path root) {
+    private ResourcePack(@Nullable FileSystem zipFileSystem, @NotNull Path root) {
         this.zipFileSystem = zipFileSystem;
         this.root = root;
     }
@@ -46,9 +46,28 @@ public class ResourcePack implements AutoCloseable {
         return new ResourcePack(fileSystem, root);
     }
 
+    /**
+     * Load a resource pack from a directory and use the directory as the root of
+     * the resource pack.
+     * <p>
+     * The directory must exist when calling this method.
+     *
+     * @param directory The path of the directory.
+     * @return The resource pack.
+     * @throws IOException If an I/O error occurs.
+     */
+    public static ResourcePack loadDirectory(Path directory) throws IOException {
+        if (!Files.isDirectory(directory)) {
+            throw new IllegalArgumentException("The provided path is not a directory: " + directory);
+        }
+        return new ResourcePack(null, directory.toAbsolutePath().normalize());
+    }
+
     @Override
     public void close() throws IOException {
-        this.zipFileSystem.close();
+        if (this.zipFileSystem != null) {
+            this.zipFileSystem.close();
+        }
     }
 
     /**
@@ -56,7 +75,7 @@ public class ResourcePack implements AutoCloseable {
      *
      * @return The root path.
      */
-    public Path getRoot() {
+    public @NotNull Path getRoot() {
         return this.root;
     }
 

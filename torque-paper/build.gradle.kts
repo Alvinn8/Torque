@@ -26,7 +26,7 @@ dependencies {
 tasks {
     runServer {
         minecraftVersion(minecraftVersion)
-        jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-Ddisable.watchdog=true")
+        jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-Ddisable.watchdog=true", "-Dtorque.assets=../../torque/src/main/resources")
     }
     assemble {
         dependsOn(shadowJar)

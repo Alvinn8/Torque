@@ -30,7 +30,7 @@ dependencies {
 
 tasks {
     runServer {
-        jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-Ddisable.watchdog=true")
+        jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-Ddisable.watchdog=true", "-Dtorque.assets=../../torque/src/main/resources")
     }
     assemble {
         dependsOn(shadowJar)

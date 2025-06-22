@@ -1,0 +1,18 @@
+{
+    "model": "torque:vehicle/car",
+    "mass_kg": 1500,
+    "components": [
+        {
+            "type": "torque:rigid_body"
+        },
+        {
+            "type": "torque:seats"
+        },
+        {
+            "type": "torque:test_drive"
+        },
+        {
+            "type": "torque:drag"
+        }
+    ]
+}
