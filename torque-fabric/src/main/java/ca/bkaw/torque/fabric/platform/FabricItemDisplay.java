@@ -1,5 +1,7 @@
 package ca.bkaw.torque.fabric.platform;
 
+import ca.bkaw.torque.platform.DataInput;
+import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.ItemStack;
 import com.mojang.math.Transformation;
@@ -42,5 +44,15 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
     @Override
     public void remove() {
         this.entity.remove(Entity.RemovalReason.KILLED);
+    }
+
+    @Override
+    public DataInput getDataInput() {
+        return null;
+    }
+
+    @Override
+    public DataOutput getDataOutput() {
+        return null;
     }
 }

@@ -11,7 +11,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
 public class TestDriveComponent implements VehicleComponent {
-    public  static final VehicleComponentType TYPE = VehicleComponentType.create(
+    public static final VehicleComponentType TYPE = VehicleComponentType.create(
         new Identifier("torque", "test_drive"),
         TestDriveComponent::new
     );
@@ -20,6 +20,11 @@ public class TestDriveComponent implements VehicleComponent {
 
     public TestDriveComponent(Vehicle vehicle, DataInput data) {
         this.vehicle = vehicle;
+    }
+
+    @Override
+    public VehicleComponentType getType() {
+        return TYPE;
     }
 
     @Override

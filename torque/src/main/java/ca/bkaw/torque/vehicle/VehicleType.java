@@ -33,6 +33,9 @@ public record VehicleType(
         VehicleModel model = vehicleManager.getTorque().getAssets().getVehicleModelRegistry().get(modelIdentifier);
 
         double mass = json.get("mass_kg").getAsDouble();
+        if (mass <= 0) {
+            throw new IllegalArgumentException("Vehicle mass must be greater than 0, got: " + mass);
+        }
 
         ArrayList<ComponentConfiguration> components = new ArrayList<>();
 

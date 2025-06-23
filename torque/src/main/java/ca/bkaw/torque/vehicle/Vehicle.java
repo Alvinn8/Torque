@@ -5,6 +5,7 @@ import ca.bkaw.torque.model.VehicleModel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +43,10 @@ public class Vehicle {
      */
     public void addComponent(@NotNull VehicleComponent component) {
         this.components.add(component);
+    }
+
+    public List<VehicleComponent> getComponents() {
+        return Collections.unmodifiableList(this.components);
     }
 
     public @NotNull Torque getTorque() {

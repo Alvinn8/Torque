@@ -48,7 +48,7 @@ public class Torque {
             this.assets.includeAssets(jarResources);
             this.assets.createVehicleModels();
             this.assets.save();
-            this.vehicleManager.saveAll();
+            this.vehicleManager.saveAndUnloadAll();
             this.vehicleManager.getVehicleTypeRegistry().clear();
             this.vehicleManager.registerVehicleTypes(jarResources);
         } catch (IOException e) {

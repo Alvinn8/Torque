@@ -87,8 +87,8 @@ public class VehicleManager {
         return this.vehicles;
     }
 
-    private void startRendering(@NotNull Vehicle vehicle) {
-        VehicleRenderer renderer = new VehicleRenderer(vehicle);
+    private void startRendering(@NotNull Vehicle vehicle, @NotNull ItemDisplay primaryEntity) {
+        VehicleRenderer renderer = new VehicleRenderer(vehicle, primaryEntity);
         renderer.setup(this.torque);
         this.vehicleRenderers.add(renderer);
     }
@@ -108,27 +108,6 @@ public class VehicleManager {
             this.currentVehicleMap.put(passenger, vehicle);
         } else {
             this.currentVehicleMap.remove(passenger);
-        }
-    }
-
-    /**
-     * Spawn a new vehicle.
-     *
-     * @param vehicleType The type of vehicle to spawn.
-     * @param world The world to spawn the vehicle in.
-     * @param position The position in the world to spawn the vehicle at.
-     */
-    public void spawnVehicle(@NotNull VehicleType vehicleType, @NotNull World world, @NotNull Vector3dc position) {
-        Vehicle vehicle = new Vehicle(this.torque, vehicleType);
-        for (VehicleType.ComponentConfiguration configuration : vehicleType.components()) {
-            VehicleComponent vehicleComponent = configuration.type().constructor().apply(vehicle, DataInput.empty());
-            if (vehicleComponent instanceof RigidBodyComponent rbc) {
-                rbc.setWorld(world);
-                rbc.setPosition(position);
-            }
-            vehicle.addComponent(vehicleComponent);
-            this.vehicles.add(vehicle);
-            this.startRendering(vehicle);
         }
     }
 
@@ -188,19 +167,94 @@ public class VehicleManager {
     }
 
     /**
+     * Spawn a new vehicle.
+     *
+     * @param vehicleType The type of vehicle to spawn.
+     * @param world The world to spawn the vehicle in.
+     * @param position The position in the world to spawn the vehicle at.
+     */
+    public void spawnVehicle(@NotNull VehicleType vehicleType, @NotNull World world, @NotNull Vector3dc position) {
+        Vehicle vehicle = new Vehicle(this.torque, vehicleType);
+        for (VehicleType.ComponentConfiguration configuration : vehicleType.components()) {
+            VehicleComponent vehicleComponent = configuration.type().constructor().apply(vehicle, DataInput.empty());
+            if (vehicleComponent instanceof RigidBodyComponent rbc) {
+                rbc.setWorld(world);
+                rbc.setPosition(position);
+            }
+            vehicle.addComponent(vehicleComponent);
+        }
+        this.vehicles.add(vehicle);
+        System.out.println("position = " + position);
+        ItemDisplay primaryEntity = world.spawnItemDisplay(position);
+        this.startRendering(vehicle, primaryEntity);
+    }
+
+    /**
+     * Save the state of the vehicle to persistent storage on the primary entity.
+     *
+     * @param vehicle The vehicle to save.
+     */
+    public void saveVehicle(@NotNull Vehicle vehicle) {
+        VehicleRenderer vehicleRenderer = this.getRenderer(vehicle);
+        if (vehicleRenderer == null) {
+            return;
+        }
+        ItemDisplay entity = vehicleRenderer.getPrimaryEntity();
+        DataOutput dataOutput = entity.getDataOutput();
+        dataOutput.writeIdentifier("vehicle_type", vehicle.getType().identifier());
+        DataOutput componentsData = dataOutput.getOrCreateDataOutput("components");
+        for (VehicleComponent component : vehicle.getComponents()) {
+            DataOutput componentData = componentsData.getOrCreateDataOutput(
+                component.getType().identifier().toString()
+            );
+            component.save(vehicle, componentData);
+            componentData.save();
+        }
+        componentsData.save();
+        dataOutput.save();
+    }
+
+    /**
      * Save all vehicles.
      */
     public void saveAll() {
+        this.vehicles.forEach(this::saveVehicle);
+    }
+
+    /**
+     * Save all vehicles and unload them from the world.
+     */
+    public void saveAndUnloadAll() {
+        this.saveAll();
         Iterator<Vehicle> iterator = this.vehicles.iterator();
         while (iterator.hasNext()) {
             Vehicle vehicle = iterator.next();
-            VehicleRenderer vehicleRenderer = this.getRenderer(vehicle);
-            if (vehicleRenderer != null) {
-                ItemDisplay entity = vehicleRenderer.getPrimaryEntity();
-                DataOutput dataOutput = entity.getDataOutput();
-                // TODO serialize all components
-            }
+            this.stopRendering(vehicle);
             iterator.remove();
         }
+    }
+
+    /**
+     * Load a vehicle from the data stored in the persistent storage in the primary
+     * entity.
+     *
+     * @param primaryEntity The primary entity that contains the vehicle data.
+     */
+    public void loadVehicle(@NotNull ItemDisplay primaryEntity) {
+        DataInput data = primaryEntity.getDataInput();
+        Identifier vehicleTypeIdentifier = data.readIdentifier("vehicle_type", null);
+        VehicleType vehicleType = this.vehicleTypeRegistry.get(vehicleTypeIdentifier);
+        if (vehicleType == null) {
+            return;
+        }
+        Vehicle vehicle = new Vehicle(this.torque, vehicleType);
+        DataInput componentsData = data.getDataInput("components");
+        for (VehicleType.ComponentConfiguration component : vehicleType.components()) {
+            DataInput componentData = componentsData.getDataInput(component.type().identifier().toString());
+            VehicleComponent vehicleComponent = component.type().constructor().apply(vehicle, componentData);
+            vehicle.addComponent(vehicleComponent);
+        }
+        this.vehicles.add(vehicle);
+        this.startRendering(vehicle, primaryEntity);
     }
 }

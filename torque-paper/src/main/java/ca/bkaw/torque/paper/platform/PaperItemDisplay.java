@@ -59,7 +59,7 @@ public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements 
         if (vehicleData == null) {
             return DataInput.empty();
         }
-        return new PdcInputOutput(vehicleData);
+        return new PdcInputOutput(vehicleData, pdc, PDC_VEHICLE_KEY);
     }
 
     @Override
@@ -70,6 +70,6 @@ public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements 
             vehicleData = pdc.getAdapterContext().newPersistentDataContainer();
             pdc.set(PDC_VEHICLE_KEY, PersistentDataType.TAG_CONTAINER, vehicleData);
         }
-        return new PdcInputOutput(vehicleData);
+        return new PdcInputOutput(vehicleData, pdc, PDC_VEHICLE_KEY);
     }
 }

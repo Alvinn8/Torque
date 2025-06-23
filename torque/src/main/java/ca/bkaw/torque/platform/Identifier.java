@@ -41,6 +41,17 @@ public record Identifier(String namespace, String key) {
     }
 
     /**
+     * Check if the string is a valid identifier.
+     *
+     * @param identifier The string.
+     * @return True if the string is a valid identifier, false otherwise.
+     */
+    public static boolean validIdentifier(String identifier) {
+        String[] parts = identifier.split(":");
+        return parts.length == 2 && validNamespace(parts[0]) && validKey(parts[1]);
+    }
+
+    /**
      * Create an identifier from a string.
      *
      * @param identifier The identifier string in the format "namespace:key".

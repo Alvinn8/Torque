@@ -54,6 +54,14 @@ public class TorqueCommand {
                     });
                 }
             }
+            case 3 -> {
+                try {
+                    this.torque.getVehicleManager().saveAll();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Saved all");
+            }
         }
     }
 

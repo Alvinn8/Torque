@@ -52,6 +52,11 @@ public class SeatsComponent implements VehicleComponent {
     }
 
     @Override
+    public VehicleComponentType getType() {
+        return TYPE;
+    }
+
+    @Override
     public void save(Vehicle vehicle, DataOutput data) {
         // Do not bother saving the passenger data. If there are passengers at this time,
         // make them exit the vehicle.

@@ -37,12 +37,11 @@ public class VehicleRenderer {
 
     public record RenderEntity(@NotNull ItemDisplay display, @NotNull Matrix4f transformation) {}
 
-    public VehicleRenderer(@NotNull Vehicle vehicle) {
+    public VehicleRenderer(@NotNull Vehicle vehicle, ItemDisplay primaryEntity) {
         this.vehicle = vehicle;
-        RigidBodyComponent rigidBody = this.vehicle.getComponent(RigidBodyComponent.class).orElseThrow();
 
         this.primary = new RenderEntity(
-            rigidBody.getWorld().spawnItemDisplay(rigidBody.getPosition()),
+            primaryEntity,
             new Matrix4f()
         );
         this.primary.display.setTeleportDuration(1);

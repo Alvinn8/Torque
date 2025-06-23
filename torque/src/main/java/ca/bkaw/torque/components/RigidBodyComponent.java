@@ -13,6 +13,7 @@ import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+import org.joml.Vector3f;
 
 public class RigidBodyComponent implements VehicleComponent {
     public static final VehicleComponentType TYPE = VehicleComponentType.create(
@@ -43,20 +44,25 @@ public class RigidBodyComponent implements VehicleComponent {
         this.localInertiaTensorInverse = new Matrix3d();
         // The world is not serialized. Use the world of the entity.
         this.world = null;
-        this.position = data.readVector3d("position", new Vector3d());
-        this.velocity = data.readVector3d("velocity", new Vector3d());
+        this.position = new Vector3d(data.readVector3f("position", new Vector3f()));
+        this.velocity = new Vector3d(data.readVector3f("velocity", new Vector3f()));
         this.orientation = data.readQuaternionf("orientation", new Quaternionf());
-        this.angularVelocity = data.readVector3d("angular_velocity", new Vector3d());
+        this.angularVelocity = new Vector3d(data.readVector3f("angular_velocity", new Vector3f()));
         this.netForce = new Vector3d();
         this.netTorque = new Vector3d();
     }
 
     @Override
+    public VehicleComponentType getType() {
+        return TYPE;
+    }
+
+    @Override
     public void save(Vehicle vehicle, DataOutput data) {
-        data.writeVector3d("position", this.position);
-        data.writeVector3d("velocity", this.velocity);
+        data.writeVector3f("position", new Vector3f(this.position));
+        data.writeVector3f("velocity", new Vector3f(this.velocity));
         data.writeQuaternionf("orientation", this.orientation);
-        data.writeVector3d("angular_velocity", this.angularVelocity);
+        data.writeVector3f("angular_velocity", new Vector3f(this.angularVelocity));
     }
 
     @Override
@@ -81,6 +87,9 @@ public class RigidBodyComponent implements VehicleComponent {
      * @param point The point of application in world coordinates. Unit: meter.
      */
     public void addForce(Vector3dc force, Vector3dc point) {
+        if (!force.isFinite()) {
+            throw new IllegalArgumentException("Force must be a finite vector.");
+        }
         this.netForce.add(force);
 
         // The point is provided in world coordinates, so we need to convert it to local
