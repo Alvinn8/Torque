@@ -40,5 +40,7 @@ public class TorqueFabric implements ModInitializer {
         return this.server;
     }
 
-
+    public @Nullable Torque getTorque() {
+        return this.torque;
+    }
 }

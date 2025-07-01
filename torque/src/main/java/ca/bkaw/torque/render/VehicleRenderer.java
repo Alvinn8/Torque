@@ -135,6 +135,7 @@ public class VehicleRenderer {
             if (renderEntity == null) {
                 // Create a new render entity for this seat
                 ItemDisplay display = this.vehicleWorld.spawnItemDisplay(seatPosition);
+                this.vehicle.getTorque().getVehicleManager().setVehiclePart(display, this.vehicle);
                 display.setTeleportDuration(1);
                 renderEntity = new RenderEntity(display, new Matrix4f());
                 this.seatEntities.put(seat, renderEntity);
@@ -158,6 +159,7 @@ public class VehicleRenderer {
                 }
                 if (renderEntity != this.primary) {
                     // Do not remove primary, but remove any other seat entities.
+                    this.vehicle.getTorque().getVehicleManager().setVehiclePart(renderEntity.display, null);
                     renderEntity.display.remove();
                 }
                 iter.remove();

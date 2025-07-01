@@ -46,6 +46,7 @@ public class VehicleManager {
     private final List<Vehicle> vehicles = new ArrayList<>();
     private final List<VehicleRenderer> vehicleRenderers = new ArrayList<>();
     private final Map<Player, Vehicle> currentVehicleMap = new HashMap<>();
+    private final Map<ItemDisplay, Vehicle> vehiclePartMap = new HashMap<>();
 
     public VehicleManager(Torque torque) {
         this.torque = torque;
@@ -98,7 +99,8 @@ public class VehicleManager {
     }
 
     /**
-     * Set the vehicle that the passenger is currently in. Or null to remove the passenger from any vehicle.
+     * Set the vehicle that the passenger is currently in. Or null to remove the
+     * passenger from any vehicle.
      *
      * @param passenger The passenger.
      * @param vehicle The vehicle, or null.
@@ -186,6 +188,7 @@ public class VehicleManager {
         this.vehicles.add(vehicle);
         System.out.println("position = " + position);
         ItemDisplay primaryEntity = world.spawnItemDisplay(position);
+        this.vehiclePartMap.put(primaryEntity, vehicle);
         this.startRendering(vehicle, primaryEntity);
     }
 
@@ -256,5 +259,30 @@ public class VehicleManager {
         }
         this.vehicles.add(vehicle);
         this.startRendering(vehicle, primaryEntity);
+    }
+
+    /**
+     * Get the vehicle that an item display entity is rendering.
+     *
+     * @param entity The item display entity.
+     * @return The vehicle, or null if the entity is not part of a vehicle.
+     */
+    @Nullable
+    public Vehicle getVehicleFromPart(@NotNull ItemDisplay entity) {
+        return this.vehiclePartMap.get(entity);
+    }
+
+    /**
+     * Set the vehicle that an item display entity is part of.
+     *
+     * @param entity The item display entity.
+     * @param vehicle The vehicle.
+     */
+    public void setVehiclePart(@NotNull ItemDisplay entity, @Nullable Vehicle vehicle) {
+        if (vehicle == null) {
+            this.vehiclePartMap.remove(entity);
+            return;
+        }
+        this.vehiclePartMap.put(entity, vehicle);
     }
 }

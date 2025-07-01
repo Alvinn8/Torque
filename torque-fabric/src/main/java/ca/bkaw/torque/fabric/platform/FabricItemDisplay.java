@@ -1,10 +1,12 @@
 package ca.bkaw.torque.fabric.platform;
 
+import ca.bkaw.torque.fabric.ItemDisplayAccessor;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.ItemStack;
 import com.mojang.math.Transformation;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import org.joml.Matrix4f;
@@ -48,11 +50,20 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
 
     @Override
     public DataInput getDataInput() {
-        return null;
+        CompoundTag torqueData = ((ItemDisplayAccessor) this.entity).torque$getTorqueData();
+        if (torqueData == null) {
+            return DataInput.empty();
+        }
+        return new NbtInputOutput(torqueData);
     }
 
     @Override
     public DataOutput getDataOutput() {
-        return null;
+        CompoundTag torqueData = ((ItemDisplayAccessor) this.entity).torque$getTorqueData();
+        if (torqueData == null) {
+            torqueData = new CompoundTag();
+            ((ItemDisplayAccessor) this.entity).torque$setTorqueData(torqueData);
+        }
+        return new NbtInputOutput(torqueData);
     }
 }
