@@ -6,6 +6,7 @@ import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
@@ -18,7 +19,7 @@ public class DragComponent implements VehicleComponent {
     public DragComponent(Vehicle vehicle, DataInput data) {}
 
     @Override
-    public VehicleComponentType getType() {
+    public @NotNull VehicleComponentType getType() {
         return TYPE;
     }
 
@@ -43,9 +44,6 @@ public class DragComponent implements VehicleComponent {
             double density = 1.225; // unit: kg/m^3 (air density)
             double dragForceMagnitude = 0.5 * dragCoefficient * density * crossSectionalArea * velocitySquared;
             Vector3d dragForce = new Vector3d(velocity).normalize().negate().mul(dragForceMagnitude);
-            if (Math.random() < 0.05 && dragForce.lengthSquared() > 0.01) {
-                System.out.println("dragForce.length() = " + dragForce.length());
-            }
             rbc.addForce(dragForce, position);
         });
     }

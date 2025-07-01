@@ -3,6 +3,8 @@ package ca.bkaw.torque.vehicle;
 import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.assets.ResourcePack;
 import ca.bkaw.torque.components.DragComponent;
+import ca.bkaw.torque.components.FloatComponent;
+import ca.bkaw.torque.components.GravityComponent;
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
 import ca.bkaw.torque.components.TestDriveComponent;
@@ -59,7 +61,9 @@ public class VehicleManager {
             RigidBodyComponent.TYPE,
             SeatsComponent.TYPE,
             TestDriveComponent.TYPE,
-            DragComponent.TYPE
+            DragComponent.TYPE,
+            GravityComponent.TYPE,
+            FloatComponent.TYPE
         );
     }
 
@@ -256,6 +260,9 @@ public class VehicleManager {
             DataInput componentData = componentsData.getDataInput(component.type().identifier().toString());
             VehicleComponent vehicleComponent = component.type().constructor().apply(vehicle, componentData);
             vehicle.addComponent(vehicleComponent);
+            if (vehicleComponent instanceof RigidBodyComponent rbc) {
+                rbc.setWorld(primaryEntity.getWorld());
+            }
         }
         this.vehicles.add(vehicle);
         this.startRendering(vehicle, primaryEntity);

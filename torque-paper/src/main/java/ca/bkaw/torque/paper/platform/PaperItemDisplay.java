@@ -3,6 +3,7 @@ package ca.bkaw.torque.paper.platform;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.ItemStack;
+import ca.bkaw.torque.platform.World;
 import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -22,6 +23,11 @@ public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements 
     @Override
     public void setTransformation(Matrix4f affineTransformMatrix) {
         this.entity.setTransformationMatrix(affineTransformMatrix);
+    }
+
+    @Override
+    public World getWorld() {
+        return new PaperWorld(this.entity.getWorld());
     }
 
     @Override

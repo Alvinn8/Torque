@@ -5,8 +5,10 @@ import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.ItemStack;
+import ca.bkaw.torque.platform.World;
 import com.mojang.math.Transformation;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import org.joml.Matrix4f;
@@ -21,6 +23,11 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
     @Override
     public void setTransformation(Matrix4f affineTransformMatrix) {
         this.entity.setTransformation(new Transformation(affineTransformMatrix));
+    }
+
+    @Override
+    public World getWorld() {
+        return new FabricWorld((ServerLevel) this.entity.level());
     }
 
     @Override

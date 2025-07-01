@@ -52,7 +52,7 @@ public class SeatsComponent implements VehicleComponent {
     }
 
     @Override
-    public VehicleComponentType getType() {
+    public @NotNull VehicleComponentType getType() {
         return TYPE;
     }
 

@@ -1,6 +1,7 @@
 package ca.bkaw.torque.vehicle;
 
 import ca.bkaw.torque.platform.DataOutput;
+import org.jetbrains.annotations.NotNull;
 
 public interface VehicleComponent {
 
@@ -9,6 +10,7 @@ public interface VehicleComponent {
      *
      * @return The type of this component.
      */
+    @NotNull
     VehicleComponentType getType();
 
     /**

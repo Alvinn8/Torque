@@ -10,9 +10,11 @@ import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
 
 /**
  * A handler for the {@code /torque} command. Note that the platform performs the
@@ -26,27 +28,38 @@ public class TorqueCommand {
     }
 
     public void summon(World world, Vector3d position) {
-        VehicleType car = this.torque.getVehicleManager().getVehicleTypeRegistry().get(new Identifier("torque", "car"));
+        VehicleType car = this.torque.getVehicleManager().getVehicleTypeRegistry().get(new Identifier("torque", "boat"));
         if (car == null) {
-            throw new IllegalArgumentException("Vehicle type 'torque:car' not found.");
+            throw new IllegalArgumentException("Vehicle type 'torque:boat' not found.");
         }
         this.torque.getVehicleManager().spawnVehicle(car, world, position);
+    }
+
+    @Nullable
+    private Vehicle getClosestVehicle(Player player) {
+        return this.torque.getVehicleManager().getVehicles().stream().min((a, b) -> {
+            Vector3dc aPos = a.getComponent(RigidBodyComponent.class).map(RigidBodyComponent::getPosition).orElse(new Vector3d());
+            Vector3dc bPos = b.getComponent(RigidBodyComponent.class).map(RigidBodyComponent::getPosition).orElse(new Vector3d());
+            double aDistance = aPos.distanceSquared(player.getPosition());
+            double bDistance = bPos.distanceSquared(player.getPosition());
+            return Double.compare(aDistance, bDistance);
+        }).orElse(null);
     }
 
     public void test(Player player, int number) {
         switch (number) {
             case 1 -> {
-                Vehicle vehicle = this.torque.getVehicleManager().getVehicles().get(0);
+                Vehicle vehicle = this.getClosestVehicle(player);
                 if (vehicle != null) {
                     vehicle.getComponent(RigidBodyComponent.class).ifPresent(
                         rbc -> {
-                            rbc.addForce(new Vector3d(1000, 0, 0), rbc.getPosition().add(1, 0, 0, new Vector3d()));
+                            rbc.addForce(new Vector3d(0, 10000, 0), rbc.getPosition().add(1, 0, 0, new Vector3d()));
                         }
                     );
                 }
             }
             case 2 -> {
-                Vehicle vehicle = this.torque.getVehicleManager().getVehicles().get(0);
+                Vehicle vehicle = this.getClosestVehicle(player);
                 if (vehicle != null) {
                     vehicle.getComponent(SeatsComponent.class).ifPresent(seats -> {
                         boolean success = seats.addPassenger(player);

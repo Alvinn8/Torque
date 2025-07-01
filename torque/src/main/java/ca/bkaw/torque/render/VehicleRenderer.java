@@ -52,7 +52,8 @@ public class VehicleRenderer {
     }
 
     public void setup(@NotNull Torque torque) {
-        this.primary.display.setItem(torque.getPlatform().createModelItem(new Identifier("torque", "vehicle/car/primary")));
+        Identifier modelIdentifier = this.vehicle.getType().model().getIdentifier();
+        this.primary.display.setItem(torque.getPlatform().createModelItem(new Identifier(modelIdentifier.namespace(), modelIdentifier.key() + "/primary")));
         this.render();
     }
 

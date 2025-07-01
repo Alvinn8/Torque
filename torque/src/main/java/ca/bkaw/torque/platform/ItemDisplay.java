@@ -22,6 +22,13 @@ public interface ItemDisplay {
     void setTransformation(Matrix4f affineTransformMatrix);
 
     /**
+     * Get the world that the entity is in.
+     *
+     * @return The world.
+     */
+    World getWorld();
+
+    /**
      * Set the world position of the item display.
      *
      * @param position The coordinates in the world to set the position to.

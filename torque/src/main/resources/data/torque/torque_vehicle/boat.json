@@ -1,0 +1,24 @@
+{
+    "model": "torque:vehicle/boat",
+    "mass_kg": 100,
+    "components": [
+        {
+            "type": "torque:rigid_body"
+        },
+        {
+            "type": "torque:seats"
+        },
+        {
+            "type": "torque:test_drive"
+        },
+        {
+            "type": "torque:drag"
+        },
+        {
+            "type": "torque:gravity"
+        },
+        {
+            "type": "torque:float"
+        }
+    ]
+}

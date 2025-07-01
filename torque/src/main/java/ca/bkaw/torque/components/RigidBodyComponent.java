@@ -53,7 +53,7 @@ public class RigidBodyComponent implements VehicleComponent {
     }
 
     @Override
-    public VehicleComponentType getType() {
+    public @NotNull VehicleComponentType getType() {
         return TYPE;
     }
 
@@ -119,6 +119,7 @@ public class RigidBodyComponent implements VehicleComponent {
     }
 
     public void setWorld(@NotNull World world) {
+        System.out.println("setting world to " + world);
         this.world = world;
     }
 

@@ -1,6 +1,8 @@
 package ca.bkaw.torque.platform;
 
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3dc;
+import org.joml.Vector3ic;
 
 /**
  * A world/dimension in the game, such as the overworld, the nether or the end.
@@ -12,5 +14,15 @@ public interface World {
      * @param position The position in the world to spawn the item display.
      * @return The item display entity.
      */
-    ItemDisplay spawnItemDisplay(Vector3dc position);
+    @NotNull
+    ItemDisplay spawnItemDisplay(@NotNull Vector3dc position);
+
+    /**
+     * Get the block state at the given position in the world.
+     *
+     * @param position The block coordinates.
+     * @return The block state.
+     */
+    @NotNull
+    BlockState getBlock(@NotNull Vector3ic position);
 }

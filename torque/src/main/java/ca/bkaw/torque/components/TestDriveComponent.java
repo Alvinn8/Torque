@@ -7,6 +7,7 @@ import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
@@ -23,7 +24,7 @@ public class TestDriveComponent implements VehicleComponent {
     }
 
     @Override
-    public VehicleComponentType getType() {
+    public @NotNull VehicleComponentType getType() {
         return TYPE;
     }
 
