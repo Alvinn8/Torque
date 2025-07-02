@@ -59,6 +59,11 @@ public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements 
     }
 
     @Override
+    public boolean isAlive() {
+        return this.entity.isValid();
+    }
+
+    @Override
     public DataInput getDataInput() {
         PersistentDataContainer pdc = this.entity.getPersistentDataContainer();
         PersistentDataContainer vehicleData = pdc.get(PDC_VEHICLE_KEY, PersistentDataType.TAG_CONTAINER);

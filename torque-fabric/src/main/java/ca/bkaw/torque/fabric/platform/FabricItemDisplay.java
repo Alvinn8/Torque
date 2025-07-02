@@ -56,6 +56,11 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
     }
 
     @Override
+    public boolean isAlive() {
+        return this.entity.isAlive();
+    }
+
+    @Override
     public DataInput getDataInput() {
         CompoundTag torqueData = ((ItemDisplayAccessor) this.entity).torque$getTorqueData();
         if (torqueData == null) {

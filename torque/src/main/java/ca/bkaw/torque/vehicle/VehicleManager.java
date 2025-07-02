@@ -71,8 +71,17 @@ public class VehicleManager {
         for (Vehicle vehicle : this.vehicles) {
             vehicle.tick();
         }
-        for (VehicleRenderer vehicleRenderer : this.vehicleRenderers) {
+        Iterator<VehicleRenderer> iter = this.vehicleRenderers.iterator();
+        while (iter.hasNext()) {
+            VehicleRenderer vehicleRenderer = iter.next();
             vehicleRenderer.render();
+            if (!vehicleRenderer.getPrimaryEntity().isAlive()) {
+                // If we remove first, we can avoid a ConcurrentModificationException
+                iter.remove();
+                this.stopRendering(vehicleRenderer.getVehicle());
+                this.vehicles.remove(vehicleRenderer.getVehicle());
+                System.out.println("Removing a vehicle");
+            }
         }
     }
 

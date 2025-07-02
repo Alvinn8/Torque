@@ -62,6 +62,13 @@ public interface ItemDisplay {
     void remove();
 
     /**
+     * Check if the entity is alive and loaded.
+     *
+     * @return True if the entity is valid, false otherwise.
+     */
+    boolean isAlive();
+
+    /**
      * Get the {@link DataInput} object that can be used to read persistent data stored
      * in this entity.
      *
