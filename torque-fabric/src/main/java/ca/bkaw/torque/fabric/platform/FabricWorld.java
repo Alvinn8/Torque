@@ -1,9 +1,11 @@
 package ca.bkaw.torque.fabric.platform;
 
 import ca.bkaw.torque.platform.BlockState;
+import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.World;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EntityType;
@@ -24,5 +26,13 @@ public record FabricWorld(ServerLevel level) implements World {
     @Override
     public @NotNull BlockState getBlock(@NotNull Vector3ic position) {
         return new FabricBlockState(this.level.getBlockState(new BlockPos(position.x(), position.y(), position.z())));
+    }
+
+    @Override
+    public void spawnParticle(Vector3ic blockPos, Identifier identifier) {
+        this.level.sendParticles(
+            ParticleTypes.SMOKE,
+            blockPos.x() + 0.5, blockPos.y() + 0.5, blockPos.z() + 0.5,
+            1, 0, 0, 0, 0);
     }
 }

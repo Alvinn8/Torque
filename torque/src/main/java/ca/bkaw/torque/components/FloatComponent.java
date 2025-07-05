@@ -36,7 +36,7 @@ public class FloatComponent implements VehicleComponent {
             BlockState block = rbc.getWorld().getBlock(new Vector3i(rbc.getPosition(), RoundingMode.TRUNCATE));
             if (block.isWaterlogged()) {
                 // Add buoyant force
-                rbc.addForce(new Vector3d(0, 1000, 0), rbc.getPosition());
+                rbc.addForce(new Vector3d(0, 2000, 0), rbc.getPosition());
             }
         });
     }

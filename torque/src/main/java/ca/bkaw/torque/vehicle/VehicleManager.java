@@ -2,6 +2,7 @@ package ca.bkaw.torque.vehicle;
 
 import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.assets.ResourcePack;
+import ca.bkaw.torque.components.CollisionComponent;
 import ca.bkaw.torque.components.DragComponent;
 import ca.bkaw.torque.components.FloatComponent;
 import ca.bkaw.torque.components.GravityComponent;
@@ -50,6 +51,8 @@ public class VehicleManager {
     private final Map<Player, Vehicle> currentVehicleMap = new HashMap<>();
     private final Map<ItemDisplay, Vehicle> vehiclePartMap = new HashMap<>();
 
+    public static boolean tickStep = false;
+
     public VehicleManager(Torque torque) {
         this.torque = torque;
         this.registerBuiltIns();
@@ -63,11 +66,16 @@ public class VehicleManager {
             TestDriveComponent.TYPE,
             DragComponent.TYPE,
             GravityComponent.TYPE,
-            FloatComponent.TYPE
+            FloatComponent.TYPE,
+            CollisionComponent.TYPE
         );
     }
 
     private void tick() {
+        // if (!tickStep) {
+        //     return;
+        // }
+        // tickStep = false;
         for (Vehicle vehicle : this.vehicles) {
             vehicle.tick();
         }

@@ -4,6 +4,7 @@ import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.World;
+import ca.bkaw.torque.util.Util;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
@@ -71,8 +72,12 @@ public class RigidBodyComponent implements VehicleComponent {
 
         // Apply linear motion.
         Vector3d acceleration = this.netForce.div(this.mass); // unit: meter/second^2
+        // deltaPosition = v_0 * t + 1/2 * a * t^2
+        Vector3d deltaPosition = new Vector3d(this.velocity).mul(deltaTime).add(
+            new Vector3d(acceleration).mul(0.5 * deltaTime * deltaTime)
+        ); // unit: meter
         this.velocity.add(acceleration.mul(deltaTime));
-        this.position.add(new Vector3d(this.velocity).mul(deltaTime));
+        this.position.add(deltaPosition);
         this.netForce.zero();
 
         // Apply angular motion.
@@ -116,6 +121,15 @@ public class RigidBodyComponent implements VehicleComponent {
             this.orientation.rotateAxis(0.05f, 0, 1, 0);
         }
         return this.orientation;
+    }
+
+    /**
+     * Get the current accumulated net force.
+     *
+     * @return The net force. Unit: Newton.
+     */
+    public Vector3d getNetForce() {
+        return this.netForce;
     }
 
     public void setWorld(@NotNull World world) {

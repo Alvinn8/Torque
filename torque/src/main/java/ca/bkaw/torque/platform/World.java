@@ -25,4 +25,6 @@ public interface World {
      */
     @NotNull
     BlockState getBlock(@NotNull Vector3ic position);
+
+    void spawnParticle(Vector3ic blockPos, Identifier identifier);
 }

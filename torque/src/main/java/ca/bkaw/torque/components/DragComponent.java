@@ -39,7 +39,7 @@ public class DragComponent implements VehicleComponent {
                 // No drag if the vehicle is not moving. Avoid divide by zero when normalizing.
                 return;
             }
-            double dragCoefficient = 50.3; // unitless
+            double dragCoefficient = 5.0; // unitless
             double crossSectionalArea = 2.0; // unit: m^2 (assumed frontal area)
             double density = 1.225; // unit: kg/m^3 (air density)
             double dragForceMagnitude = 0.5 * dragCoefficient * density * crossSectionalArea * velocitySquared;

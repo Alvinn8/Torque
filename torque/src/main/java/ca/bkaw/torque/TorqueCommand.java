@@ -8,6 +8,7 @@ import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.vehicle.Vehicle;
+import ca.bkaw.torque.vehicle.VehicleManager;
 import ca.bkaw.torque.vehicle.VehicleType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,11 +29,11 @@ public class TorqueCommand {
     }
 
     public void summon(World world, Vector3d position) {
-        VehicleType car = this.torque.getVehicleManager().getVehicleTypeRegistry().get(new Identifier("torque", "boat"));
-        if (car == null) {
-            throw new IllegalArgumentException("Vehicle type 'torque:boat' not found.");
+        VehicleType vehicleType = this.torque.getVehicleManager().getVehicleTypeRegistry().get(new Identifier("torque", "car"));
+        if (vehicleType == null) {
+            throw new IllegalArgumentException("Vehicle type not found.");
         }
-        this.torque.getVehicleManager().spawnVehicle(car, world, position);
+        this.torque.getVehicleManager().spawnVehicle(vehicleType, world, position);
     }
 
     @Nullable
@@ -74,6 +75,18 @@ public class TorqueCommand {
                     e.printStackTrace();
                 }
                 System.out.println("Saved all");
+            }
+            case 4 -> {
+                Vehicle vehicle = this.getClosestVehicle(player);
+                if (vehicle != null) {
+                    vehicle.getComponent(RigidBodyComponent.class).ifPresent(rbc -> {
+                        // Rotate 45 degrees around the Y axis.
+                        ((Quaternionf) rbc.getOrientation()).rotateAxis((float) Math.PI / 4, 0, 1, 0); // 45 degrees in radians
+                    });
+                }
+            }
+            case 5 -> {
+                VehicleManager.tickStep = true;
             }
         }
     }
