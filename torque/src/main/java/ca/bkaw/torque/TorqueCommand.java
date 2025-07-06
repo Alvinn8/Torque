@@ -29,7 +29,7 @@ public class TorqueCommand {
     }
 
     public void summon(World world, Vector3d position) {
-        VehicleType vehicleType = this.torque.getVehicleManager().getVehicleTypeRegistry().get(new Identifier("torque", "car"));
+        VehicleType vehicleType = this.torque.getVehicleManager().getVehicleTypeRegistry().get(new Identifier("torque", "boat"));
         if (vehicleType == null) {
             throw new IllegalArgumentException("Vehicle type not found.");
         }
@@ -38,11 +38,12 @@ public class TorqueCommand {
 
     @Nullable
     private Vehicle getClosestVehicle(Player player) {
+        Vector3d playerPosition = player.getPosition();
         return this.torque.getVehicleManager().getVehicles().stream().min((a, b) -> {
             Vector3dc aPos = a.getComponent(RigidBodyComponent.class).map(RigidBodyComponent::getPosition).orElse(new Vector3d());
             Vector3dc bPos = b.getComponent(RigidBodyComponent.class).map(RigidBodyComponent::getPosition).orElse(new Vector3d());
-            double aDistance = aPos.distanceSquared(player.getPosition());
-            double bDistance = bPos.distanceSquared(player.getPosition());
+            double aDistance = aPos.distanceSquared(playerPosition);
+            double bDistance = bPos.distanceSquared(playerPosition);
             return Double.compare(aDistance, bDistance);
         }).orElse(null);
     }

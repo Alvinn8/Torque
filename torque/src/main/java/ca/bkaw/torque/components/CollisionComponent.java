@@ -61,13 +61,8 @@ public class CollisionComponent implements VehicleComponent {
 
             this.obb.visualize(this.boundingBoxDisplay);
 
-            final double deltaTime = 1 / 20.0; // unit: seconds
-            Vector3d acceleration = rbc.getNetForce().div(vehicle.getType().mass()); // unit: meter/second^2
-            Vector3d deltaPosition = new Vector3d(rbc.getVelocity()).mul(deltaTime).add(
-                new Vector3d(acceleration).mul(0.5 * deltaTime * deltaTime)
-            ); // unit: meter
-
-            Vector3d desiredDeltaPosition = new Vector3d(deltaPosition);
+            Vector3d desiredVelocity = new Vector3d(rbc.getVelocity());
+            Vector3d desiredNetForce = new Vector3d(rbc.getNetForce());
 
             int index = 0;
             World world = rbc.getWorld();
@@ -79,12 +74,12 @@ public class CollisionComponent implements VehicleComponent {
                     this.blockPositionDisplays.add(display);
                 } else {
                     display = this.blockPositionDisplays.get(index);
-                    display.setPosition(new Vector3d(blockPos).add(0.5, 0.5, 0.5));
                 }
                 index++;
                 if (world.getBlock(blockPos).isCollidable(rbc.getWorld(), blockPos)) {
                     display.setItem(vehicle.getTorque().getPlatform().createModelItem(new Identifier("minecraft", "red_wool")));
-                    display.setTransformation(new Matrix4f().scale(1.05f, 1.05f, 1.05f));
+                    display.setTransformation(new Matrix4f().translate(0, -20, 0).scale(1.05f, 1.05f, 1.05f));
+                    display.setPosition(new Vector3d(blockPos).add(0.5, 20.5, 0.5));
 
                     // Stop the delta position in this direction.
                     Vector3d direction = new Vector3d(blockPos).sub(rbc.getPosition());
@@ -99,12 +94,17 @@ public class CollisionComponent implements VehicleComponent {
                     // }
 
                     // direction.normalize().mul(desiredDeltaPosition.dot(direction));
-                    Vector3d projection = direction.mul(desiredDeltaPosition.dot(direction) / direction.lengthSquared());
-                    desiredDeltaPosition.sub(projection);
+                    Vector3d projection = direction.mul(desiredVelocity.dot(direction) / direction.lengthSquared());
+                    desiredVelocity.sub(projection);
+
+                    direction = new Vector3d(blockPos).sub(rbc.getPosition());
+                    Vector3d projection2 = direction.mul(desiredNetForce.dot(direction) / direction.lengthSquared());
+                    desiredNetForce.sub(projection2);
                 } else {
                     // The block is passable. For debug, show a stone block.
                     display.setItem(vehicle.getTorque().getPlatform().createModelItem(new Identifier("minecraft", "stone")));
                     display.setTransformation(new Matrix4f().scale(0.2f, 0.2f, 0.2f));
+                    display.setPosition(new Vector3d(blockPos).add(0.5, 0.5, 0.5));
                 }
             }
             while (index < this.blockPositionDisplays.size()) {
@@ -113,20 +113,18 @@ public class CollisionComponent implements VehicleComponent {
             }
 
             // Calculate the force needed to convert the delta position to the desired delta position.
-            Vector3d desiredAcceleration = desiredDeltaPosition.mul(2 / (deltaTime * deltaTime), new Vector3d())
-                .sub(rbc.getVelocity().mul(2 / deltaTime, new Vector3d())); // unit: meter/second^2
-            Vector3d desiredForce = desiredAcceleration.mul(vehicle.getType().mass()); // unit: Newton
+            Vector3d velocityDifference = desiredVelocity.sub(rbc.getVelocity());
+            Vector3d forceDifference = desiredNetForce.sub(rbc.getNetForce());
 
-            // Apply the difference between the desired force and the current net force.
-            Vector3d forceDifference = desiredForce.sub(rbc.getNetForce());
+            final double invDeltaTime = 20; // Unit: s^-1
+            Vector3d force = forceDifference.add(velocityDifference.mul(vehicle.getType().mass() * invDeltaTime));
+            force.mul(1.2);
             if (Math.random() < 0.05) {
-                System.out.println("Delta position: " + deltaPosition);
-                System.out.println("Desired delta position: " + desiredDeltaPosition);
-                System.out.println("velocity = " + Util.formatSi("m/s", rbc.getVelocity()));
-                System.out.println("netForce = " + Util.formatSi("N", rbc.getNetForce()));
-                System.out.println("forceDifference = " + Util.formatSi("N", forceDifference));
+                // System.out.println("velocity = " + Util.formatSi("m/s", rbc.getVelocity()));
+                // System.out.println("netForce = " + Util.formatSi("N", rbc.getNetForce()));
+                System.out.println("force = " + Util.formatSi("N", force));
             }
-            rbc.addForce(forceDifference, rbc.getPosition());
+            rbc.addForce(force, rbc.getPosition());
         });
     }
 

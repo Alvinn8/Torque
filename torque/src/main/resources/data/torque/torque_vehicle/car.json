@@ -9,9 +9,6 @@
             "type": "torque:drag"
         },
         {
-            "type": "torque:gravity"
-        },
-        {
             "type": "torque:collision"
         },
         {

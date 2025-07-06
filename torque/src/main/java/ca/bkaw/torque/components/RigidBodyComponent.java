@@ -72,12 +72,8 @@ public class RigidBodyComponent implements VehicleComponent {
 
         // Apply linear motion.
         Vector3d acceleration = this.netForce.div(this.mass); // unit: meter/second^2
-        // deltaPosition = v_0 * t + 1/2 * a * t^2
-        Vector3d deltaPosition = new Vector3d(this.velocity).mul(deltaTime).add(
-            new Vector3d(acceleration).mul(0.5 * deltaTime * deltaTime)
-        ); // unit: meter
         this.velocity.add(acceleration.mul(deltaTime));
-        this.position.add(deltaPosition);
+        this.position.add(this.velocity.mul(deltaTime));
         this.netForce.zero();
 
         // Apply angular motion.

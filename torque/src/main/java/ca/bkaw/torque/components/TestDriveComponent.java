@@ -47,7 +47,7 @@ public class TestDriveComponent implements VehicleComponent {
 
         this.vehicle.getComponent(RigidBodyComponent.class).ifPresent(rbc -> {
             Vector3dc position = rbc.getPosition();
-            double magnitude = 5000; // unit: Newton
+            double magnitude = 10_000; // unit: Newton
             if (driverInput.sprint) {
                 magnitude *= 10; // double the force when sprinting
             }
