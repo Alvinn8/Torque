@@ -29,7 +29,7 @@ public class TorqueCommand {
     }
 
     public void summon(World world, Vector3d position) {
-        VehicleType vehicleType = this.torque.getVehicleManager().getVehicleTypeRegistry().get(new Identifier("torque", "boat"));
+        VehicleType vehicleType = this.torque.getVehicleManager().getVehicleTypeRegistry().get(new Identifier("torque", "car"));
         if (vehicleType == null) {
             throw new IllegalArgumentException("Vehicle type not found.");
         }
@@ -55,7 +55,7 @@ public class TorqueCommand {
                 if (vehicle != null) {
                     vehicle.getComponent(RigidBodyComponent.class).ifPresent(
                         rbc -> {
-                            rbc.addForce(new Vector3d(0, 10000, 0), rbc.getPosition().add(1, 0, 0, new Vector3d()));
+                            rbc.addForce(new Vector3d(0, 10000, 0), rbc.getPosition().add(10000, 0, 0, new Vector3d()));
                         }
                     );
                 }

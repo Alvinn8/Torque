@@ -25,10 +25,6 @@ public class RigidBodyComponent implements VehicleComponent {
     // All vectors are stored in world coordinates.
     // The position is at the center of mass.
 
-    // Properties
-    private final double mass; // unit: kilogram
-    private final Matrix3d localInertiaTensorInverse; // unit: (kg m^2)^-1, local to the unrotated vehicle's coordinate system
-
     // Position and velocity
     private World world;
     private final Vector3d position; // unit: meter
@@ -41,8 +37,6 @@ public class RigidBodyComponent implements VehicleComponent {
     private final Vector3d netTorque; // unit: Newton-meter
 
     public RigidBodyComponent(Vehicle vehicle, DataInput data) {
-        this.mass = vehicle.getType().mass();
-        this.localInertiaTensorInverse = new Matrix3d();
         // The world is not serialized. Use the world of the entity.
         this.world = null;
         this.position = new Vector3d(data.readVector3f("position", new Vector3f()));
@@ -71,13 +65,31 @@ public class RigidBodyComponent implements VehicleComponent {
         final double deltaTime = 1 / 20.0; // one tick, unit: second
 
         // Apply linear motion.
-        Vector3d acceleration = this.netForce.div(this.mass); // unit: meter/second^2
+        Vector3d acceleration = this.netForce.div(vehicle.getType().mass()); // unit: meter/second^2
         this.velocity.add(acceleration.mul(deltaTime));
         this.position.add(this.velocity.mul(deltaTime));
         this.netForce.zero();
 
         // Apply angular motion.
-        // TODO
+        Matrix3d localInertiaTensorInverse = vehicle.getType().localInertiaTensorInverse();
+        Matrix3d rotationMatrix = this.orientation.get(new Matrix3d());
+        Matrix3d worldInertiaTensorInverse = new Matrix3d(rotationMatrix)
+            .mul(localInertiaTensorInverse)
+            .mul(rotationMatrix.transpose()); // unit: (kg m^2)^-1, world coordinates
+        Vector3d angularAcceleration = this.netTorque.mul(worldInertiaTensorInverse); // unit: radians/second^2
+        this.angularVelocity.add(angularAcceleration.mul(deltaTime));
+        // Update orientation based on angular velocity.
+        float angle = (float) (this.angularVelocity.length() * deltaTime); // Unit: radians
+        if (angle > 1e-6) {
+            Quaternionf deltaOrientation = new Quaternionf().rotateAxis(
+                angle,
+                (float) this.angularVelocity.x(), (float) this.angularVelocity.y(), (float) this.angularVelocity.z()
+            );
+            this.orientation.mul(deltaOrientation).normalize();
+        }
+        if (Math.random() < 0.05) {
+            System.out.println("this.netTorque = " + Util.formatSi("Nm", this.netTorque));
+        }
         this.netTorque.zero();
     }
 

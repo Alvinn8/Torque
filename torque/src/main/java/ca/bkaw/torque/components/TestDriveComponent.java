@@ -57,14 +57,20 @@ public class TestDriveComponent implements VehicleComponent {
             if (driverInput.backward) {
                 rbc.addForce(new Vector3d(0, 0, magnitude).rotate(new Quaterniond(rbc.getOrientation())), position);
             }
-            final float rotateSpeed = 0.05f; // unit: radians per tick
             if (driverInput.left) {
-                // rbc.addForce(new Vector3d(-magnitude, 0, 0), position);
-                ((Quaternionf) rbc.getOrientation()).rotateAxis(rotateSpeed, 0, 1, 0);
+                rbc.addForce(new Vector3d(magnitude, 0, 0), position.add(new Vector3d(0, 0, 2).rotate(new Quaterniond(rbc.getOrientation())), new Vector3d()));
+                rbc.addForce(new Vector3d(-magnitude, 0, 0), position.add(new Vector3d(0, 0, -2).rotate(new Quaterniond(rbc.getOrientation())), new Vector3d()));
             }
+            double rotationMagnitude = 1_000;
             if (driverInput.right) {
-                // rbc.addForce(new Vector3d(magnitude, 0, 0), position);
-                ((Quaternionf) rbc.getOrientation()).rotateAxis(-rotateSpeed, 0, 1, 0);
+                rbc.addForce(new Vector3d(rotationMagnitude, 0, 0), position.add(
+                    new Vector3d(0, 0, -2).rotate(new Quaterniond(rbc.getOrientation())),
+                    new Vector3d()
+                ));
+                rbc.addForce(new Vector3d(-rotationMagnitude, 0, 0), position.add(
+                    new Vector3d(0, 0, 2).rotate(new Quaterniond(rbc.getOrientation())),
+                    new Vector3d()
+                ));
             }
         });
     }

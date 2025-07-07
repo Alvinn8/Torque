@@ -96,7 +96,7 @@ public class TorqueAssets {
         this.resourcePack.close();
         this.resourcePack = null;
 
-        // Get file sha1 hash of resource pack
+        // Get the file SHA-1 hash of resource pack
         try {
             this.sha1 = MessageDigest.getInstance("SHA-1").digest(Files.readAllBytes(this.resourcePackPath));
         } catch (NoSuchAlgorithmException e) {
@@ -116,93 +116,105 @@ public class TorqueAssets {
         return this.sender;
     }
 
-    public void createVehicleModels() throws IOException {
+    /**
+     * Get a vehicle model if it has already been created, or create it from the JSON
+     * file if it does not exist.
+     *
+     * @param identifier The identifier of the JSON file. The JSON file should be located at
+     *                   "assets/{namespace}/models/{key}.json".
+     * @return The vehicle model, or null if it does not exist or cannot be created.
+     * @throws IOException If an I/O error occurs.
+     */
+    @Nullable
+    public VehicleModel getOrCreateVehicleModel(Identifier identifier) throws IOException {
         if (this.resourcePack == null) {
-            throw new IllegalStateException("Cannot create vehicle models now.");
+            throw new IllegalStateException("Cannot create vehicle model now.");
         }
 
-        this.vehicleModelRegistry.clear();
-
-        List<Path> files;
-        try (Stream<Path> stream = Files.list(this.resourcePack.getPath("assets/torque/models/vehicle"))) {
-            files = stream.filter(path -> Files.isRegularFile(path) && path.toString().endsWith(".json")).toList();
+        VehicleModel existing = this.vehicleModelRegistry.get(identifier);
+        if (existing != null) {
+            return existing;
         }
-        for (Path path : files) {
-            String key = path.getFileName().toString();
-            key = key.substring(0, key.length() - ".json".length());
-            if (!Identifier.validKey(key)) {
-                continue;
-            }
 
-            JsonObject json;
-            try (BufferedReader reader = Files.newBufferedReader(path)) {
-                json = JsonParser.parseReader(reader).getAsJsonObject();
-            }
-            Model model = new Model(json);
-            ModelElementList elements = model.getAllElements();
-            if (elements == null) {
-                continue;
-            }
-
-            // Center geometrically to maximize the space used.
-            Vector3d centerDiff = elements.centerGeometrically();
-
-            // Find tagged elements
-            List<Seat> seats = new ArrayList<>();
-            for (ModelElement element : elements.getElements()) {
-                Set<String> tags = element.getTags();
-                if (tags.contains("seat")) {
-                    boolean isDriver = tags.contains("driver");
-                    // Use the middle as the seat position, however vertically we want to use the lowest point.
-                    Vector3d seatPosition = element.getMiddle();
-                    seatPosition.y = Math.min(element.getFrom().y, element.getTo().y);
-                    seatPosition.div(16); // Convert from model units ("pixels") to blocks.
-                    seatPosition.add(0, Seat.VERTICAL_OFFSET, 0);
-
-                    seats.add(new Seat(
-                        new Vector3f(seatPosition),
-                        isDriver
-                    ));
-                }
-            }
-
-            // Treat elements with a leading dot as hidden elements.
-            elements.removeIf(el -> String.valueOf(el.getName()).startsWith("."));
-
-            // The game only allows a block size of 3.
-            // Scale down so it fits.
-            double originalBlockSize = elements.getBlockSize();
-            double scale = 1.0;
-            if (originalBlockSize > 3.0) {
-                scale = 3.0 / originalBlockSize;
-                elements.scale(new Vector3d(scale), new Vector3d(8, 0, 8));
-            }
-
-            String name = path.getFileName().toString();
-            name = name.substring(0, name.length() - ".json".length());
-            Path directory = this.resourcePack.getPath("assets/torque/models/vehicle/" + name);
-            Files.createDirectories(directory);
-
-            Path primaryPath = directory.resolve("primary.json");
-            Files.writeString(primaryPath, gson.toJson(model.getJson()));
-
-            // Create an item model
-            this.createItemModel(new Identifier("torque", "vehicle/" + name + "/primary"));
-
-            // Delete original to avoid errors in the client logs.
-            Files.delete(path);
-
-            VehicleModel vehicleModel = new VehicleModel(
-                new Identifier("torque", "vehicle/" + name),
-                // The vehicle model should scale up to the original size.
-                1.0 / scale,
-                // The vehicle should be moved back vertically so that it is grounded at right level.
-                // Convert model units ("pixels") to blocks by dividing by 16.
-                new Vector3f(0, (float) -centerDiff.y / 16.0f, 0),
-                seats
-            );
-            this.vehicleModelRegistry.register(vehicleModel);
+        Path path = this.resourcePack.getPath(
+            "assets/" + identifier.namespace() + "/models/" + identifier.key() + ".json"
+        );
+        if (Files.notExists(path)) {
+            return null;
         }
+        JsonObject json;
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            json = JsonParser.parseReader(reader).getAsJsonObject();
+        }
+        Model model = new Model(json);
+        ModelElementList elements = model.getAllElements();
+        if (elements == null) {
+            // No elements found, cannot create a vehicle model.
+            return null;
+        }
+
+        // Center geometrically to maximize the space used.
+        Vector3d centerDiff = elements.centerGeometrically();
+
+        // Find tagged elements
+        List<Seat> seats = new ArrayList<>();
+        for (ModelElement element : elements.getElements()) {
+            Set<String> tags = element.getTags();
+            if (tags.contains("seat")) {
+                boolean isDriver = tags.contains("driver");
+                // Use the middle as the seat position, however vertically we want to use the lowest point.
+                Vector3d seatPosition = element.getMiddle();
+                seatPosition.y = Math.min(element.getFrom().y, element.getTo().y);
+                seatPosition.div(16); // Convert from model units ("pixels") to blocks.
+                seatPosition.add(0, Seat.VERTICAL_OFFSET, 0);
+
+                seats.add(new Seat(
+                    new Vector3f(seatPosition),
+                    isDriver
+                ));
+            }
+        }
+
+        Model modelToKeep = model.deepCopy();
+
+        // Treat elements with a leading dot as hidden elements.
+        elements.removeIf(el -> String.valueOf(el.getName()).startsWith("."));
+
+        // The game only allows a block size of 3.
+        // Scale down so it fits.
+        double originalBlockSize = elements.getBlockSize();
+        double scale = 1.0;
+        if (originalBlockSize > 3.0) {
+            scale = 3.0 / originalBlockSize;
+            elements.scale(new Vector3d(scale), new Vector3d(8, 0, 8));
+        }
+
+        Path directory = this.resourcePack.getPath(
+            "assets/" + identifier.namespace() + "/models/" + identifier.key()
+        );
+        Files.createDirectories(directory);
+
+        Path primaryPath = directory.resolve("primary.json");
+        Files.writeString(primaryPath, gson.toJson(model.getJson()));
+
+        // Create an item model
+        this.createItemModel(new Identifier(identifier.namespace(), identifier.key() + "/primary"));
+
+        // Delete original to avoid errors in the client logs.
+        Files.delete(path);
+
+        VehicleModel vehicleModel = new VehicleModel(
+            identifier,
+            modelToKeep,
+            // The vehicle model should scale up to the original size.
+            1.0 / scale,
+            // The vehicle should be moved back vertically so that it is grounded at right level.
+            // Convert model units ("pixels") to blocks by dividing by 16.
+            new Vector3f(0, (float) -centerDiff.y / 16.0f, 0),
+            seats
+        );
+        this.vehicleModelRegistry.register(vehicleModel);
+        return vehicleModel;
     }
 
     /**

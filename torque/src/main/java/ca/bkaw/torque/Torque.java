@@ -46,11 +46,10 @@ public class Torque {
         ) {
             this.assets = TorqueAssets.createPack(this);
             this.assets.includeAssets(jarResources);
-            this.assets.createVehicleModels();
-            this.assets.save();
             this.vehicleManager.saveAndUnloadAll();
             this.vehicleManager.getVehicleTypeRegistry().clear();
             this.vehicleManager.registerVehicleTypes(jarResources);
+            this.assets.save();
         } catch (IOException e) {
             throw new RuntimeException("Failed to set up Torque assets.", e);
         }
