@@ -7,6 +7,7 @@ import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Quaterniond;
 import org.joml.Vector3d;
 
 public class GravityComponent implements VehicleComponent {
@@ -30,7 +31,14 @@ public class GravityComponent implements VehicleComponent {
     public void tick(Vehicle vehicle) {
         vehicle.getComponent(RigidBodyComponent.class).ifPresent(rbc -> {
             // Apply a downward force to simulate gravity
-            rbc.addForce(new Vector3d(0, -GRAVITATIONAL_ACCELERATION * vehicle.getType().mass(), 0), rbc.getPosition());
+            double magnitude = -GRAVITATIONAL_ACCELERATION * vehicle.getType().mass();
+            // rbc.addForce(new Vector3d(0, magnitude, 0), rbc.getPosition());
+            double spreadDistance = 1;
+            double yOffset = 0;
+            rbc.addForce(new Vector3d(0, magnitude / 4, 0), rbc.getPosition().add(new Vector3d(spreadDistance, yOffset, 0).rotate(new Quaterniond(rbc.getOrientation())), new Vector3d()));
+            rbc.addForce(new Vector3d(0, magnitude / 4, 0), rbc.getPosition().add(new Vector3d(-spreadDistance, yOffset, 0).rotate(new Quaterniond(rbc.getOrientation())), new Vector3d()));
+            rbc.addForce(new Vector3d(0, magnitude / 4, 0), rbc.getPosition().add(new Vector3d(0, yOffset, spreadDistance).rotate(new Quaterniond(rbc.getOrientation())), new Vector3d()));
+            rbc.addForce(new Vector3d(0, magnitude / 4, 0), rbc.getPosition().add(new Vector3d(0, yOffset, -spreadDistance).rotate(new Quaterniond(rbc.getOrientation())), new Vector3d()));
         });
     }
 }

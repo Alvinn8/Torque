@@ -72,10 +72,10 @@ public class VehicleManager {
     }
 
     private void tick() {
-        // if (!tickStep) {
-        //     return;
-        // }
-        // tickStep = false;
+        if (!tickStep && false) {
+            return;
+        }
+        tickStep = false;
         for (Vehicle vehicle : this.vehicles) {
             vehicle.tick();
         }

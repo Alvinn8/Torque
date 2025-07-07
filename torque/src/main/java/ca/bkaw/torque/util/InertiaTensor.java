@@ -130,4 +130,15 @@ public class InertiaTensor {
             .m22(a.z * b.z);
     }
 
+    public static Vector3d getCenterOfMass(ModelElementList elements) {
+        Vector3d centerOfMass = new Vector3d();
+        double volume = getVolume(elements); // Unit: m^3
+
+        for (ModelElement element : elements.getElements()) {
+            double elementVolume = getVolume(element); // Unit: m^3
+            Vector3d elementCenter = element.getFrom().add(element.getTo()).mul(0.5 / 16); // Unit: m
+            centerOfMass.add(elementCenter.mul(elementVolume / volume));
+        }
+        return centerOfMass;
+    }
 }

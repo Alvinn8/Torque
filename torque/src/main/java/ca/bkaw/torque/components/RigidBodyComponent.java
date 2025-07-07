@@ -20,7 +20,8 @@ public class RigidBodyComponent implements VehicleComponent {
     public static final VehicleComponentType TYPE = VehicleComponentType.create(
         new Identifier("torque", "rigid_body"),
         RigidBodyComponent::new
-    );
+    );// one tick, unit: second
+    public static final double DELTA_TIME = 1 / 20.0;
 
     // All vectors are stored in world coordinates.
     // The position is at the center of mass.
@@ -62,24 +63,19 @@ public class RigidBodyComponent implements VehicleComponent {
 
     @Override
     public void tick(Vehicle vehicle) {
-        final double deltaTime = 1 / 20.0; // one tick, unit: second
 
         // Apply linear motion.
         Vector3d acceleration = this.netForce.div(vehicle.getType().mass()); // unit: meter/second^2
-        this.velocity.add(acceleration.mul(deltaTime));
-        this.position.add(this.velocity.mul(deltaTime));
+        this.velocity.add(acceleration.mul(DELTA_TIME));
+        this.position.add(this.velocity.mul(DELTA_TIME, new Vector3d()));
         this.netForce.zero();
 
         // Apply angular motion.
-        Matrix3d localInertiaTensorInverse = vehicle.getType().localInertiaTensorInverse();
-        Matrix3d rotationMatrix = this.orientation.get(new Matrix3d());
-        Matrix3d worldInertiaTensorInverse = new Matrix3d(rotationMatrix)
-            .mul(localInertiaTensorInverse)
-            .mul(rotationMatrix.transpose()); // unit: (kg m^2)^-1, world coordinates
+        Matrix3d worldInertiaTensorInverse = this.getInertiaTensorInverse(vehicle); // unit: (kg m^2)^-1
         Vector3d angularAcceleration = this.netTorque.mul(worldInertiaTensorInverse); // unit: radians/second^2
-        this.angularVelocity.add(angularAcceleration.mul(deltaTime));
+        this.angularVelocity.add(angularAcceleration.mul(DELTA_TIME));
         // Update orientation based on angular velocity.
-        float angle = (float) (this.angularVelocity.length() * deltaTime); // Unit: radians
+        float angle = (float) (this.angularVelocity.length() * DELTA_TIME); // unit: radians
         if (angle > 1e-6) {
             Quaternionf deltaOrientation = new Quaternionf().rotateAxis(
                 angle,
@@ -87,17 +83,30 @@ public class RigidBodyComponent implements VehicleComponent {
             );
             this.orientation.mul(deltaOrientation).normalize();
         }
-        if (Math.random() < 0.05) {
-            System.out.println("this.netTorque = " + Util.formatSi("Nm", this.netTorque));
-        }
         this.netTorque.zero();
+    }
+
+    /**
+     * Get the inertia tensor inverse in world coordinates.
+     * 
+     * @param vehicle The vehicle that this rigid body component belongs to.
+     * @return The inertia tensor inverse in world coordinates.
+     */
+    public Matrix3d getInertiaTensorInverse(Vehicle vehicle) {
+        // TODO cache per tick?
+        // Get the inertia tensor inverse in world coordinates.
+        Matrix3d localInertiaTensorInverse = vehicle.getType().localInertiaTensorInverse();
+        Matrix3d rotationMatrix = this.orientation.get(new Matrix3d());
+        return new Matrix3d(rotationMatrix)
+            .mul(localInertiaTensorInverse)
+            .mul(rotationMatrix.transpose()); // unit: (kg m^2)^-1, world coordinates
     }
 
     /**
      * Add a force acting on the rigid body.
      *
-     * @param force The force vector in world coordinates. Unit: Newton.
-     * @param point The point of application in world coordinates. Unit: meter.
+     * @param force The force vector in world coordinates. unit: Newton.
+     * @param point The point of application in world coordinates. unit: meter.
      */
     public void addForce(Vector3dc force, Vector3dc point) {
         if (!force.isFinite()) {
@@ -138,6 +147,14 @@ public class RigidBodyComponent implements VehicleComponent {
      */
     public Vector3d getNetForce() {
         return this.netForce;
+    }
+
+    public Vector3d getNetTorque() {
+        return this.netTorque;
+    }
+
+    public Vector3d getAngularVelocity() {
+        return this.angularVelocity;
     }
 
     public void setWorld(@NotNull World world) {

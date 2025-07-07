@@ -9,6 +9,7 @@ import ca.bkaw.torque.assets.send.ResourcePackSender;
 import ca.bkaw.torque.model.Seat;
 import ca.bkaw.torque.model.VehicleModel;
 import ca.bkaw.torque.platform.Identifier;
+import ca.bkaw.torque.util.InertiaTensor;
 import ca.bkaw.torque.util.Registry;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -154,7 +155,8 @@ public class TorqueAssets {
         }
 
         // Center geometrically to maximize the space used.
-        Vector3d centerDiff = elements.centerGeometrically();
+        Vector3d centerOfMass = InertiaTensor.getCenterOfMass(elements);
+        elements.move(new Vector3d(centerOfMass).negate());
 
         // Find tagged elements
         List<Seat> seats = new ArrayList<>();
@@ -210,7 +212,7 @@ public class TorqueAssets {
             1.0 / scale,
             // The vehicle should be moved back vertically so that it is grounded at right level.
             // Convert model units ("pixels") to blocks by dividing by 16.
-            new Vector3f(0, (float) -centerDiff.y / 16.0f, 0),
+            new Vector3f(0, (float) -centerOfMass.y / 16.0f, 0),
             seats
         );
         this.vehicleModelRegistry.register(vehicleModel);
