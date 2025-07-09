@@ -7,6 +7,7 @@ import ca.bkaw.torque.model.VehicleModel;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
+import ca.bkaw.torque.util.Debug;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleManager;
 import ca.bkaw.torque.vehicle.VehicleType;
@@ -65,7 +66,7 @@ public class TorqueCommand {
                 if (vehicle != null) {
                     vehicle.getComponent(SeatsComponent.class).ifPresent(seats -> {
                         boolean success = seats.addPassenger(player);
-                        System.out.println("success = " + success);
+                        Debug.print("success = " + success);
                     });
                 }
             }
@@ -75,7 +76,7 @@ public class TorqueCommand {
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
-                System.out.println("Saved all");
+                Debug.print("Saved all");
             }
             case 4 -> {
                 Vehicle vehicle = this.getClosestVehicle(player);
@@ -88,6 +89,18 @@ public class TorqueCommand {
             }
             case 5 -> {
                 VehicleManager.tickStep = true;
+            }
+            case 6 -> {
+                Debug.setInstance(new Debug(this.torque));
+            }
+            case 7 -> {
+                Vehicle vehicle = this.getClosestVehicle(player);
+                if (vehicle != null) {
+                    vehicle.getComponent(RigidBodyComponent.class).ifPresent(rbc -> {
+                        World world = rbc.getWorld();
+                        Debug.visualizeVectorAt(rbc.getWorld(), player.getPosition(), new Vector3d(0, 5, 0), "lime_wool");
+                    });
+                }
             }
         }
     }

@@ -10,7 +10,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.joml.Matrix4f;
-import org.joml.Vector3d;
+import org.joml.Vector3dc;
 
 public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements ca.bkaw.torque.platform.ItemDisplay {
     public static final NamespacedKey PDC_VEHICLE_KEY = new NamespacedKey("torque", "vehicle");
@@ -31,7 +31,7 @@ public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements 
     }
 
     @Override
-    public void setPosition(Vector3d position) {
+    public void setPosition(Vector3dc position) {
         this.entity.teleport(
             new Location(this.entity.getWorld(), position.x(), position.y(), position.z()),
             TeleportFlag.EntityState.RETAIN_PASSENGERS

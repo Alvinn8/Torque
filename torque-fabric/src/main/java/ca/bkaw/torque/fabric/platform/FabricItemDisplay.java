@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import org.joml.Matrix4f;
-import org.joml.Vector3d;
+import org.joml.Vector3dc;
 
 public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDisplay {
     @Override
@@ -31,7 +31,7 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
     }
 
     @Override
-    public void setPosition(Vector3d position) {
+    public void setPosition(Vector3dc position) {
         this.entity.setPos(position.x(), position.y(), position.z());
     }
 

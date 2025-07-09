@@ -3,17 +3,14 @@ package ca.bkaw.torque.components;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
-import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.World;
+import ca.bkaw.torque.util.Debug;
 import ca.bkaw.torque.util.OBB;
-import ca.bkaw.torque.util.Util;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
-import org.joml.Matrix4f;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -29,8 +26,6 @@ public class CollisionComponent implements VehicleComponent {
     );
 
     private OBB obb;
-    private @Nullable ItemDisplay boundingBoxDisplay = null;
-    private List<ItemDisplay> blockPositionDisplays = new ArrayList<>();
 
     public CollisionComponent(Vehicle vehicle, DataInput dataInput) {
 
@@ -58,16 +53,9 @@ public class CollisionComponent implements VehicleComponent {
                 new Vector3d(1, 0.8, 2.25),
                 rbc.getOrientation()
             );
+            Debug.visualizeObb(rbc.getWorld(), this.obb, "glass");
 
-            if (this.boundingBoxDisplay == null) {
-                this.boundingBoxDisplay = rbc.getWorld().spawnItemDisplay(rbc.getPosition());
-                this.boundingBoxDisplay.setTeleportDuration(0);
-                this.boundingBoxDisplay.setItem(vehicle.getTorque().getPlatform().createModelItem(new Identifier("minecraft", "glass")));
-            }
-
-            this.obb.visualize(this.boundingBoxDisplay);
-
-            List<ContactPoint> contactPoints = this.getContactPoints(vehicle, rbc);
+            List<ContactPoint> contactPoints = this.getContactPoints(rbc);
 
             if (!contactPoints.isEmpty()) {
                 this.handleCollisions(vehicle, rbc, contactPoints);
@@ -75,26 +63,12 @@ public class CollisionComponent implements VehicleComponent {
         });
     }
 
-    private List<ContactPoint> getContactPoints(Vehicle vehicle, RigidBodyComponent rbc) {
+    private List<ContactPoint> getContactPoints(RigidBodyComponent rbc) {
         List<ContactPoint> contactPoints = new ArrayList<>();
 
-        int index = 0;
         World world = rbc.getWorld();
         for (Vector3ic blockPos : this.obb.getBlocksInsideApprox()) {
-            ItemDisplay display;
-            if (index >= this.blockPositionDisplays.size()) {
-                display = world.spawnItemDisplay(new Vector3d(blockPos).add(0.5, 0.5, 0.5));
-                display.setTeleportDuration(0);
-                this.blockPositionDisplays.add(display);
-            } else {
-                display = this.blockPositionDisplays.get(index);
-            }
-            index++;
             if (world.getBlock(blockPos).isCollidable(rbc.getWorld(), blockPos)) {
-                display.setItem(vehicle.getTorque().getPlatform().createModelItem(new Identifier("minecraft", "red_wool")));
-                display.setTransformation(new Matrix4f().translate(0, -20, 0).scale(1.05f, 1.05f, 1.05f));
-                display.setPosition(new Vector3d(blockPos).add(0.5, 20.5, 0.5));
-
                 // Stop the delta position in this direction.
                 Vector3d direction = new Vector3d(blockPos).sub(rbc.getPosition());
                 // Find the closest axis-aligned direction.
@@ -108,25 +82,23 @@ public class CollisionComponent implements VehicleComponent {
                 }
                 direction.normalize();
 
-                Vector3d contactPosition = new Vector3d(blockPos).add(0.5, 0.5, 0.5).add(direction.mul(0.5, new Vector3d()));
-                contactPoints.add(new ContactPoint(contactPosition, direction.negate(), new Vector3d()));
+                Vector3d normal = direction.negate();
+                normal = new Vector3d(0, 1, 0);
+                Vector3d contactPosition = new Vector3d(blockPos).add(0.5, 0.5, 0.5).add(normal.mul(0.5, new Vector3d()));
+                contactPoints.add(new ContactPoint(contactPosition, normal, new Vector3d()));
+
+                Debug.highlightFullBlock(world, blockPos, "red_wool");
+                // Debug.visualizeVectorAt(world, contactPosition, normal, "pink_wool");
             } else {
                 // The block is passable. For debug, show a stone block.
-                display.setItem(vehicle.getTorque().getPlatform().createModelItem(new Identifier("minecraft", "stone")));
-                display.setTransformation(new Matrix4f().scale(0.2f, 0.2f, 0.2f));
-                display.setPosition(new Vector3d(blockPos).add(0.5, 0.5, 0.5));
+                Debug.highlightBlockSmall(world, blockPos, "stone");
             }
-        }
-        while (index < this.blockPositionDisplays.size()) {
-            ItemDisplay display = this.blockPositionDisplays.removeLast();
-            display.remove();
         }
         return contactPoints;
     }
 
     private void handleCollisions(Vehicle vehicle, RigidBodyComponent rbc, List<ContactPoint> contactPoints) {
         final double deltaTime = 1 / 20.0; // one tick, unit: seconds
-        final boolean debug = false;
 
         // Apply all external forces to see the acceleration without collisions.
         Vector3d predictedAcceleration = new Vector3d(rbc.getNetForce()).div(vehicle.getType().mass());
@@ -146,7 +118,7 @@ public class CollisionComponent implements VehicleComponent {
         while (iteration < 10) {
             iteration++;
             boolean changed = false;
-            if (debug) System.out.println("===================== Iteration " + iteration + " ====================");
+            // Debug.print("===================== Iteration " + iteration + " ====================");
 
             for (ContactPoint contactPoint : contactPoints) {
                 // The vector from the vehicle's center of mass to the contact point.
@@ -161,7 +133,7 @@ public class CollisionComponent implements VehicleComponent {
 
                 if (relativeVelocity > -0.01) {
                     // The vehicle is moving away from the surface, no impulse needed.
-                    if (debug) System.out.println("Contact Point " + contactPoint.position + " is moving away, relative velocity = " + Util.formatSi("m/s", relativeVelocity));
+                    // Debug.print("Contact Point " + contactPoint.position + " is moving away, relative velocity = " + Util.formatSi("m/s", relativeVelocity));
                     continue;
                 }
 
@@ -182,7 +154,7 @@ public class CollisionComponent implements VehicleComponent {
                     continue;
                 }
                 changed = true;
-                if (debug) System.out.println("Contact Point " + contactPoint.position + " applying impulse " + Util.formatSi("Ns", impulseMagnitude) + " rel velocity = " + Util.formatSi("m/s", relativeVelocity));
+                // Debug.print("Contact Point " + contactPoint.position + " applying impulse " + Util.formatSi("Ns", impulseMagnitude) + " rel velocity = " + Util.formatSi("m/s", relativeVelocity));
 
                 Vector3d impulse = new Vector3d(contactPoint.normal).mul(impulseMagnitude);
 
@@ -209,7 +181,30 @@ public class CollisionComponent implements VehicleComponent {
                 break;
             }
         }
-        if (debug) System.out.println("iteration = " + iteration);
+        // Debug.print("iteration = " + iteration);
+        if (iteration >= 10) {
+            Debug.print("CollisionComponent: Too many iterations, vehicle may be stuck in a collision.");
+        }
+
+        // Ensure no energy is added to the system.
+        // This is important to prevent the vehicle from gaining energy from collisions.
+        Matrix3d inertiaTensor = new Matrix3d(inertiaTensorInverse).invert();
+
+        double currentLinearKineticEnergy = 0.5 * vehicle.getType().mass() * rbc.getVelocity().lengthSquared(); // Unit: Joules
+        double currentAngularKineticEnergy = 0.5 * rbc.getAngularVelocity().dot(inertiaTensor.transform(rbc.getAngularVelocity(), new Vector3d())); // Unit: Joules
+        double currentTotalKineticEnergy = currentLinearKineticEnergy + currentAngularKineticEnergy;
+
+        double nextLinearKineticEnergy = 0.5 * vehicle.getType().mass() * nextVelocity.lengthSquared(); // Unit: Joules
+        double nextAngularKineticEnergy = 0.5 * nextAngularVelocity.dot(inertiaTensor.transform(nextAngularVelocity, new Vector3d())); // Unit: Joules
+        double nextTotalKineticEnergy = nextLinearKineticEnergy + nextAngularKineticEnergy;
+
+        if (nextTotalKineticEnergy > currentTotalKineticEnergy) {
+            // Energy was added to the system. Scale down the next velocities.
+            double scale = Math.sqrt(currentTotalKineticEnergy / nextTotalKineticEnergy);
+            scale = scale * 0.9; // Penalty for trying to create energy.
+            nextVelocity.mul(scale);
+            nextAngularVelocity.mul(scale);
+        }
 
         // Now that collisions have been resolved at all contact points, we need to
         // apply all the impulses. This will ensure the actual velocity of the vehicle
@@ -222,6 +217,7 @@ public class CollisionComponent implements VehicleComponent {
         for (ContactPoint contactPoint : contactPoints) {
             Vector3d averageForce = new Vector3d(contactPoint.impulse).div(deltaTime);
             rbc.addForce(averageForce, contactPoint.position);
+            Debug.visualizeVectorAt(rbc.getWorld(), contactPoint.position, new Vector3d(averageForce).div(1000), "pink_wool");
         }
     }
 

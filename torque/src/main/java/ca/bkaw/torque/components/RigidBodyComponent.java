@@ -84,6 +84,17 @@ public class RigidBodyComponent implements VehicleComponent {
             this.orientation.mul(deltaOrientation).normalize();
         }
         this.netTorque.zero();
+
+        // Dampen angular velocity to prevent jitter.
+        double angularVelocityLengthSq = this.angularVelocity.lengthSquared();
+        if (angularVelocityLengthSq < 1e-4) {
+            this.angularVelocity.zero();
+        } else if (angularVelocityLengthSq < 0.01) {
+            // If the angular velocity is very small, reduce it further to prevent jitter.
+            this.angularVelocity.mul(0.9);
+        } else {
+            this.angularVelocity.mul(0.98);
+        }
     }
 
     /**
@@ -158,7 +169,6 @@ public class RigidBodyComponent implements VehicleComponent {
     }
 
     public void setWorld(@NotNull World world) {
-        System.out.println("setting world to " + world);
         this.world = world;
     }
 

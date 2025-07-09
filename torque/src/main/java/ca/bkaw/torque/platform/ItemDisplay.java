@@ -1,7 +1,7 @@
 package ca.bkaw.torque.platform;
 
 import org.joml.Matrix4f;
-import org.joml.Vector3d;
+import org.joml.Vector3dc;
 
 /**
  * An item display entity.
@@ -33,7 +33,7 @@ public interface ItemDisplay {
      *
      * @param position The coordinates in the world to set the position to.
      */
-    void setPosition(Vector3d position);
+    void setPosition(Vector3dc position);
 
     /**
      * Set the interpolation duration for teleportation.

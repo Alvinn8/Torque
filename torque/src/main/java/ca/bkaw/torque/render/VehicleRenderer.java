@@ -8,7 +8,7 @@ import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
-import ca.bkaw.torque.util.OBB;
+import ca.bkaw.torque.util.Debug;
 import ca.bkaw.torque.vehicle.Vehicle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +30,6 @@ public class VehicleRenderer {
     private final @NotNull RenderEntity primary;
     private final @Nullable Seat viewportSeat;
     private final Map<Seat, RenderEntity> seatEntities = new HashMap<>();
-    private @Nullable ItemDisplay boundingBoxDisplay = null;
 
     // Cached from RigidBodyComponent
     private World vehicleWorld;
@@ -111,13 +110,6 @@ public class VehicleRenderer {
 
         // Perform seat rendering.
         this.vehicle.getComponent(SeatsComponent.class).ifPresent(this::renderSeats);
-
-        if (this.boundingBoxDisplay != null) {
-            OBB obb = null; // TODO
-            if (obb != null) {
-                obb.visualize(this.boundingBoxDisplay);
-            }
-        }
     }
 
     private void renderSeats(SeatsComponent seats) {
@@ -151,7 +143,7 @@ public class VehicleRenderer {
                 renderEntity = new RenderEntity(display, new Matrix4f());
                 this.seatEntities.put(seat, renderEntity);
                 passengerData.passenger().mountVehicle(display);
-                System.out.println("Creating seat now");
+                Debug.print("Creating seat now");
             }
 
             renderEntity.display.setPosition(seatPosition);

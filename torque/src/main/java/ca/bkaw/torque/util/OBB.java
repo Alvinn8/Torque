@@ -1,13 +1,9 @@
 package ca.bkaw.torque.util;
 
-import ca.bkaw.torque.platform.ItemDisplay;
-import org.joml.Matrix4f;
-import org.joml.Quaterniond;
 import org.joml.Quaternionfc;
 import org.joml.RoundingMode;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
-import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
@@ -28,6 +24,18 @@ public class OBB {
         this.center = center;
         this.halfSize = halfSize;
         this.rotation = rotation;
+    }
+
+    public Vector3dc getCenter() {
+        return this.center;
+    }
+
+    public Vector3dc getHalfSize() {
+        return this.halfSize;
+    }
+
+    public Quaternionfc getRotation() {
+        return this.rotation;
     }
 
     public Vector3dc[] getCorners() {
@@ -72,14 +80,5 @@ public class OBB {
             deltaX.add(directionX);
         }
         return vectors;
-    }
-
-    public void visualize(ItemDisplay itemDisplay) {
-        itemDisplay.setTransformation(
-            new Matrix4f()
-                .rotate(this.rotation)
-                .scale((float) (2 * this.halfSize.x()), (float) (2 * this.halfSize.y()), (float) (2 * this.halfSize.z()))
-        );
-        itemDisplay.setPosition(new Vector3d(this.center));
     }
 }

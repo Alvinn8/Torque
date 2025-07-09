@@ -16,12 +16,14 @@ import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.render.VehicleRenderer;
+import ca.bkaw.torque.util.Debug;
 import ca.bkaw.torque.util.Registry;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
 import java.io.BufferedReader;
@@ -88,8 +90,13 @@ public class VehicleManager {
                 iter.remove();
                 this.stopRendering(vehicleRenderer.getVehicle());
                 this.vehicles.remove(vehicleRenderer.getVehicle());
-                System.out.println("Removing a vehicle");
+                Debug.print("Removing a vehicle");
             }
+        }
+
+        Debug debug = Debug.getInstance();
+        if (debug != null) {
+            debug.tick();
         }
     }
 
@@ -207,7 +214,6 @@ public class VehicleManager {
             vehicle.addComponent(vehicleComponent);
         }
         this.vehicles.add(vehicle);
-        System.out.println("position = " + position);
         ItemDisplay primaryEntity = world.spawnItemDisplay(position);
         this.vehiclePartMap.put(primaryEntity, vehicle);
         this.startRendering(vehicle, primaryEntity);
