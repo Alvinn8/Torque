@@ -12,6 +12,9 @@
             "type": "torque:gravity"
         },
         {
+            "type": "torque:orientation_lock"
+        },
+        {
             "type": "torque:collision"
         },
         {

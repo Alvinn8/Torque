@@ -6,6 +6,7 @@ import ca.bkaw.torque.components.CollisionComponent;
 import ca.bkaw.torque.components.DragComponent;
 import ca.bkaw.torque.components.FloatComponent;
 import ca.bkaw.torque.components.GravityComponent;
+import ca.bkaw.torque.components.OrientationLockComponent;
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
 import ca.bkaw.torque.components.TestDriveComponent;
@@ -69,7 +70,8 @@ public class VehicleManager {
             DragComponent.TYPE,
             GravityComponent.TYPE,
             FloatComponent.TYPE,
-            CollisionComponent.TYPE
+            CollisionComponent.TYPE,
+            OrientationLockComponent.TYPE
         );
     }
 

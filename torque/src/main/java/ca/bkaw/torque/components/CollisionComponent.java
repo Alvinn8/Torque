@@ -198,9 +198,10 @@ public class CollisionComponent implements VehicleComponent {
         double nextAngularKineticEnergy = 0.5 * nextAngularVelocity.dot(inertiaTensor.transform(nextAngularVelocity, new Vector3d())); // Unit: Joules
         double nextTotalKineticEnergy = nextLinearKineticEnergy + nextAngularKineticEnergy;
 
+        double scale = 1.0;
         if (nextTotalKineticEnergy > currentTotalKineticEnergy) {
             // Energy was added to the system. Scale down the next velocities.
-            double scale = Math.sqrt(currentTotalKineticEnergy / nextTotalKineticEnergy);
+            scale = Math.sqrt(currentTotalKineticEnergy / nextTotalKineticEnergy);
             scale = scale * 0.9; // Penalty for trying to create energy.
             nextVelocity.mul(scale);
             nextAngularVelocity.mul(scale);
@@ -214,11 +215,14 @@ public class CollisionComponent implements VehicleComponent {
         // be applied over the delta time, and then apply that force at the contact
         // point.
 
-        for (ContactPoint contactPoint : contactPoints) {
-            Vector3d averageForce = new Vector3d(contactPoint.impulse).div(deltaTime);
-            rbc.addForce(averageForce, contactPoint.position);
-            Debug.visualizeVectorAt(rbc.getWorld(), contactPoint.position, new Vector3d(averageForce).div(1000), "pink_wool");
-        }
+        rbc.setVelocity(nextVelocity);
+        rbc.setAngularVelocity(nextAngularVelocity);
+
+        // for (ContactPoint contactPoint : contactPoints) {
+        //     Vector3d averageForce = new Vector3d(contactPoint.impulse).div(deltaTime).mul(scale);
+        //     rbc.addForce(averageForce, contactPoint.position);
+        //     Debug.visualizeVectorAt(rbc.getWorld(), contactPoint.position, new Vector3d(averageForce).div(1000), "pink_wool");
+        // }
     }
 
 }

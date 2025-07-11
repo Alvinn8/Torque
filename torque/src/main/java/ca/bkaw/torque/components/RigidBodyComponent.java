@@ -4,7 +4,6 @@ import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.World;
-import ca.bkaw.torque.util.Util;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
@@ -86,14 +85,9 @@ public class RigidBodyComponent implements VehicleComponent {
         this.netTorque.zero();
 
         // Dampen angular velocity to prevent jitter.
-        double angularVelocityLengthSq = this.angularVelocity.lengthSquared();
-        if (angularVelocityLengthSq < 1e-4) {
+        // this.angularVelocity.mul(0.8);
+        if (this.angularVelocity.lengthSquared() < 1e-2) {
             this.angularVelocity.zero();
-        } else if (angularVelocityLengthSq < 0.01) {
-            // If the angular velocity is very small, reduce it further to prevent jitter.
-            this.angularVelocity.mul(0.9);
-        } else {
-            this.angularVelocity.mul(0.98);
         }
     }
 
@@ -174,5 +168,17 @@ public class RigidBodyComponent implements VehicleComponent {
 
     public void setPosition(Vector3dc position) {
         this.position.set(position);
+    }
+
+    public void setOrientation(Quaternionfc orientation) {
+        this.orientation.set(orientation);
+    }
+
+    public void setVelocity(Vector3d nextVelocity) {
+        this.velocity.set(nextVelocity);
+    }
+
+    public void setAngularVelocity(Vector3d angularVelocity) {
+        this.angularVelocity.set(angularVelocity);
     }
 }

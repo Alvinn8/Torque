@@ -38,10 +38,10 @@ public class GravityComponent implements VehicleComponent {
             // rbc.addForce(new Vector3d(0, magnitude, 0), rbc.getPosition());
             double spreadDistance = 1;
             double yOffset = 0;
-            this.gravityPoint(rbc, magnitude / 4, new Vector3d(spreadDistance, yOffset, 0).rotate(new Quaterniond(rbc.getOrientation())));
-            this.gravityPoint(rbc, magnitude / 4, new Vector3d(-spreadDistance, yOffset, 0).rotate(new Quaterniond(rbc.getOrientation())));
-            this.gravityPoint(rbc, magnitude / 4, new Vector3d(0, yOffset, spreadDistance).rotate(new Quaterniond(rbc.getOrientation())));
-            this.gravityPoint(rbc, magnitude / 4, new Vector3d(0, yOffset, -spreadDistance).rotate(new Quaterniond(rbc.getOrientation())));
+            this.gravityPoint(rbc, magnitude / 4, new Vector3d(spreadDistance, yOffset, spreadDistance).rotate(new Quaterniond(rbc.getOrientation())));
+            this.gravityPoint(rbc, magnitude / 4, new Vector3d(spreadDistance, yOffset, -spreadDistance).rotate(new Quaterniond(rbc.getOrientation())));
+            this.gravityPoint(rbc, magnitude / 4, new Vector3d(-spreadDistance, yOffset, -spreadDistance).rotate(new Quaterniond(rbc.getOrientation())));
+            this.gravityPoint(rbc, magnitude / 4, new Vector3d(-spreadDistance, yOffset, spreadDistance).rotate(new Quaterniond(rbc.getOrientation())));
         });
     }
 
