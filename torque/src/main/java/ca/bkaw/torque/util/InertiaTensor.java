@@ -34,6 +34,11 @@ public class InertiaTensor {
         double averageDensity = mass / volume; // Unit: kg/m^3
 
         for (ModelElement element : elements.getElements()) {
+            String name = element.getName();
+            if (name != null && name.startsWith(".")) {
+                // Skip hidden elements.
+                continue;
+            }
             double elementVolume = getVolume(element); // Unit: m^3
             double elementMass = averageDensity * elementVolume; // Unit: kg
 
@@ -95,7 +100,10 @@ public class InertiaTensor {
      * @return The total volume. Unit: m^3
      */
     private static double getVolume(ModelElementList elements) {
-        return elements.getElements().stream().mapToDouble(InertiaTensor::getVolume).sum();
+        return elements.getElements().stream()
+            .filter(element -> element.getName() == null || !element.getName().startsWith("."))
+            .mapToDouble(InertiaTensor::getVolume)
+            .sum();
     }
 
     /**
