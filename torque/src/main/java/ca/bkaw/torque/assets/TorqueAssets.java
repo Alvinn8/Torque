@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 public class TorqueAssets {
     public static final UUID PACK_UUID = UUID.fromString("c73385d8-6493-4124-af7a-62dbd32eb0e5");
@@ -158,6 +157,8 @@ public class TorqueAssets {
         Vector3d centerOfMass = InertiaTensor.getCenterOfMass(elements);
         elements.move(new Vector3d(centerOfMass).negate());
 
+        Model modelToKeep = model.deepCopy();
+
         // Find tagged elements
         List<Seat> seats = new ArrayList<>();
         for (ModelElement element : elements.getElements()) {
@@ -176,8 +177,6 @@ public class TorqueAssets {
                 ));
             }
         }
-
-        Model modelToKeep = model.deepCopy();
 
         // Treat elements with a leading dot as hidden elements.
         elements.removeIf(el -> String.valueOf(el.getName()).startsWith("."));

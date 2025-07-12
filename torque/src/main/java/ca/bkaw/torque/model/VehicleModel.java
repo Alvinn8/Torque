@@ -12,6 +12,7 @@ public class VehicleModel {
     private final Identifier identifier;
     private @Nullable Model model;
     private VehicleModelPart inline;
+    private VehicleModelPart hologram;
     private VehicleModelPart primary;
     private List<VehicleModelPart> parts;
     private double scale;
