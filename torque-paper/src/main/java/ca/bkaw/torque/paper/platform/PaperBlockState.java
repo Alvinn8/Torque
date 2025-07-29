@@ -1,9 +1,11 @@
 package ca.bkaw.torque.paper.platform;
 
 import ca.bkaw.torque.platform.BlockState;
+import ca.bkaw.torque.platform.World;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
+import org.joml.Vector3ic;
 
 public record PaperBlockState(BlockData blockData) implements BlockState {
     @Override
@@ -15,5 +17,10 @@ public record PaperBlockState(BlockData blockData) implements BlockState {
             return waterlogged.isWaterlogged();
         }
         return false;
+    }
+
+    @Override
+    public boolean isCollidable(World world, Vector3ic position) {
+        return !((PaperWorld) world).world().getBlockAt(position.x(), position.y(), position.z()).isPassable();
     }
 }

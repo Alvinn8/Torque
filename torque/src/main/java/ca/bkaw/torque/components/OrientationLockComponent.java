@@ -9,6 +9,7 @@ import ca.bkaw.torque.vehicle.VehicleComponentType;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 
 public class OrientationLockComponent implements VehicleComponent {
@@ -31,18 +32,28 @@ public class OrientationLockComponent implements VehicleComponent {
 
     @Override
     public void tick(Vehicle vehicle) {
-        vehicle.getComponent(RigidBodyComponent.class).ifPresent(rbc -> {
+       vehicle.getComponent(RigidBodyComponent.class).ifPresent(rbc -> {
             Quaternionfc currentOrientation = rbc.getOrientation();
+            Vector3d angularVelocity = rbc.getAngularVelocity();
 
-            Vector3f forward = new Vector3f(0, 0, -1).rotate(currentOrientation);
-            float yaw = (float) Math.atan2(forward.x, forward.z);
+            float smoothingFactor = 0.3f;
 
-            Quaternionf yawOnly = new Quaternionf().rotateY(yaw);
+            // Only keep the component of angular velocity around the Y axis and apply smoothing
+            Vector3d direction = new Vector3d(0, 1, 0); // Y axis
+            double projection = angularVelocity.dot(direction) / direction.lengthSquared();
+            Vector3d filteredAngularVelocity = new Vector3d(direction).mul(projection);
+            Vector3d smoothedAngularVelocity = new Vector3d(angularVelocity).lerp(filteredAngularVelocity, smoothingFactor);
+            rbc.setAngularVelocity(smoothedAngularVelocity);
 
-            float smoothingFactor = 0.1f;
-            Quaternionf smoothed = new Quaternionf(currentOrientation).slerp(yawOnly, smoothingFactor);
+            // Swing-Twist decomposition to isolate yaw (twist around Y axis)
+            Vector3f directionF = new Vector3f(0, 1, 0);
+            Vector3f ra = new Vector3f(currentOrientation.x(), currentOrientation.y(), currentOrientation.z());
+            Vector3f p = new Vector3f(directionF).mul(ra.dot(directionF) / directionF.lengthSquared());
+            Quaternionf twist = new Quaternionf(p.x, p.y, p.z, currentOrientation.w()).normalize();
 
-            // rbc.setOrientation(smoothed); // TODO not the spirit
+            Quaternionf smoothed = new Quaternionf(currentOrientation).slerp(twist, smoothingFactor);
+
+            rbc.setOrientation(smoothed); // TODO not the spirit
         });
     }
 }

@@ -1,9 +1,10 @@
 package ca.bkaw.torque.paper.platform;
 
 import ca.bkaw.torque.platform.BlockState;
+import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.ItemDisplay;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
+import org.bukkit.Particle;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3dc;
 import org.joml.Vector3ic;
@@ -19,5 +20,10 @@ public record PaperWorld(org.bukkit.World world) implements ca.bkaw.torque.platf
     @Override
     public @NotNull BlockState getBlock(@NotNull Vector3ic position) {
         return new PaperBlockState(this.world.getBlockData(position.x(), position.y(), position.z()));
+    }
+
+    @Override
+    public void spawnParticle(Vector3ic blockPos, Identifier identifier) {
+        this.world.spawnParticle(Particle.SMOKE, blockPos.x(), blockPos.y(), blockPos.z(), 1);
     }
 }

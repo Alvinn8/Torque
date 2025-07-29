@@ -47,7 +47,7 @@ public class GravityComponent implements VehicleComponent {
 
     private void gravityPoint(RigidBodyComponent rbc, double magnitude, Vector3d offset) {
         Vector3d position = rbc.getPosition().add(offset.rotate(new Quaterniond(rbc.getOrientation())), new Vector3d());
-        Vector3d below = new Vector3d(position).sub(0, 0.1, 0);
+        Vector3d below = new Vector3d(position).sub(0, 0.01, 0);
         Vector3i blockPos = new Vector3i(below, RoundingMode.FLOOR);
         World world = rbc.getWorld();
         if (world.getBlock(blockPos).isCollidable(world, blockPos)) {

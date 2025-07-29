@@ -49,7 +49,7 @@ public class TestDriveComponent implements VehicleComponent {
             Vector3dc position = rbc.getPosition();
             double magnitude = 10_000; // unit: Newton
             if (driverInput.sprint) {
-                magnitude *= 10; // double the force when sprinting
+                magnitude *= 10;
             }
             if (driverInput.forward) {
                 rbc.addForce(new Vector3d(0, 0, -magnitude).rotate(new Quaterniond(rbc.getOrientation())), position);
@@ -57,20 +57,28 @@ public class TestDriveComponent implements VehicleComponent {
             if (driverInput.backward) {
                 rbc.addForce(new Vector3d(0, 0, magnitude).rotate(new Quaterniond(rbc.getOrientation())), position);
             }
+
+            // Steering by applying lateral forces at front and rear
+            double steerForce = 5_000; // Adjust for steering sensitivity
+            double steerOffset = 2.0;  // Distance from center of mass
+
             if (driverInput.left) {
-                rbc.addForce(new Vector3d(magnitude, 0, 0), position.add(new Vector3d(0, 0, 2).rotate(new Quaterniond(rbc.getOrientation())), new Vector3d()));
-                rbc.addForce(new Vector3d(-magnitude, 0, 0), position.add(new Vector3d(0, 0, -2).rotate(new Quaterniond(rbc.getOrientation())), new Vector3d()));
+                // Rightward force at front, leftward at rear
+                Vector3d front = new Vector3d(0, 0, steerOffset).rotate(new Quaterniond(rbc.getOrientation())).add(position, new Vector3d());
+                Vector3d rear = new Vector3d(0, 0, -steerOffset).rotate(new Quaterniond(rbc.getOrientation())).add(position, new Vector3d());
+                Vector3d right = new Vector3d(1, 0, 0).rotate(new Quaterniond(rbc.getOrientation()));
+                Vector3d left = new Vector3d(-1, 0, 0).rotate(new Quaterniond(rbc.getOrientation()));
+                rbc.addForce(right.mul(steerForce, new Vector3d()), front);
+                rbc.addForce(left.mul(steerForce, new Vector3d()), rear);
             }
-            double rotationMagnitude = 1_000;
             if (driverInput.right) {
-                rbc.addForce(new Vector3d(rotationMagnitude, 0, 0), position.add(
-                    new Vector3d(0, 0, -2).rotate(new Quaterniond(rbc.getOrientation())),
-                    new Vector3d()
-                ));
-                rbc.addForce(new Vector3d(-rotationMagnitude, 0, 0), position.add(
-                    new Vector3d(0, 0, 2).rotate(new Quaterniond(rbc.getOrientation())),
-                    new Vector3d()
-                ));
+                // Leftward force at front, rightward at rear
+                Vector3d front = new Vector3d(0, 0, steerOffset).rotate(new Quaterniond(rbc.getOrientation())).add(position, new Vector3d());
+                Vector3d rear = new Vector3d(0, 0, -steerOffset).rotate(new Quaterniond(rbc.getOrientation())).add(position, new Vector3d());
+                Vector3d right = new Vector3d(1, 0, 0).rotate(new Quaterniond(rbc.getOrientation()));
+                Vector3d left = new Vector3d(-1, 0, 0).rotate(new Quaterniond(rbc.getOrientation()));
+                rbc.addForce(left.mul(steerForce, new Vector3d()), front);
+                rbc.addForce(right.mul(steerForce, new Vector3d()), rear);
             }
         });
     }
