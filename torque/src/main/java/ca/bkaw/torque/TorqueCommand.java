@@ -56,7 +56,7 @@ public class TorqueCommand {
                 if (vehicle != null) {
                     vehicle.getComponent(RigidBodyComponent.class).ifPresent(
                         rbc -> {
-                            rbc.addForce(new Vector3d(0, 10000, 0), rbc.getPosition().add(10000, 0, 0, new Vector3d()));
+                            rbc.addForce(new Vector3d(0, 100000, 0), rbc.getPosition().add(0, 0, 8, new Vector3d()));
                         }
                     );
                 }

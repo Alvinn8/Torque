@@ -36,6 +36,14 @@ public class OrientationLockComponent implements VehicleComponent {
             Quaternionfc currentOrientation = rbc.getOrientation();
             Vector3d angularVelocity = rbc.getAngularVelocity();
 
+            boolean isColliding = vehicle.getComponent(SimpleCollisionComponent.class)
+                .map(SimpleCollisionComponent::isColliding)
+                .orElse(false);
+            if (!isColliding) {
+                // No orientation lock if colliding. Let the vehicle rotate freely.
+                return;
+            }
+
             float smoothingFactor = 0.3f;
 
             // Only keep the component of angular velocity around the Y axis and apply smoothing

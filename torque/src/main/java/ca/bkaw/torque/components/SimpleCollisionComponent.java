@@ -26,6 +26,18 @@ public class SimpleCollisionComponent implements VehicleComponent {
     private OBB obb;
     private @Nullable Vector3i highestCollisionBlock;
 
+    /**
+     * Whether the vehicle has ground contact.
+     * <p>
+     * Note that if the vehicle is rotated, the "ground" may not be the actual ground
+     * but the surface at the vehicle's bottom.
+     */
+    private boolean onGround = false;
+    /**
+     * Whether the vehicle is colliding with any block in any direction.
+     */
+    private boolean isColliding = false;
+
     public SimpleCollisionComponent(Vehicle vehicle, DataInput dataInput) {}
 
     @Override
@@ -68,6 +80,9 @@ public class SimpleCollisionComponent implements VehicleComponent {
             double originalVelBackward = velBackward;
             this.highestCollisionBlock = null;
 
+            this.onGround = false;
+            this.isColliding = false;
+
             // Variables needed for collision checks
             Vector3dc halfSize = this.obb.getHalfSize();
             Vector3d checkPosition = new Vector3d();
@@ -92,6 +107,7 @@ public class SimpleCollisionComponent implements VehicleComponent {
                     for (double offsetBackward = -halfSize.z(); offsetBackward <= halfSize.z(); offsetBackward += 1) {
                         if (this.doCollisionBlockCheck(world, checkPosition)) {
                             velRight = 0;
+                            this.isColliding = true;
                             break rightLoop;
                         }
                         checkPosition.add(backward); // checkPosition += backward
@@ -110,7 +126,12 @@ public class SimpleCollisionComponent implements VehicleComponent {
                         .fma(-halfSize.z(), backward); // Start at the right position
                     for (double offsetBackward = -halfSize.z(); offsetBackward <= halfSize.z(); offsetBackward += 1) {
                         if (this.doCollisionBlockCheck(world, checkPosition)) {
+                            if (velUp < 0) {
+                                // If the vehicle is moving dow into the ground.
+                                this.onGround = true;
+                            }
                             velUp = 0;
+                            this.isColliding = true;
                             break;
                         }
                         checkPosition.add(backward); // checkPosition += * backward
@@ -131,6 +152,7 @@ public class SimpleCollisionComponent implements VehicleComponent {
                     for (double offsetRight = -halfSize.x(); offsetRight <= halfSize.x(); offsetRight += 1) {
                         if (this.doCollisionBlockCheck(world, checkPosition)) {
                             velBackward = 0;
+                            this.isColliding = true;
                             break backwardLoop;
                         }
                         checkPosition.add(right); // checkPosition += * right
@@ -168,5 +190,13 @@ public class SimpleCollisionComponent implements VehicleComponent {
         }
         Debug.highlightBlockSmall(world, blockPos, "stone");
         return false;
+    }
+
+    public boolean isOnGround() {
+        return this.onGround;
+    }
+
+    public boolean isColliding() {
+        return this.isColliding;
     }
 }

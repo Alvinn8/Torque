@@ -38,22 +38,15 @@ public class GravityComponent implements VehicleComponent {
             // rbc.addForce(new Vector3d(0, magnitude, 0), rbc.getPosition());
             double spreadDistance = 1;
             double yOffset = 0;
-            this.gravityPoint(rbc, magnitude / 4, new Vector3d(spreadDistance, yOffset, spreadDistance).rotate(new Quaterniond(rbc.getOrientation())));
-            this.gravityPoint(rbc, magnitude / 4, new Vector3d(spreadDistance, yOffset, -spreadDistance).rotate(new Quaterniond(rbc.getOrientation())));
-            this.gravityPoint(rbc, magnitude / 4, new Vector3d(-spreadDistance, yOffset, -spreadDistance).rotate(new Quaterniond(rbc.getOrientation())));
-            this.gravityPoint(rbc, magnitude / 4, new Vector3d(-spreadDistance, yOffset, spreadDistance).rotate(new Quaterniond(rbc.getOrientation())));
+            this.gravityPoint(rbc, magnitude / 4, new Vector3d(spreadDistance, yOffset, spreadDistance));
+            this.gravityPoint(rbc, magnitude / 4, new Vector3d(spreadDistance, yOffset, -spreadDistance));
+            this.gravityPoint(rbc, magnitude / 4, new Vector3d(-spreadDistance, yOffset, -spreadDistance));
+            this.gravityPoint(rbc, magnitude / 4, new Vector3d(-spreadDistance, yOffset, spreadDistance));
         });
     }
 
     private void gravityPoint(RigidBodyComponent rbc, double magnitude, Vector3d offset) {
         Vector3d position = rbc.getPosition().add(offset.rotate(new Quaterniond(rbc.getOrientation())), new Vector3d());
-        Vector3d below = new Vector3d(position).sub(0, 0.01, 0);
-        Vector3i blockPos = new Vector3i(below, RoundingMode.FLOOR);
-        World world = rbc.getWorld();
-        if (world.getBlock(blockPos).isCollidable(world, blockPos)) {
-            // If there is a block below, we don't apply gravity at that point.
-            return;
-        }
         rbc.addForce(new Vector3d(0, magnitude, 0), position);
 
     }
