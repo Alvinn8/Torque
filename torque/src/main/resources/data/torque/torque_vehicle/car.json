@@ -15,7 +15,7 @@
             "type": "torque:orientation_lock"
         },
         {
-            "type": "torque:impulse_collision"
+            "type": "torque:simple_collision"
         },
         {
             "type": "torque:rigid_body"

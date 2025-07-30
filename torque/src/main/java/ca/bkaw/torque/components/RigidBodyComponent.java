@@ -66,6 +66,7 @@ public class RigidBodyComponent implements VehicleComponent {
         // Apply linear motion.
         Vector3d acceleration = this.netForce.div(vehicle.getType().mass()); // unit: meter/second^2
         this.velocity.add(acceleration.mul(DELTA_TIME));
+        vehicle.getComponent(SimpleCollisionComponent.class).ifPresent(simpleCollision -> simpleCollision.run(vehicle));
         this.position.add(this.velocity.mul(DELTA_TIME, new Vector3d()));
         this.netForce.zero();
 

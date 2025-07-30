@@ -46,7 +46,13 @@ public class DragComponent implements VehicleComponent {
             Vector3d dragForce = new Vector3d(velocity).normalize().negate().mul(dragForceMagnitude);
             rbc.addForce(dragForce, position);
 
-            rbc.setAngularVelocity(rbc.getAngularVelocity().mul(0.8f));
+            Vector3d angularVelocity = rbc.getAngularVelocity();
+            if (angularVelocity.lengthSquared() < 0.1) {
+                angularVelocity.mul(0.2f);
+            } else {
+                angularVelocity.mul(0.8f);
+            }
+            rbc.setAngularVelocity(angularVelocity);
         });
     }
 }

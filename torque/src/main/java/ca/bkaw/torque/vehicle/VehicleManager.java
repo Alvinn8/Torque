@@ -9,6 +9,7 @@ import ca.bkaw.torque.components.GravityComponent;
 import ca.bkaw.torque.components.OrientationLockComponent;
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
+import ca.bkaw.torque.components.SimpleCollisionComponent;
 import ca.bkaw.torque.components.TestDriveComponent;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
@@ -72,15 +73,12 @@ public class VehicleManager {
             GravityComponent.TYPE,
             FloatComponent.TYPE,
             ImpulseCollisionComponent.TYPE,
+            SimpleCollisionComponent.TYPE,
             OrientationLockComponent.TYPE
         );
     }
 
     private void tick() {
-        if (!tickStep && false) {
-            return;
-        }
-        tickStep = false;
         // Check if ticking is frozen
         if (tickingFrozen) {
             // If we have remaining steps, execute one and decrement

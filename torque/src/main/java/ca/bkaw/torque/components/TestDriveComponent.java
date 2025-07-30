@@ -57,6 +57,15 @@ public class TestDriveComponent implements VehicleComponent {
             if (driverInput.backward) {
                 rbc.addForce(new Vector3d(0, 0, magnitude).rotate(new Quaterniond(rbc.getOrientation())), position);
             }
+            if (false) {
+                if (driverInput.right) {
+                    rbc.addForce(new Vector3d(magnitude, 0, 0).rotate(new Quaterniond(rbc.getOrientation())), position);
+                }
+                if (driverInput.left) {
+                    rbc.addForce(new Vector3d(-magnitude, 0, 0).rotate(new Quaterniond(rbc.getOrientation())), position);
+                }
+                return;
+            }
 
             // Steering by applying lateral forces at front and rear
             double steerForce = 5_000; // Adjust for steering sensitivity
