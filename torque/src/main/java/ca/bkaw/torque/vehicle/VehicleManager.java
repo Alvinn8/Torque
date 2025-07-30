@@ -2,7 +2,7 @@ package ca.bkaw.torque.vehicle;
 
 import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.assets.ResourcePack;
-import ca.bkaw.torque.components.CollisionComponent;
+import ca.bkaw.torque.components.ImpulseCollisionComponent;
 import ca.bkaw.torque.components.DragComponent;
 import ca.bkaw.torque.components.FloatComponent;
 import ca.bkaw.torque.components.GravityComponent;
@@ -24,7 +24,6 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
 import java.io.BufferedReader;
@@ -70,7 +69,7 @@ public class VehicleManager {
             DragComponent.TYPE,
             GravityComponent.TYPE,
             FloatComponent.TYPE,
-            CollisionComponent.TYPE,
+            ImpulseCollisionComponent.TYPE,
             OrientationLockComponent.TYPE
         );
     }

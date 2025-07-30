@@ -19,15 +19,15 @@ import org.joml.Vector3ic;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CollisionComponent implements VehicleComponent {
+public class ImpulseCollisionComponent implements VehicleComponent {
     public static final VehicleComponentType TYPE = new VehicleComponentType(
-        new Identifier("torque", "collision"),
-        CollisionComponent::new
+        new Identifier("torque", "impulse_collision"),
+        ImpulseCollisionComponent::new
     );
 
     private OBB obb;
 
-    public CollisionComponent(Vehicle vehicle, DataInput dataInput) {
+    public ImpulseCollisionComponent(Vehicle vehicle, DataInput dataInput) {
 
     }
 
@@ -183,7 +183,7 @@ public class CollisionComponent implements VehicleComponent {
         }
         // Debug.print("iteration = " + iteration);
         if (iteration >= 10) {
-            Debug.print("CollisionComponent: Too many iterations, vehicle may be stuck in a collision.");
+            Debug.print("ImpulseCollisionComponent: Too many iterations, vehicle may be stuck in a collision.");
         }
 
         // Ensure no energy is added to the system.
