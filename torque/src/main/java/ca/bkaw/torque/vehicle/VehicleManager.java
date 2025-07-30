@@ -53,7 +53,9 @@ public class VehicleManager {
     private final Map<Player, Vehicle> currentVehicleMap = new HashMap<>();
     private final Map<ItemDisplay, Vehicle> vehiclePartMap = new HashMap<>();
 
-    public static boolean tickStep = false;
+    // Tick control
+    private boolean tickingFrozen = false;
+    private int remainingSteps = 0;
 
     public VehicleManager(Torque torque) {
         this.torque = torque;
@@ -79,6 +81,17 @@ public class VehicleManager {
             return;
         }
         tickStep = false;
+        // Check if ticking is frozen
+        if (tickingFrozen) {
+            // If we have remaining steps, execute one and decrement
+            if (remainingSteps > 0) {
+                remainingSteps--;
+            } else {
+                // No steps remaining, skip this tick
+                return;
+            }
+        }
+
         for (Vehicle vehicle : this.vehicles) {
             vehicle.tick();
         }
@@ -315,5 +328,51 @@ public class VehicleManager {
             return;
         }
         this.vehiclePartMap.put(entity, vehicle);
+    }
+
+    /**
+     * Freeze ticking, preventing vehicles from updating until unfrozen or stepped.
+     */
+    public void freezeTicking() {
+        this.tickingFrozen = true;
+        this.remainingSteps = 0;
+    }
+
+    /**
+     * Unfreeze ticking, allowing vehicles to update normally.
+     */
+    public void unfreezeTicking() {
+        this.tickingFrozen = false;
+        this.remainingSteps = 0;
+    }
+
+    /**
+     * Step a certain number of ticks while ticking is frozen.
+     * If ticking is not frozen, this method does nothing.
+     *
+     * @param steps The number of ticks to step.
+     */
+    public void stepTicks(int steps) {
+        if (tickingFrozen) {
+            this.remainingSteps += steps;
+        }
+    }
+
+    /**
+     * Check if ticking is currently frozen.
+     *
+     * @return True if ticking is frozen, false otherwise.
+     */
+    public boolean isTickingFrozen() {
+        return this.tickingFrozen;
+    }
+
+    /**
+     * Get the number of remaining tick steps.
+     *
+     * @return The number of remaining steps.
+     */
+    public int getRemainingSteps() {
+        return this.remainingSteps;
     }
 }

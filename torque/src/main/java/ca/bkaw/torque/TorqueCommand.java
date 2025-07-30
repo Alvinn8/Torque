@@ -87,9 +87,6 @@ public class TorqueCommand {
                     });
                 }
             }
-            case 5 -> {
-                VehicleManager.tickStep = true;
-            }
             case 6 -> {
                 Debug.setInstance(new Debug(this.torque));
             }
@@ -114,6 +111,43 @@ public class TorqueCommand {
             this.torque.reload();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Freeze vehicle ticking.
+     */
+    public void tickFreeze() {
+        this.torque.getVehicleManager().freezeTicking();
+    }
+
+    /**
+     * Unfreeze vehicle ticking.
+     */
+    public void tickUnfreeze() {
+        this.torque.getVehicleManager().unfreezeTicking();
+    }
+
+    /**
+     * Step vehicle ticking by a certain number of ticks.
+     *
+     * @param steps The number of ticks to step (defaults to 1 if not specified).
+     */
+    public void tickStep(int steps) {
+        this.torque.getVehicleManager().stepTicks(steps);
+    }
+
+    /**
+     * Get information about the current tick state.
+     *
+     * @return A string describing the current tick state.
+     */
+    public String getTickStatus() {
+        VehicleManager vm = this.torque.getVehicleManager();
+        if (vm.isTickingFrozen()) {
+            return "Ticking is frozen. Remaining steps: " + vm.getRemainingSteps();
+        } else {
+            return "Ticking is running normally.";
         }
     }
 }

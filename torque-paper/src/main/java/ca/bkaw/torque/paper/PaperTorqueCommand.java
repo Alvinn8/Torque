@@ -74,6 +74,50 @@ public class PaperTorqueCommand {
                             return 1;
                         })
                 )
+                .then(
+                    Commands.literal("tick")
+                        .then(
+                            Commands.literal("freeze")
+                                .executes(ctx -> {
+                                    this.handler().tickFreeze();
+                                    ctx.getSource().getSender().sendMessage("Vehicle ticking has been frozen.");
+                                    return 1;
+                                })
+                        )
+                        .then(
+                            Commands.literal("step")
+                                .executes(ctx -> {
+                                    this.handler().tickStep(1);
+                                    ctx.getSource().getSender().sendMessage("Stepped 1 tick.");
+                                    return 1;
+                                })
+                                .then(
+                                    Commands.argument("amount", IntegerArgumentType.integer(1, 1000))
+                                        .executes(ctx -> {
+                                            int amount = IntegerArgumentType.getInteger(ctx, "amount");
+                                            this.handler().tickStep(amount);
+                                            ctx.getSource().getSender().sendMessage("Stepped " + amount + " ticks.");
+                                            return 1;
+                                        })
+                                )
+                        )
+                        .then(
+                            Commands.literal("unfreeze")
+                                .executes(ctx -> {
+                                    this.handler().tickUnfreeze();
+                                    ctx.getSource().getSender().sendMessage("Vehicle ticking has been unfrozen.");
+                                    return 1;
+                                })
+                        )
+                        .then(
+                            Commands.literal("status")
+                                .executes(ctx -> {
+                                    String status = this.handler().getTickStatus();
+                                    ctx.getSource().getSender().sendMessage(status);
+                                    return 1;
+                                })
+                        )
+                )
                 .build()
         );
     }
