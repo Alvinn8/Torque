@@ -2,12 +2,16 @@ package ca.bkaw.torque.assets;
 
 import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.assets.model.Model;
-import ca.bkaw.torque.assets.model.ModelElement;
 import ca.bkaw.torque.assets.model.ModelElementList;
+import ca.bkaw.torque.assets.model.ModelExtractor;
 import ca.bkaw.torque.assets.send.BuiltInTcpResourcePackSender;
 import ca.bkaw.torque.assets.send.ResourcePackSender;
 import ca.bkaw.torque.model.Seat;
+import ca.bkaw.torque.model.SeatTagHandler;
+import ca.bkaw.torque.model.SteeringWheelTagHandler;
 import ca.bkaw.torque.model.VehicleModel;
+import ca.bkaw.torque.model.VehicleModelPart;
+import ca.bkaw.torque.model.WheelTagHandler;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.util.InertiaTensor;
 import ca.bkaw.torque.util.Registry;
@@ -28,14 +32,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 
 public class TorqueAssets {
     public static final UUID PACK_UUID = UUID.fromString("c73385d8-6493-4124-af7a-62dbd32eb0e5");
     public static final String DESCRIPTION = "Torque";
     public static final int PACK_FORMAT = 55;
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
 
     private @Nullable ResourcePack resourcePack;
     private final @NotNull Path resourcePackPath;
@@ -153,30 +157,28 @@ public class TorqueAssets {
             return null;
         }
 
-        // Center geometrically to maximize the space used.
+        // Center on center of mass.
         Vector3d centerOfMass = InertiaTensor.getCenterOfMass(elements);
         elements.move(new Vector3d(centerOfMass).negate());
 
         Model modelToKeep = model.deepCopy();
 
-        // Find tagged elements
-        List<Seat> seats = new ArrayList<>();
-        for (ModelElement element : elements.getElements()) {
-            Set<String> tags = element.getTags();
-            if (tags.contains("seat")) {
-                boolean isDriver = tags.contains("driver");
-                // Use the middle as the seat position, however vertically we want to use the lowest point.
-                Vector3d seatPosition = element.getMiddle();
-                seatPosition.y = Math.min(element.getFrom().y, element.getTo().y);
-                seatPosition.div(16); // Convert from model units ("pixels") to blocks.
-                seatPosition.add(0, Seat.VERTICAL_OFFSET, 0);
+        ModelExtractor modelExtractor = new ModelExtractor(model);
 
-                seats.add(new Seat(
-                    new Vector3f(seatPosition),
-                    isDriver
-                ));
-            }
-        }
+        // Process tags
+        SeatTagHandler seatHandler = new SeatTagHandler();
+        List<Seat> seats = seatHandler.process(model, modelExtractor);
+        
+        // Process other tag handlers and store results for later use
+        SteeringWheelTagHandler steeringWheelHandler = new SteeringWheelTagHandler();
+        steeringWheelHandler.process(model, modelExtractor);
+        
+        WheelTagHandler wheelHandler = new WheelTagHandler();
+        wheelHandler.process(model, modelExtractor);
+
+        Map<String, Model> modelParts = modelExtractor.executeExtractions();
+
+        // Save primary model
 
         // Treat elements with a leading dot as hidden elements.
         elements.removeIf(el -> String.valueOf(el.getName()).startsWith("."));
@@ -190,16 +192,40 @@ public class TorqueAssets {
             elements.scale(new Vector3d(scale), new Vector3d(8, 0, 8));
         }
 
+        for (Model modelPart : modelParts.values()) {
+            ModelElementList partElements = modelPart.getAllElements();
+            if (partElements == null) {
+                continue;
+            }
+            elements.removeIf(el -> String.valueOf(el.getName()).startsWith("."));
+            if (scale != 1.0) {
+                partElements.scale(new Vector3d(scale), new Vector3d(8, 0, 8));
+            }
+        }
+
+        // Save primary model
+
         Path directory = this.resourcePack.getPath(
             "assets/" + identifier.namespace() + "/models/" + identifier.key()
         );
         Files.createDirectories(directory);
 
         Path primaryPath = directory.resolve("primary.json");
-        Files.writeString(primaryPath, gson.toJson(model.getJson()));
+        Files.writeString(primaryPath, GSON.toJson(model.getJson()));
 
         // Create an item model
         this.createItemModel(new Identifier(identifier.namespace(), identifier.key() + "/primary"));
+
+        // Save model parts
+        List<VehicleModelPart> vehicleModelParts = new ArrayList<>();
+        for (Map.Entry<String, Model> entry : modelParts.entrySet()) {
+            String partName = entry.getKey();
+            Model partModel = entry.getValue();
+            Path partPath = directory.resolve(partName + ".json");
+            Files.writeString(partPath, GSON.toJson(partModel.getJson()));
+            this.createItemModel(new Identifier(identifier.namespace(), identifier.key() + "/" + partName));
+            vehicleModelParts.add(new VehicleModelPart(partName));
+        }
 
         // Delete original to avoid errors in the client logs.
         Files.delete(path);
@@ -207,6 +233,7 @@ public class TorqueAssets {
         VehicleModel vehicleModel = new VehicleModel(
             identifier,
             modelToKeep,
+            vehicleModelParts,
             // The vehicle model should scale up to the original size.
             1.0 / scale,
             // The vehicle should be moved back vertically so that it is grounded at right level.
@@ -214,6 +241,7 @@ public class TorqueAssets {
             new Vector3f(0, (float) -centerOfMass.y / 16.0f, 0),
             seats
         );
+
         this.vehicleModelRegistry.register(vehicleModel);
         return vehicleModel;
     }
@@ -237,7 +265,7 @@ public class TorqueAssets {
         
         Path itemPath = this.resourcePack.getPath("assets/" + identifier.namespace() + "/items/" + identifier.key() + ".json");
         Files.createDirectories(itemPath.getParent());
-        Files.writeString(itemPath, gson.toJson(json));
+        Files.writeString(itemPath, GSON.toJson(json));
     }
 
     public Registry<VehicleModel> getVehicleModelRegistry() {

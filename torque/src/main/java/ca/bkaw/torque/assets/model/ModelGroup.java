@@ -13,6 +13,8 @@ import org.jetbrains.annotations.UnmodifiableView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A wrapper around a group created by Blockbench in a {@link Model}.
@@ -21,6 +23,7 @@ public class ModelGroup {
     private final JsonObject json;
     private @Nullable IntList childElements;
     private @Nullable List<ModelGroup> childGroups;
+    private @Nullable Set<String> tags;
 
     public ModelGroup(@NotNull JsonObject json) {
         this.json = json;
@@ -37,6 +40,23 @@ public class ModelGroup {
     }
 
     /**
+     * Get the tags from this group's name.
+     *
+     * @return The set of tags found in the group name.
+     */
+    public @NotNull Set<String> getTags() {
+        if (this.tags != null) {
+            return this.tags;
+        }
+        String name = this.getName();
+        // Match hashtag followed by alphanumeric characters or underscores and collect them in a set.
+        this.tags = ModelElement.TAG_PATTERN.matcher(name).results()
+            .map(match -> match.group("tag"))
+            .collect(Collectors.toSet());
+        return this.tags;
+    }
+
+    /**
      * Recursively get the indexes of all elements in this group.
      *
      * @return The unmodifiable list of indexes.
@@ -49,7 +69,7 @@ public class ModelGroup {
         for (ModelGroup childGroup : this.getChildGroups()) {
             list.addAll(childGroup.getAllElements());
         }
-        return list;
+        return IntLists.unmodifiable(list);
     }
 
     /**

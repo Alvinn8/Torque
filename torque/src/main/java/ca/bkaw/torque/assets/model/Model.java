@@ -147,6 +147,13 @@ public class Model {
     }
 
     /**
+     * Remove all groups from this model.
+     */
+    public void removeGroups() {
+        this.json.remove(GROUPS);
+    }
+
+    /**
      * Get the JSON object this model is wrapping.
      *
      * @return The json.
@@ -164,5 +171,45 @@ public class Model {
     @NotNull
     public Model deepCopy() {
         return new Model(this.json.deepCopy());
+    }
+
+    /**
+     * Get all elements that have the specified tag.
+     * 
+     * @param tag The tag to search for
+     * @return A list of elements with the specified tag
+     */
+    @NotNull
+    public List<ModelElement> getElementsByTag(@NotNull String tag) {
+        List<ModelElement> result = new ArrayList<>();
+        ModelElementList allElements = this.getAllElements();
+        if (allElements != null) {
+            for (ModelElement element : allElements.getElements()) {
+                if (element.getTags().contains(tag)) {
+                    result.add(element);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Get all groups that have the specified tag.
+     * 
+     * @param tag The tag to search for
+     * @return A list of groups with the specified tag
+     */
+    @NotNull
+    public List<ModelGroup> getGroupsByTag(@NotNull String tag) {
+        List<ModelGroup> result = new ArrayList<>();
+        List<ModelGroup> allGroups = this.getGroups();
+        if (allGroups != null) {
+            for (ModelGroup group : allGroups) {
+                if (group.getTags().contains(tag)) {
+                    result.add(group);
+                }
+            }
+        }
+        return result;
     }
 }

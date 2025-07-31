@@ -1,5 +1,9 @@
 package ca.bkaw.torque.model;
 
 public class VehicleModelPart {
-    private String name;
+    private final String name;
+
+    public VehicleModelPart(String name) {
+        this.name = name;
+    }
 }

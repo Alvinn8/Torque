@@ -4,7 +4,7 @@ import ca.bkaw.torque.assets.model.Model;
 import ca.bkaw.torque.platform.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.List;
 
@@ -16,12 +16,13 @@ public class VehicleModel {
     private VehicleModelPart primary;
     private List<VehicleModelPart> parts;
     private double scale;
-    private @NotNull Vector3f translation;
+    private @NotNull Vector3fc translation;
     private @NotNull List<Seat> seats;
 
-    public VehicleModel(Identifier identifier, @NotNull Model model, double scale, @NotNull Vector3f translation, @NotNull List<Seat> seats) {
+    public VehicleModel(Identifier identifier, @NotNull Model model, List<VehicleModelPart> parts, double scale, @NotNull Vector3fc translation, @NotNull List<Seat> seats) {
         this.identifier = identifier;
         this.model = model;
+        this.parts = parts;
         this.scale = scale;
         this.translation = translation;
         this.seats = seats;
@@ -35,7 +36,7 @@ public class VehicleModel {
         return this.scale;
     }
 
-    public Vector3f getTranslation() {
+    public @NotNull Vector3fc getTranslation() {
         return this.translation;
     }
 

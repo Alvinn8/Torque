@@ -179,6 +179,16 @@ public class ModelElementList {
     }
 
     /**
+     * Remove the element at the specified index.
+     *
+     * @param index The index of the element to remove.
+     */
+    public void remove(int index) {
+        this.elements.remove(index);
+        this.json.remove(index);
+    }
+
+    /**
      * Get the JSON array of elements this list is wrapping.
      *
      * @return The json.
