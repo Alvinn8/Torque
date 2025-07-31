@@ -11,7 +11,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
 public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDisplay {
@@ -28,6 +31,12 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
     @Override
     public World getWorld() {
         return new FabricWorld((ServerLevel) this.entity.level());
+    }
+
+    @Override
+    public @NotNull Vector3d getPosition() {
+        Vec3 position = this.entity.position();
+        return new Vector3d(position.x(), position.y(), position.z());
     }
 
     @Override
@@ -78,4 +87,10 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
         }
         return new NbtInputOutput(torqueData);
     }
+
+    @Override
+    public void mountVehicle(@NotNull ItemDisplay entity) {
+        this.entity.startRiding(((FabricItemDisplay) entity).entity(), true);
+    }
+
 }

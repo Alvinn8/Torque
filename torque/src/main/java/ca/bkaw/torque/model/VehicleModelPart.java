@@ -1,9 +1,13 @@
 package ca.bkaw.torque.model;
 
-public class VehicleModelPart {
-    private final String name;
+import ca.bkaw.torque.platform.Identifier;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3fc;
 
-    public VehicleModelPart(String name) {
-        this.name = name;
-    }
+public record VehicleModelPart(
+    String name,
+    Identifier modelIdentifier,
+    double scale,
+    @NotNull Vector3fc translation
+) {
 }

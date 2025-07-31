@@ -1,6 +1,8 @@
 package ca.bkaw.torque.platform;
 
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
 /**
@@ -27,6 +29,13 @@ public interface ItemDisplay {
      * @return The world.
      */
     World getWorld();
+
+    /**
+     * Get the current position in the world.
+     *
+     * @return The position.
+     */
+    @NotNull Vector3d getPosition();
 
     /**
      * Set the world position of the item display.
@@ -83,4 +92,12 @@ public interface ItemDisplay {
      * @return The data output.
      */
     DataOutput getDataOutput();
+
+    /**
+     * Mount the entity to another entity.
+     *
+     * @param entity The entity to mount.
+     */
+    void mountVehicle(@NotNull ItemDisplay entity);
+
 }

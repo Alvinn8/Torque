@@ -57,16 +57,16 @@ public class ModelElementList {
      */
     @NotNull
     public Vector3d getMiddle() {
-        Vector3d min = new Vector3d(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE);
-        Vector3d max = new Vector3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+        Vector3d min = new Vector3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+        Vector3d max = new Vector3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
         for (ModelElement element : this.getElements()) {
             Vector3d elementMiddle = element.getMiddle();
-            if (elementMiddle.x > min.x) min.x = elementMiddle.x;
-            if (elementMiddle.y > min.y) min.y = elementMiddle.y;
-            if (elementMiddle.z > min.z) min.z = elementMiddle.z;
-            if (elementMiddle.x < max.x) max.x = elementMiddle.x;
-            if (elementMiddle.y < max.y) max.y = elementMiddle.y;
-            if (elementMiddle.z < max.z) max.z = elementMiddle.z;
+            if (elementMiddle.x < min.x) min.x = elementMiddle.x;
+            if (elementMiddle.y < min.y) min.y = elementMiddle.y;
+            if (elementMiddle.z < min.z) min.z = elementMiddle.z;
+            if (elementMiddle.x > max.x) max.x = elementMiddle.x;
+            if (elementMiddle.y > max.y) max.y = elementMiddle.y;
+            if (elementMiddle.z > max.z) max.z = elementMiddle.z;
         }
         return min.lerp(max, 0.5);
     }

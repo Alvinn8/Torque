@@ -4,6 +4,7 @@ import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
 import ca.bkaw.torque.model.Seat;
+import ca.bkaw.torque.model.VehicleModelPart;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.Player;
@@ -28,6 +29,7 @@ public class VehicleRenderer {
 
     private final @NotNull Vehicle vehicle;
     private final @NotNull RenderEntity primary;
+    private final Map<VehicleModelPart, RenderEntity> partEntities = new HashMap<>();
     private final @Nullable Seat viewportSeat;
     private final Map<Seat, RenderEntity> seatEntities = new HashMap<>();
 
@@ -47,6 +49,18 @@ public class VehicleRenderer {
         );
         this.primary.display.setTeleportDuration(1);
         this.primary.display.setInterpolationDuration(1);
+
+        for (VehicleModelPart vehiclePart : vehicle.getType().model().getParts()) {
+            ItemDisplay partEntity = primaryEntity.getWorld().spawnItemDisplay(primaryEntity.getPosition());
+            partEntity.setItem(
+                vehicle.getTorque().getPlatform().createModelItem(vehiclePart.modelIdentifier())
+            );
+            partEntity.setTeleportDuration(1);
+            partEntity.setInterpolationDuration(1);
+            partEntity.mountVehicle(primaryEntity);
+            this.partEntities.put(vehiclePart, new RenderEntity(partEntity, new Matrix4f()));
+            vehicle.getTorque().getVehicleManager().setVehiclePart(partEntity, vehicle);
+        }
 
         List<Seat> seats = vehicle.getType().model().getSeats();
         this.viewportSeat = seats.isEmpty() ? null : seats.getFirst();
@@ -107,6 +121,24 @@ public class VehicleRenderer {
         this.primary.display.setTransformation(this.primary.transformation);
         this.primary.display.setPosition(this.vehiclePosition.sub(viewportTranslation, new Vector3d()));
         this.primary.display.setStartInterpolation(0);
+
+        // Perform part rendering.
+        for (Map.Entry<VehicleModelPart, RenderEntity> entry : this.partEntities.entrySet()) {
+            VehicleModelPart modelPart = entry.getKey();
+            RenderEntity partEntity = entry.getValue();
+            partEntity.transformation.identity()
+                .translate(viewportTranslation)
+                .rotate(this.vehicleOrientation)
+                .translate(modelPart.translation())
+                .scale((float) modelPart.scale())
+                .translate(0.0f, 0.5f, 0.0f)
+                .rotate(new Quaternionf().rotateAxis((float) (Math.random() * Math.PI * 2), 1, 0, 0))
+                .rotate(ROTATE_Y_180)
+                .translate((float) Math.random() * 0.0001f, 0, 0)
+            ;
+            partEntity.display.setTransformation(partEntity.transformation);
+            partEntity.display.setStartInterpolation(0);
+        }
 
         // Perform seat rendering.
         this.vehicle.getComponent(SeatsComponent.class).ifPresent(this::renderSeats);

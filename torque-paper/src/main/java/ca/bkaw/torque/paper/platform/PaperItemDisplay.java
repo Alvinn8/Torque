@@ -2,6 +2,7 @@ package ca.bkaw.torque.paper.platform;
 
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
+import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.ItemStack;
 import ca.bkaw.torque.platform.World;
 import io.papermc.paper.entity.TeleportFlag;
@@ -9,7 +10,9 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
 public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements ca.bkaw.torque.platform.ItemDisplay {
@@ -28,6 +31,12 @@ public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements 
     @Override
     public World getWorld() {
         return new PaperWorld(this.entity.getWorld());
+    }
+
+    @Override
+    public @NotNull Vector3d getPosition() {
+        Location location = this.entity.getLocation();
+        return new Vector3d(location.getX(), location.getY(), location.getZ());
     }
 
     @Override
@@ -83,4 +92,10 @@ public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements 
         }
         return new PdcInputOutput(vehicleData, pdc, PDC_VEHICLE_KEY);
     }
+
+    @Override
+    public void mountVehicle(@NotNull ItemDisplay entity) {
+        ((PaperItemDisplay) entity).entity().addPassenger(this.entity);
+    }
+
 }

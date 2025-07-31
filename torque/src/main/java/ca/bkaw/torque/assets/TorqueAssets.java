@@ -192,19 +192,6 @@ public class TorqueAssets {
             elements.scale(new Vector3d(scale), new Vector3d(8, 0, 8));
         }
 
-        for (Model modelPart : modelParts.values()) {
-            ModelElementList partElements = modelPart.getAllElements();
-            if (partElements == null) {
-                continue;
-            }
-            elements.removeIf(el -> String.valueOf(el.getName()).startsWith("."));
-            if (scale != 1.0) {
-                partElements.scale(new Vector3d(scale), new Vector3d(8, 0, 8));
-            }
-        }
-
-        // Save primary model
-
         Path directory = this.resourcePack.getPath(
             "assets/" + identifier.namespace() + "/models/" + identifier.key()
         );
@@ -221,10 +208,37 @@ public class TorqueAssets {
         for (Map.Entry<String, Model> entry : modelParts.entrySet()) {
             String partName = entry.getKey();
             Model partModel = entry.getValue();
+            ModelElementList partElements = partModel.getAllElements();
+            if (partElements == null) {
+                continue;
+            }
+
+            // Remove hidden elements
+            partElements.removeIf(el -> String.valueOf(el.getName()).startsWith("."));
+
+            // Center
+            Vector3d partMovedBy = partElements.centerGeometrically();
+            System.out.println("partMovedBy = " + partMovedBy + " for " + partName);
+
+            // Scale to size
+            double partOriginalBlockSize = partElements.getBlockSize();
+            System.out.println("partOriginalBlockSize = " + partOriginalBlockSize + " for " + partName);
+            double partScale = 1.0;
+            if (partOriginalBlockSize > 3.0) {
+                partScale = 3.0 / partOriginalBlockSize;
+                partElements.scale(new Vector3d(scale), new Vector3d(8, 8, 8));
+            }
             Path partPath = directory.resolve(partName + ".json");
             Files.writeString(partPath, GSON.toJson(partModel.getJson()));
-            this.createItemModel(new Identifier(identifier.namespace(), identifier.key() + "/" + partName));
-            vehicleModelParts.add(new VehicleModelPart(partName));
+            Identifier modelIdentifier = new Identifier(identifier.namespace(), identifier.key() + "/" + partName);
+            this.createItemModel(modelIdentifier);
+            vehicleModelParts.add(new VehicleModelPart(
+                partName,
+                modelIdentifier,
+                1.0 / partScale,
+                // Convert model units ("pixels") to blocks by dividing by 16.
+                new Vector3f(partMovedBy).div(16).negate().sub(0, (float) centerOfMass.y / 16.0f, 0)
+            ));
         }
 
         // Delete original to avoid errors in the client logs.

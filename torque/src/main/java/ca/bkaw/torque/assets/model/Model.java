@@ -10,7 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A wrapper around a model in a resource pack.
@@ -19,6 +21,7 @@ import java.util.List;
  */
 public class Model {
     public static final String ELEMENTS = "elements";
+    public static final String TEXTURES = "textures";
     public static final String GROUPS = "groups";
 
     private final @NotNull JsonObject json;
@@ -211,5 +214,42 @@ public class Model {
             }
         }
         return result;
+    }
+
+    /**
+     * Get the texture mapping of this model.
+     *
+     * @return A map of texture names to their identifiers.
+     */
+    @Nullable
+    public Map<String, String> getTextures() {
+        JsonObject json = this.json.getAsJsonObject(TEXTURES);
+        if (json == null) {
+            return null;
+        }
+        HashMap<String, String> map = new HashMap<>();
+        for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+            String key = entry.getKey();
+            JsonElement value = entry.getValue();
+            map.put(key, value.getAsString());
+        }
+        return map;
+    }
+
+    /**
+     * Set the texture mapping of this model.
+     *
+     * @param textures The map of textures.
+     */
+    public void setTextures(@Nullable Map<String, String> textures) {
+        if (textures == null) {
+            this.json.remove(TEXTURES);
+            return;
+        }
+        JsonObject json = new JsonObject();
+        for (Map.Entry<String, String> entry : textures.entrySet()) {
+            json.addProperty(entry.getKey(), entry.getValue());
+        }
+        this.json.add(TEXTURES, json);
     }
 }

@@ -118,6 +118,9 @@ public class ModelExtractor {
                 }
                 extractedModel.setElements(newElements);
             }
+
+            // Copy textures
+            extractedModel.setTextures(this.model.getTextures());
             
             results.put(request.name, extractedModel);
         }

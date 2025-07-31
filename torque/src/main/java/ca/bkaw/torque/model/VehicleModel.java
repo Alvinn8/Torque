@@ -40,6 +40,10 @@ public class VehicleModel {
         return this.translation;
     }
 
+    public List<VehicleModelPart> getParts() {
+        return this.parts;
+    }
+
     public @NotNull List<Seat> getSeats() {
         return this.seats;
     }
