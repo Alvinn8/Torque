@@ -61,7 +61,7 @@ public class WheelComponent implements VehicleComponent, PartRotationProvider {
 
         // First apply steering rotation around Y-axis (vertical steering)
         vehicle.getComponent(SteeringWheelComponent.class).ifPresent(steeringWheel -> {
-            float steeringAngle = steeringWheel.getAngle() * 0.2f;
+            float steeringAngle = steeringWheel.getAngle() * 0.8f;
             rotation.rotateY(-steeringAngle);
         });
 

@@ -13,6 +13,7 @@ import ca.bkaw.torque.components.SimpleCollisionComponent;
 import ca.bkaw.torque.components.SteeringWheelComponent;
 import ca.bkaw.torque.components.TestDriveComponent;
 import ca.bkaw.torque.components.WheelComponent;
+import ca.bkaw.torque.model.TagHandler;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
@@ -20,6 +21,10 @@ import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.render.VehicleRenderer;
+import ca.bkaw.torque.tags.LightTags;
+import ca.bkaw.torque.tags.SeatTags;
+import ca.bkaw.torque.tags.SteeringWheelTags;
+import ca.bkaw.torque.tags.WheelTags;
 import ca.bkaw.torque.util.Debug;
 import ca.bkaw.torque.util.Registry;
 import com.google.gson.JsonObject;
@@ -49,6 +54,7 @@ public class VehicleManager {
         = new Registry<>(VehicleComponentType::identifier);
     private final Registry<VehicleType> vehicleTypeRegistry
         = new Registry<>(VehicleType::identifier);
+    private final List<TagHandler<?>> tagHandlers = new ArrayList<>();
 
     // Loaded vehicles
     private final List<Vehicle> vehicles = new ArrayList<>();
@@ -68,18 +74,25 @@ public class VehicleManager {
 
     private void registerBuiltIns() {
         this.componentTypeRegistry.register(
+            DragComponent.TYPE,
+            FloatComponent.TYPE,
+            GravityComponent.TYPE,
+            ImpulseCollisionComponent.TYPE,
+            OrientationLockComponent.TYPE,
             RigidBodyComponent.TYPE,
             SeatsComponent.TYPE,
-            TestDriveComponent.TYPE,
-            DragComponent.TYPE,
-            GravityComponent.TYPE,
-            FloatComponent.TYPE,
-            ImpulseCollisionComponent.TYPE,
             SimpleCollisionComponent.TYPE,
-            OrientationLockComponent.TYPE,
             SteeringWheelComponent.TYPE,
+            TestDriveComponent.TYPE,
             WheelComponent.TYPE
         );
+        this.tagHandlers.addAll(List.of(
+            new LightTags(),
+            new SeatTags(),
+            new SteeringWheelTags(),
+            new WheelTags()
+        ));
+
     }
 
     private void tick() {
@@ -126,6 +139,17 @@ public class VehicleManager {
 
     public Registry<VehicleType> getVehicleTypeRegistry() {
         return this.vehicleTypeRegistry;
+    }
+
+    /**
+     * Get a mutable list of tag handlers that run on vehicle models.
+     * <p>
+     * Custom tag handlers can be added to this list to handle custom tags.
+     *
+     * @return The list.
+     */
+    public List<TagHandler<?>> getTagHandlers() {
+        return this.tagHandlers;
     }
 
     public List<Vehicle> getVehicles() {

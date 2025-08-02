@@ -6,12 +6,9 @@ import ca.bkaw.torque.assets.model.ModelElementList;
 import ca.bkaw.torque.assets.model.ModelExtractor;
 import ca.bkaw.torque.assets.send.BuiltInTcpResourcePackSender;
 import ca.bkaw.torque.assets.send.ResourcePackSender;
-import ca.bkaw.torque.model.Seat;
-import ca.bkaw.torque.model.SeatTagHandler;
-import ca.bkaw.torque.model.SteeringWheelTagHandler;
+import ca.bkaw.torque.model.TagHandler;
 import ca.bkaw.torque.model.VehicleModel;
 import ca.bkaw.torque.model.VehicleModelPart;
-import ca.bkaw.torque.model.WheelTagHandler;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.util.InertiaTensor;
 import ca.bkaw.torque.util.Registry;
@@ -31,6 +28,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,6 +39,7 @@ public class TorqueAssets {
     public static final int PACK_FORMAT = 55;
     private static final Gson GSON = new Gson();
 
+    private @NotNull final Torque torque;
     private @Nullable ResourcePack resourcePack;
     private final @NotNull Path resourcePackPath;
     private byte @Nullable[] sha1;
@@ -49,6 +48,7 @@ public class TorqueAssets {
     private final Registry<VehicleModel> vehicleModelRegistry = new Registry<>(VehicleModel::getIdentifier);
 
     private TorqueAssets(@NotNull Torque torque, @NotNull ResourcePack resourcePack, @NotNull Path resourcePackPath) {
+        this.torque = torque;
         this.resourcePack = resourcePack;
         this.resourcePackPath = resourcePackPath;
         try {
@@ -166,16 +166,17 @@ public class TorqueAssets {
         ModelExtractor modelExtractor = new ModelExtractor(model);
 
         // Process tags
-        SeatTagHandler seatHandler = new SeatTagHandler();
-        List<Seat> seats = seatHandler.process(model, modelExtractor);
-        
-        // Process other tag handlers and store results for later use
-        SteeringWheelTagHandler steeringWheelHandler = new SteeringWheelTagHandler();
-        steeringWheelHandler.process(model, modelExtractor);
-        
-        WheelTagHandler wheelHandler = new WheelTagHandler();
-        wheelHandler.process(model, modelExtractor);
+        Map<Class<? extends TagHandler<?>>, Object> tagHandlerData = new HashMap<>();
+        for (TagHandler<?> tagHandler : this.torque.getVehicleManager().getTagHandlers()) {
+            Object result = tagHandler.process(model, modelExtractor);
+            if (result != null) {
+                @SuppressWarnings("unchecked")
+                Class<? extends TagHandler<?>> handlerClass = (Class<? extends TagHandler<?>>) tagHandler.getClass();
+                tagHandlerData.put(handlerClass, result);
+            }
+        }
 
+        // Perform extraction to get model parts.
         Map<String, Model> modelParts = modelExtractor.executeExtractions();
 
         // Save primary model
@@ -201,7 +202,18 @@ public class TorqueAssets {
         Files.writeString(primaryPath, GSON.toJson(model.getJson()));
 
         // Create an item model
-        this.createItemModel(new Identifier(identifier.namespace(), identifier.key() + "/primary"));
+        Identifier primaryModelIdentifier = new Identifier(identifier.namespace(), identifier.key() + "/primary");
+        this.createItemModel(primaryModelIdentifier);
+
+        VehicleModelPart primary = new VehicleModelPart(
+            "primary",
+            primaryModelIdentifier,
+            // The vehicle model should scale up to the original size.
+            (float) (1.0 / scale),
+            // The vehicle should be moved back vertically so that it is grounded at right level.
+            // Convert model units ("pixels") to blocks by dividing by 16.
+            new Vector3f(0, (float) -centerOfMass.y / 16.0f, 0)
+        );
 
         // Save model parts
         List<VehicleModelPart> vehicleModelParts = new ArrayList<>();
@@ -233,7 +245,7 @@ public class TorqueAssets {
             vehicleModelParts.add(new VehicleModelPart(
                 partName,
                 modelIdentifier,
-                1.0 / partScale,
+                (float) (1.0 / partScale),
                 // Convert model units ("pixels") to blocks by dividing by 16.
                 new Vector3f(partMovedBy).div(16).negate().sub(0, (float) centerOfMass.y / 16.0f, 0)
             ));
@@ -245,13 +257,9 @@ public class TorqueAssets {
         VehicleModel vehicleModel = new VehicleModel(
             identifier,
             modelToKeep,
+            primary,
             vehicleModelParts,
-            // The vehicle model should scale up to the original size.
-            1.0 / scale,
-            // The vehicle should be moved back vertically so that it is grounded at right level.
-            // Convert model units ("pixels") to blocks by dividing by 16.
-            new Vector3f(0, (float) -centerOfMass.y / 16.0f, 0),
-            seats
+            tagHandlerData
         );
 
         this.vehicleModelRegistry.register(vehicleModel);
@@ -278,9 +286,5 @@ public class TorqueAssets {
         Path itemPath = this.resourcePack.getPath("assets/" + identifier.namespace() + "/items/" + identifier.key() + ".json");
         Files.createDirectories(itemPath.getParent());
         Files.writeString(itemPath, GSON.toJson(json));
-    }
-
-    public Registry<VehicleModel> getVehicleModelRegistry() {
-        return this.vehicleModelRegistry;
     }
 }

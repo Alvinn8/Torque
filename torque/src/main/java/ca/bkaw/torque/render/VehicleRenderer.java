@@ -3,12 +3,12 @@ package ca.bkaw.torque.render;
 import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
-import ca.bkaw.torque.model.Seat;
 import ca.bkaw.torque.model.VehicleModelPart;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
+import ca.bkaw.torque.tags.SeatTags;
 import ca.bkaw.torque.util.Debug;
 import ca.bkaw.torque.vehicle.PartRotationProvider;
 import ca.bkaw.torque.vehicle.Vehicle;
@@ -32,8 +32,8 @@ public class VehicleRenderer {
     private final @NotNull Vehicle vehicle;
     private final @NotNull RenderEntity primary;
     private final Map<VehicleModelPart, RenderEntity> partEntities = new HashMap<>();
-    private final @Nullable Seat viewportSeat;
-    private final Map<Seat, RenderEntity> seatEntities = new HashMap<>();
+    private final @Nullable SeatTags.Seat viewportSeat;
+    private final Map<SeatTags.Seat, RenderEntity> seatEntities = new HashMap<>();
 
     // Cached from RigidBodyComponent
     private World vehicleWorld;
@@ -64,7 +64,7 @@ public class VehicleRenderer {
             vehicle.getTorque().getVehicleManager().setVehiclePart(partEntity, vehicle);
         }
 
-        List<Seat> seats = vehicle.getType().model().getSeats();
+        List<SeatTags.Seat> seats = vehicle.getType().model().getTagData(SeatTags.class).orElse(List.of());
         this.viewportSeat = seats.isEmpty() ? null : seats.getFirst();
     }
 
@@ -91,8 +91,8 @@ public class VehicleRenderer {
         return this.primary.display;
     }
 
-    private Vector3f getSeatTranslation(@NotNull Seat seat) {
-        return seat.getTranslation()
+    private Vector3f getSeatTranslation(@NotNull SeatTags.Seat seat) {
+        return seat.translation()
             .negate(new Vector3f())
             .rotate(ROTATE_Y_180)
             .rotate(this.vehicleOrientation, new Vector3f());
@@ -129,13 +129,15 @@ public class VehicleRenderer {
             ? this.getSeatTranslation(this.viewportSeat)
             : new Vector3f();
 
+        VehicleModelPart primaryPart = this.vehicle.getType().model().getPrimary();
+
         // Transformations apply in reverse order because
         // of how matrix multiplication works
         this.primary.transformation.identity()
             .translate(viewportTranslation)
             .rotate(this.vehicleOrientation)
-            .translate(this.vehicle.getType().model().getTranslation())
-            .scale((float) this.vehicle.getType().model().getScale())
+            .translate(primaryPart.translation())
+            .scale(primaryPart.scale())
             .translate(0.0f, 0.5f, 0.0f)
             .rotate(ROTATE_Y_180)
             .translate((float) Math.random() * 0.0001f, 0, 0)
@@ -156,7 +158,7 @@ public class VehicleRenderer {
                 .translate(viewportTranslation)
                 .rotate(this.vehicleOrientation)
                 .translate(modelPart.translation())
-                .scale((float) modelPart.scale())
+                .scale(modelPart.scale())
                 .translate(0.0f, 0.5f, 0.0f)
                 .rotate(partRotation) // Apply component-controlled rotation
                 .rotate(ROTATE_Y_180)
@@ -173,7 +175,7 @@ public class VehicleRenderer {
     private void renderSeats(SeatsComponent seats) {
         int count = 0;
         for (var entry : seats.getPassengerData().entrySet()) {
-            Seat seat = entry.getKey();
+            SeatTags.Seat seat = entry.getKey();
             SeatsComponent.PassengerData passengerData = entry.getValue();
             if (!passengerData.isValid()) {
                 continue;
@@ -213,7 +215,7 @@ public class VehicleRenderer {
             var iter = this.seatEntities.entrySet().iterator();
             while (iter.hasNext()) {
                 var entry = iter.next();
-                Seat seat = entry.getKey();
+                SeatTags.Seat seat = entry.getKey();
                 RenderEntity renderEntity = entry.getValue();
                 if (seats.getPassengerData().containsKey(seat)) {
                     continue;
@@ -228,7 +230,7 @@ public class VehicleRenderer {
         }
     }
 
-    public void passengerChanged(@NotNull Seat seat, @Nullable Player passenger) {
+    public void passengerChanged(@NotNull SeatTags.Seat seat, @Nullable Player passenger) {
 
     }
 

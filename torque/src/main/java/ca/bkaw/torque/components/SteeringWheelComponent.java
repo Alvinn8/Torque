@@ -39,6 +39,8 @@ public class SteeringWheelComponent implements VehicleComponent, PartRotationPro
             .map(SeatsComponent::getDriverInput)
             .orElse(null);
 
+        this.angle *= 0.9f;
+
         if (driverInput != null) {
             if (driverInput.left) {
                 this.angle -= 0.1f;

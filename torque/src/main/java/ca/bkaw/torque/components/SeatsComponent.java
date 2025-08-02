@@ -1,12 +1,12 @@
 package ca.bkaw.torque.components;
 
-import ca.bkaw.torque.model.Seat;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.Input;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.render.VehicleRenderer;
+import ca.bkaw.torque.tags.SeatTags;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
@@ -18,6 +18,7 @@ import org.joml.Vector3dc;
 import org.joml.Vector3f;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,7 +31,7 @@ public class SeatsComponent implements VehicleComponent {
     );
 
     private final @NotNull Vehicle vehicle;
-    private final Map<Seat, PassengerData> passengerData = new HashMap<>();
+    private final Map<SeatTags.Seat, PassengerData> passengerData = new HashMap<>();
 
     public record PassengerData(Player passenger, long enteredAt, Input input) {
         public PassengerData(Player passenger) {
@@ -90,7 +91,7 @@ public class SeatsComponent implements VehicleComponent {
      *
      * @return The map of seats to passenger data.
      */
-    public Map<Seat, PassengerData> getPassengerData() {
+    public Map<SeatTags.Seat, PassengerData> getPassengerData() {
         return this.passengerData;
     }
 
@@ -101,7 +102,7 @@ public class SeatsComponent implements VehicleComponent {
      * @return The passenger, or null.
      */
     @Nullable
-    public Player getPassenger(Seat seat) {
+    public Player getPassenger(SeatTags.Seat seat) {
         PassengerData passengerData = this.passengerData.get(seat);
         if (passengerData == null) return null;
         if (!passengerData.isValid()) {
@@ -118,8 +119,8 @@ public class SeatsComponent implements VehicleComponent {
      * @return The seat the passenger is in. Or null if none.
      */
     @Nullable
-    public Seat getPassengerSeat(Player passenger) {
-        for (Map.Entry<Seat, PassengerData> entry : this.passengerData.entrySet()) {
+    public SeatTags.Seat getPassengerSeat(Player passenger) {
+        for (Map.Entry<SeatTags.Seat, PassengerData> entry : this.passengerData.entrySet()) {
             PassengerData passengerData = entry.getValue();
             if (passengerData.passenger().equals(passenger) && passengerData.isValid()) {
                 return entry.getKey();
@@ -135,22 +136,23 @@ public class SeatsComponent implements VehicleComponent {
      * @return The closest available seat, or null if no seats are available.
      */
     @Nullable
-    public Seat getClosestAvailiableSeat(@NotNull Vector3dc position) {
+    public SeatTags.Seat getClosestAvailiableSeat(@NotNull Vector3dc position) {
         Vector3f positionF = new Vector3f(position);
-        Seat closestSeat = null;
+        SeatTags.Seat closestSeat = null;
         double closestDistanceSq = Double.MAX_VALUE;
 
         RigidBodyComponent rbc = this.vehicle.getComponent(RigidBodyComponent.class).orElseThrow();
         Vector3f vehiclePosition = new Vector3f(rbc.getPosition());
         Quaternionfc vehicleOrientation = rbc.getOrientation();
 
-        for (Seat seat : this.vehicle.getType().model().getSeats()) {
+        List<SeatTags.Seat> seats = this.vehicle.getType().model().getTagData(SeatTags.class).orElse(List.of());
+        for (SeatTags.Seat seat : seats) {
             if (this.getPassenger(seat) != null) {
                 continue; // Seat is already occupied
             }
 
             Vector3f seatPosition = vehiclePosition.add(
-                seat.getTranslation().rotate(vehicleOrientation, new Vector3f())
+                seat.translation().rotate(vehicleOrientation, new Vector3f())
             );
             double distanceSq = positionF.distanceSquared(seatPosition);
 
@@ -170,10 +172,10 @@ public class SeatsComponent implements VehicleComponent {
      * @param seat The seat.
      * @param passenger The passenger.
      */
-    public void setPassenger(@NotNull Seat seat, @Nullable Player passenger) {
+    public void setPassenger(@NotNull SeatTags.Seat seat, @Nullable Player passenger) {
         VehicleManager vehicleManager = this.vehicle.getTorque().getVehicleManager();
 
-        Seat oldSeat = this.getPassengerSeat(passenger);
+        SeatTags.Seat oldSeat = this.getPassengerSeat(passenger);
         if (oldSeat != null) {
             this.passengerData.remove(oldSeat);
         }
@@ -200,7 +202,7 @@ public class SeatsComponent implements VehicleComponent {
      * @return {@code true} if the passenger entered the vehicle, {@code false} if not
      */
     public boolean addPassenger(@NotNull Player passenger) {
-        Seat seat = this.getClosestAvailiableSeat(passenger.getPosition());
+        SeatTags.Seat seat = this.getClosestAvailiableSeat(passenger.getPosition());
         if (seat == null) return false;
         this.setPassenger(seat, passenger);
         return true;
@@ -215,9 +217,9 @@ public class SeatsComponent implements VehicleComponent {
     public Input getDriverInput() {
         Input input = null;
         for (var entry : this.passengerData.entrySet()) {
-            Seat seat = entry.getKey();
+            SeatTags.Seat seat = entry.getKey();
             PassengerData passengerData = entry.getValue();
-            if (!seat.isDriver()) {
+            if (!seat.driver()) {
                 continue;
             }
             if (input == null) {

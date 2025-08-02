@@ -7,7 +7,7 @@ import org.joml.Vector3fc;
 public record VehicleModelPart(
     String name,
     Identifier modelIdentifier,
-    double scale,
+    float scale,
     @NotNull Vector3fc translation
 ) {
 }
