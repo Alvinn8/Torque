@@ -100,4 +100,17 @@ public interface ItemDisplay {
      */
     void mountVehicle(@NotNull ItemDisplay entity);
 
+    /**
+     * Set whether the item display should be glowing.
+     *
+     * @param glowing Whether glowing.
+     */
+    void setGlowing(boolean glowing);
+
+    /**
+     * Set the glow color of the item display.
+     *
+     * @param glowColor The color of the glow, in RGB format.
+     */
+    void setGlowColor(int glowColor);
 }

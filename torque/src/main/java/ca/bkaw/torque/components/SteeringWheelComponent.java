@@ -4,14 +4,14 @@ import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.Input;
-import ca.bkaw.torque.vehicle.PartRotationProvider;
+import ca.bkaw.torque.vehicle.PartTransformationProvider;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
 
-public class SteeringWheelComponent implements VehicleComponent, PartRotationProvider {
+public class SteeringWheelComponent implements VehicleComponent, PartTransformationProvider {
     public static final VehicleComponentType TYPE = VehicleComponentType.create(
         new Identifier("torque", "steering_wheel"),
         SteeringWheelComponent::new
@@ -52,11 +52,12 @@ public class SteeringWheelComponent implements VehicleComponent, PartRotationPro
     }
 
     @Override
-    public Quaternionf getPartRotation(@NotNull String partName, @NotNull Vehicle vehicle) {
+    public PartTransform getPartTransform(@NotNull String partName, @NotNull Vehicle vehicle) {
         // Check if this part name contains "steering_wheel" (case insensitive)
         if (partName.toLowerCase().contains("steering_wheel")) {
             // Rotate around Z-axis (negative Z is forward)
-            return new Quaternionf().rotateZ(-this.angle);
+            Quaternionf rotation = new Quaternionf().rotateZ(-this.angle);
+            return new PartTransform(rotation);
         }
         return null; // This component doesn't control this part
     }

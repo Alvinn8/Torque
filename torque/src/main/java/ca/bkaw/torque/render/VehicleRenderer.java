@@ -10,7 +10,7 @@ import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.tags.SeatTags;
 import ca.bkaw.torque.util.Debug;
-import ca.bkaw.torque.vehicle.PartRotationProvider;
+import ca.bkaw.torque.vehicle.PartTransformationProvider;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import org.jetbrains.annotations.NotNull;
@@ -18,9 +18,9 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
+import org.joml.Vector3f;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
-import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.List;
@@ -99,23 +99,22 @@ public class VehicleRenderer {
     }
 
     /**
-     * Get the rotation for a specific model part by checking all PartRotationProvider components.
+     * Get the transformation data for a specific model part by checking all PartTransformationProvider components.
      * 
      * @param partName The name of the model part
-     * @return The rotation to apply, or identity quaternion if no provider controls this part
+     * @return The combined transformation data to apply
      */
     @NotNull
-    private Quaternionf getPartRotation(@NotNull String partName) {
-        Quaternionf totalRotation = new Quaternionf();
+    private PartTransformationProvider.PartTransform getPartTransform(@NotNull String partName) {
         for (VehicleComponent component : this.vehicle.getComponents()) {
-            if (component instanceof PartRotationProvider provider) {
-                Quaternionf rotation = provider.getPartRotation(partName, this.vehicle);
-                if (rotation != null) {
-                    totalRotation.mul(rotation);
+            if (component instanceof PartTransformationProvider provider) {
+                PartTransformationProvider.PartTransform transform = provider.getPartTransform(partName, this.vehicle);
+                if (transform != null) {
+                    return transform;
                 }
             }
         }
-        return totalRotation;
+        return new PartTransformationProvider.PartTransform(new Quaternionf(), new Vector3f(), false, null);
     }
 
     public void render() {
@@ -152,15 +151,21 @@ public class VehicleRenderer {
             RenderEntity partEntity = entry.getValue();
             
             // Get the rotation for this part from components
-            Quaternionf partRotation = this.getPartRotation(modelPart.name());
-            
+            PartTransformationProvider.PartTransform partTransform = this.getPartTransform(modelPart.name());
+
+            partEntity.display.setGlowing(partTransform.isGlowing());
+            Integer glowColor = partTransform.getGlowColor();
+            if (glowColor != null) {
+                partEntity.display.setGlowColor(glowColor);
+            }
+
             partEntity.transformation.identity()
                 .translate(viewportTranslation)
                 .rotate(this.vehicleOrientation)
                 .translate(modelPart.translation())
                 .scale(modelPart.scale())
                 .translate(0.0f, 0.5f, 0.0f)
-                .rotate(partRotation) // Apply component-controlled rotation
+                .rotate(partTransform.getRotation()) // Apply component-controlled rotation
                 .rotate(ROTATE_Y_180)
                 .translate((float) Math.random() * 0.0001f, 0, 0)
             ;

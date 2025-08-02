@@ -12,6 +12,7 @@ import ca.bkaw.torque.components.SeatsComponent;
 import ca.bkaw.torque.components.SimpleCollisionComponent;
 import ca.bkaw.torque.components.SteeringWheelComponent;
 import ca.bkaw.torque.components.TestDriveComponent;
+import ca.bkaw.torque.components.TurnSignalComponent;
 import ca.bkaw.torque.components.WheelComponent;
 import ca.bkaw.torque.model.TagHandler;
 import ca.bkaw.torque.platform.DataInput;
@@ -84,6 +85,7 @@ public class VehicleManager {
             SimpleCollisionComponent.TYPE,
             SteeringWheelComponent.TYPE,
             TestDriveComponent.TYPE,
+            TurnSignalComponent.TYPE,
             WheelComponent.TYPE
         );
         this.tagHandlers.addAll(List.of(

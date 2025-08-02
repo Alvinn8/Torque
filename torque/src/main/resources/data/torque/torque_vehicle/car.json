@@ -28,6 +28,9 @@
         },
         {
             "type": "torque:wheel"
+        },
+        {
+            "type": "torque:turn_signal"
         }
     ]
 }

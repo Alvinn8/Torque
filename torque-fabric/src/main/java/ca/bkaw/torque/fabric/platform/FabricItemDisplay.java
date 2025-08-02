@@ -93,4 +93,13 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
         this.entity.startRiding(((FabricItemDisplay) entity).entity(), true);
     }
 
+    @Override
+    public void setGlowing(boolean glowing) {
+        this.entity.setGlowingTag(glowing);
+    }
+
+    @Override
+    public void setGlowColor(int glowColor) {
+        this.entity.setGlowColorOverride(glowColor);
+    }
 }

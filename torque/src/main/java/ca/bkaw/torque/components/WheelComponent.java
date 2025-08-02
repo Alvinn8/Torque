@@ -3,7 +3,7 @@ package ca.bkaw.torque.components;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
-import ca.bkaw.torque.vehicle.PartRotationProvider;
+import ca.bkaw.torque.vehicle.PartTransformationProvider;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
@@ -13,7 +13,7 @@ import org.joml.Quaternionf;
 /**
  * Example component that controls wheel rotation based on vehicle movement.
  */
-public class WheelComponent implements VehicleComponent, PartRotationProvider {
+public class WheelComponent implements VehicleComponent, PartTransformationProvider {
     public static final VehicleComponentType TYPE = VehicleComponentType.create(
         new Identifier("torque", "wheel"),
         WheelComponent::new
@@ -52,7 +52,7 @@ public class WheelComponent implements VehicleComponent, PartRotationProvider {
     }
 
     @Override
-    public Quaternionf getPartRotation(@NotNull String partName, @NotNull Vehicle vehicle) {
+    public PartTransform getPartTransform(@NotNull String partName, @NotNull Vehicle vehicle) {
         if (!partName.startsWith("wheel")) {
             return null;
         }
@@ -68,7 +68,7 @@ public class WheelComponent implements VehicleComponent, PartRotationProvider {
         // Then apply wheel spinning rotation around X-axis
         rotation.rotateX(-this.wheelRotation);
 
-        return rotation;
+        return new PartTransform(rotation);
     }
 
     /**

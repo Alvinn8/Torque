@@ -6,6 +6,7 @@ import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.ItemStack;
 import ca.bkaw.torque.platform.World;
 import io.papermc.paper.entity.TeleportFlag;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -98,4 +99,13 @@ public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements 
         ((PaperItemDisplay) entity).entity().addPassenger(this.entity);
     }
 
+    @Override
+    public void setGlowing(boolean glowing) {
+        this.entity.setGlowing(glowing);
+    }
+
+    @Override
+    public void setGlowColor(int glowColor) {
+        this.entity.setGlowColorOverride(Color.fromRGB(glowColor));
+    }
 }
