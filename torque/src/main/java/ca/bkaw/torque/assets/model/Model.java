@@ -188,7 +188,7 @@ public class Model {
         ModelElementList allElements = this.getAllElements();
         if (allElements != null) {
             for (ModelElement element : allElements.getElements()) {
-                if (element.getTags().contains(tag)) {
+                if (element.getTags().hasTag(tag)) {
                     result.add(element);
                 }
             }
@@ -208,7 +208,7 @@ public class Model {
         List<ModelGroup> allGroups = this.getGroups();
         if (allGroups != null) {
             for (ModelGroup group : allGroups) {
-                if (group.getTags().contains(tag)) {
+                if (group.getTags().hasTag(tag)) {
                     result.add(group);
                 }
             }
