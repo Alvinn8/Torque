@@ -10,6 +10,7 @@ public interface DataOutput {
     void writeIdentifier(String key, Identifier value);
     void writeVector3f(String key, Vector3f value);
     void writeQuaternionf(String key, Quaternionf value);
+    void writeFloat(String key, float value);
 
     /**
      * Get or create a nested {@link DataOutput} for the given key.

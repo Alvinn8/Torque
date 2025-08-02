@@ -47,6 +47,16 @@ public class PdcInputOutput implements DataInput, DataOutput {
     }
 
     @Override
+    public float readFloat(String key, float defaultValue) {
+        return this.pdc.getOrDefault(this.makeKey(key), PersistentDataType.FLOAT, defaultValue);
+    }
+
+    @Override
+    public void writeFloat(String key, float value) {
+        this.pdc.set(this.makeKey(key), PersistentDataType.FLOAT, value);
+    }
+
+    @Override
     public Vector3f readVector3f(String key, Vector3f defaultValue) {
         List<Float> data = this.pdc.get(this.makeKey(key), PersistentDataType.LIST.floats());
         if (data == null || data.size() != 3) {

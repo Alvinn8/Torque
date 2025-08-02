@@ -218,11 +218,9 @@ public class TorqueAssets {
 
             // Center
             Vector3d partMovedBy = partElements.centerGeometrically();
-            System.out.println("partMovedBy = " + partMovedBy + " for " + partName);
 
             // Scale to size
             double partOriginalBlockSize = partElements.getBlockSize();
-            System.out.println("partOriginalBlockSize = " + partOriginalBlockSize + " for " + partName);
             double partScale = 1.0;
             if (partOriginalBlockSize > 3.0) {
                 partScale = 3.0 / partOriginalBlockSize;

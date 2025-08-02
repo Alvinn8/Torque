@@ -11,6 +11,7 @@ public interface DataInput {
     Identifier readIdentifier(String key, Identifier defaultValue);
     Vector3f readVector3f(String key, Vector3f defaultValue);
     Quaternionf readQuaternionf(String key, Quaternionf defaultValue);
+    float readFloat(String key, float defaultValue);
 
     /**
      * Get or create a nested {@link DataInput} for the given key.
@@ -35,5 +36,6 @@ public interface DataInput {
         @Override public Vector3f readVector3f(String key, Vector3f defaultValue) { return defaultValue; }
         @Override public Quaternionf readQuaternionf(String key, Quaternionf defaultValue) { return defaultValue; }
         @Override public @NotNull DataInput getDataInput(String key) { return DataInput.empty(); }
+        @Override public float readFloat(String key, float defaultValue) { return defaultValue; }
     }
 }

@@ -10,7 +10,9 @@ import ca.bkaw.torque.components.OrientationLockComponent;
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
 import ca.bkaw.torque.components.SimpleCollisionComponent;
+import ca.bkaw.torque.components.SteeringWheelComponent;
 import ca.bkaw.torque.components.TestDriveComponent;
+import ca.bkaw.torque.components.WheelComponent;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
@@ -74,7 +76,9 @@ public class VehicleManager {
             FloatComponent.TYPE,
             ImpulseCollisionComponent.TYPE,
             SimpleCollisionComponent.TYPE,
-            OrientationLockComponent.TYPE
+            OrientationLockComponent.TYPE,
+            SteeringWheelComponent.TYPE,
+            WheelComponent.TYPE
         );
     }
 

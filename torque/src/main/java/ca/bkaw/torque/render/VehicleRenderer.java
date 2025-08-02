@@ -10,7 +10,9 @@ import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.util.Debug;
+import ca.bkaw.torque.vehicle.PartRotationProvider;
 import ca.bkaw.torque.vehicle.Vehicle;
+import ca.bkaw.torque.vehicle.VehicleComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -96,6 +98,26 @@ public class VehicleRenderer {
             .rotate(this.vehicleOrientation, new Vector3f());
     }
 
+    /**
+     * Get the rotation for a specific model part by checking all PartRotationProvider components.
+     * 
+     * @param partName The name of the model part
+     * @return The rotation to apply, or identity quaternion if no provider controls this part
+     */
+    @NotNull
+    private Quaternionf getPartRotation(@NotNull String partName) {
+        Quaternionf totalRotation = new Quaternionf();
+        for (VehicleComponent component : this.vehicle.getComponents()) {
+            if (component instanceof PartRotationProvider provider) {
+                Quaternionf rotation = provider.getPartRotation(partName, this.vehicle);
+                if (rotation != null) {
+                    totalRotation.mul(rotation);
+                }
+            }
+        }
+        return totalRotation;
+    }
+
     public void render() {
         RigidBodyComponent rigidBody = this.vehicle.getComponent(RigidBodyComponent.class).orElseThrow();
 
@@ -126,13 +148,17 @@ public class VehicleRenderer {
         for (Map.Entry<VehicleModelPart, RenderEntity> entry : this.partEntities.entrySet()) {
             VehicleModelPart modelPart = entry.getKey();
             RenderEntity partEntity = entry.getValue();
+            
+            // Get the rotation for this part from components
+            Quaternionf partRotation = this.getPartRotation(modelPart.name());
+            
             partEntity.transformation.identity()
                 .translate(viewportTranslation)
                 .rotate(this.vehicleOrientation)
                 .translate(modelPart.translation())
                 .scale((float) modelPart.scale())
                 .translate(0.0f, 0.5f, 0.0f)
-                .rotate(new Quaternionf().rotateAxis((float) (Math.random() * Math.PI * 2), 1, 0, 0))
+                .rotate(partRotation) // Apply component-controlled rotation
                 .rotate(ROTATE_Y_180)
                 .translate((float) Math.random() * 0.0001f, 0, 0)
             ;

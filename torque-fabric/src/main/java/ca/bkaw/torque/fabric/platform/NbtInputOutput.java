@@ -59,7 +59,16 @@ public class NbtInputOutput implements DataInput, DataOutput {
     @Override
     public void writeQuaternionf(String key, Quaternionf value) {
         this.nbt.store(makeKey(key), ExtraCodecs.QUATERNIONF_COMPONENTS, value);
+    }
 
+    @Override
+    public float readFloat(String key, float defaultValue) {
+        return this.nbt.getFloatOr(makeKey(key), defaultValue);
+    }
+
+    @Override
+    public void writeFloat(String key, float value) {
+        this.nbt.putFloat(makeKey(key), value);
     }
 
     @Override

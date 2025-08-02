@@ -22,6 +22,12 @@
         },
         {
             "type": "torque:seats"
+        },
+        {
+            "type": "torque:steering_wheel"
+        },
+        {
+            "type": "torque:wheel"
         }
     ]
 }
