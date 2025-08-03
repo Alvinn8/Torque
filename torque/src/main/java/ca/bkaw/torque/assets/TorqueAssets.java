@@ -158,7 +158,9 @@ public class TorqueAssets {
         }
 
         // Center on center of mass.
-        Vector3d centerOfMass = InertiaTensor.getCenterOfMass(elements);
+        // The center of mass is calculated in world space, so convert back to pixels by
+        // multiplying by 16 because 16 pixels = 1 meter.
+        Vector3d centerOfMass = InertiaTensor.getCenterOfMass(elements).mul(16);
         elements.move(new Vector3d(centerOfMass).negate());
 
         Model modelToKeep = model.deepCopy();

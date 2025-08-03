@@ -1,5 +1,5 @@
 {
-    "model": "torque:vehicle/car",
+    "model": "torque:vehicle/test",
     "mass_kg": 1500,
     "components": [
         {

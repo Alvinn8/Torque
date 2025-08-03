@@ -28,7 +28,7 @@ public class InertiaTensor {
         double mass,
         ModelElementList elements
     ) {
-        Matrix3d inertiaTensor = new Matrix3d();
+        Matrix3d inertiaTensor = new Matrix3d().zero();
 
         double volume = getVolume(elements); // Unit: m^3
         double averageDensity = mass / volume; // Unit: kg/m^3
@@ -42,15 +42,16 @@ public class InertiaTensor {
             double elementVolume = getVolume(element); // Unit: m^3
             double elementMass = averageDensity * elementVolume; // Unit: kg
 
-            Vector3d halfExtents = element.getTo().sub(element.getFrom()).absolute().mul(0.5 / 16); // Unit: m
-            Vector3d elementCenter = element.getFrom().add(element.getTo()).mul(0.5 / 16); // Unit: m
+            Vector3d extents = element.getTo().sub(element.getFrom()).absolute().div(16); // Unit: m
+            Vector3d elementCenter = element.getMiddle().div(16); // Unit: m
 
             // Calculate the inertia tensor in the local space of the element.
+            // For a rectangular box: I_xx = (1/12) * m * (h² + d²), etc.
             Matrix3d elementInertiaTensor = new Matrix3d().zero()
-                .m00((float) (halfExtents.y * halfExtents.y + halfExtents.z * halfExtents.z))
-                .m11((float) (halfExtents.x * halfExtents.x + halfExtents.z * halfExtents.z))
-                .m22((float) (halfExtents.x * halfExtents.x + halfExtents.y * halfExtents.y))
-                .scale((float) ((1.0 / 12) * elementMass)); // Unit: kg*m^2
+                .m00(extents.y * extents.y + extents.z * extents.z)
+                .m11(extents.x * extents.x + extents.z * extents.z)
+                .m22(extents.x * extents.x + extents.y * extents.y)
+                .scale((1.0 / 12) * elementMass); // Unit: kg*m^2
 
             // If we have rotation, we need to calculate where the center ends up after
             // rotation, and we need to rotate the inertia tensor.
@@ -138,13 +139,25 @@ public class InertiaTensor {
             .m22(a.z * b.z);
     }
 
+    /**
+     * Get the elements' center of mass in world space.
+     * <p>
+     * So 16 pixels = 1 meter.
+     *
+     * @param elements The model elements.
+     * @return The center of mass in world space. Unit: m
+     */
     public static Vector3d getCenterOfMass(ModelElementList elements) {
         Vector3d centerOfMass = new Vector3d();
         double volume = getVolume(elements); // Unit: m^3
 
         for (ModelElement element : elements.getElements()) {
+            // Skip hidden elements.
+            if (String.valueOf(element.getName()).startsWith(".")) {
+                continue;
+            }
             double elementVolume = getVolume(element); // Unit: m^3
-            Vector3d elementCenter = element.getFrom().add(element.getTo()).mul(0.5 / 16); // Unit: m
+            Vector3d elementCenter = element.getMiddle().div(16); // Unit: m
             centerOfMass.add(elementCenter.mul(elementVolume / volume));
         }
         return centerOfMass;
