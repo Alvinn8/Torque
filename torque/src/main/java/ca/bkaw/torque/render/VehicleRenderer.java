@@ -92,10 +92,9 @@ public class VehicleRenderer {
     }
 
     private Vector3f getSeatTranslation(@NotNull SeatTags.Seat seat) {
-        return seat.translation()
-            .negate(new Vector3f())
-            .rotate(ROTATE_Y_180)
-            .rotate(this.vehicleOrientation, new Vector3f());
+        return new Vector3f(seat.translation())
+            .add(this.vehicle.getType().model().getPrimary().translation())
+            .rotate(this.vehicleOrientation);
     }
 
     /**
@@ -127,6 +126,7 @@ public class VehicleRenderer {
         Vector3f viewportTranslation = this.viewportSeat != null
             ? this.getSeatTranslation(this.viewportSeat)
             : new Vector3f();
+        viewportTranslation.negate();
 
         VehicleModelPart primaryPart = this.vehicle.getType().model().getPrimary();
 
@@ -137,7 +137,6 @@ public class VehicleRenderer {
             .rotate(this.vehicleOrientation)
             .translate(primaryPart.translation())
             .scale(primaryPart.scale())
-            .translate(0.0f, 0.5f, 0.0f)
             .rotate(ROTATE_Y_180)
             .translate((float) Math.random() * 0.0001f, 0, 0)
         ;
@@ -164,7 +163,6 @@ public class VehicleRenderer {
                 .rotate(this.vehicleOrientation)
                 .translate(modelPart.translation())
                 .scale(modelPart.scale())
-                .translate(0.0f, 0.5f, 0.0f)
                 .rotate(partTransform.getRotation()) // Apply component-controlled rotation
                 .rotate(ROTATE_Y_180)
                 .translate((float) Math.random() * 0.0001f, 0, 0)

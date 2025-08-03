@@ -18,6 +18,7 @@ import com.google.gson.JsonParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.joml.Vector3f;
 
 import java.io.BufferedReader;
@@ -121,6 +122,25 @@ public class TorqueAssets {
     }
 
     /**
+     * Convert the position of a point in the vehicle model's coordinate system to
+     * an offset from the model's center measured in meters.
+     * <p>
+     * This can be used to get the offset of an element relative to the vehicle's
+     * center of mass.
+     *
+     * @param modelPosition The vector in the vehicle model's coordinate system.
+     *                      Unit: Model units ("pixels").
+     * @return The vector in world coordinates. Unit: meters.
+     */
+    public static @NotNull Vector3d getElementOffset(@NotNull Vector3dc modelPosition) {
+        // The element position is in model units ("pixels"), so we need to convert it
+        // to blocks. 1 block = 16 pixels.
+        // The model is centered around (8, 8, 8) in the model, so we need to find
+        // the difference from that center.
+        return new Vector3d(modelPosition).sub(8, 8, 8).div(16);
+    }
+
+    /**
      * Get a vehicle model if it has already been created, or create it from the JSON
      * file if it does not exist.
      *
@@ -158,10 +178,12 @@ public class TorqueAssets {
         }
 
         // Center on center of mass.
+        Vector3d centerOfMass = InertiaTensor.getCenterOfMass(elements);
         // The center of mass is calculated in world space, so convert back to pixels by
         // multiplying by 16 because 16 pixels = 1 meter.
-        Vector3d centerOfMass = InertiaTensor.getCenterOfMass(elements).mul(16);
-        elements.move(new Vector3d(centerOfMass).negate());
+        // The center is at (8, 8, 8) in the model.
+        Vector3d diff = new Vector3d(8, 8, 8).sub(new Vector3d(centerOfMass).mul(16));
+        elements.move(diff);
 
         Model modelToKeep = model.deepCopy();
 
@@ -192,7 +214,7 @@ public class TorqueAssets {
         double scale = 1.0;
         if (originalBlockSize > 3.0) {
             scale = 3.0 / originalBlockSize;
-            elements.scale(new Vector3d(scale), new Vector3d(8, 0, 8));
+            elements.scale(new Vector3d(scale), new Vector3d(8, 8, 8));
         }
 
         Path directory = this.resourcePack.getPath(
@@ -212,9 +234,13 @@ public class TorqueAssets {
             primaryModelIdentifier,
             // The vehicle model should scale up to the original size.
             (float) (1.0 / scale),
-            // The vehicle should be moved back vertically so that it is grounded at right level.
+            // The vehicle should be moved back vertically so that it is
+            // grounded at right level.
             // Convert model units ("pixels") to blocks by dividing by 16.
-            new Vector3f(0, (float) -centerOfMass.y / 16.0f, 0)
+            // Also add 0.5 blocks because the model is centered around (8, 8, 8) in
+            // the model, so we need to move it down by half a block (8 model units, "pixels")
+            // so that the bottom of the model is at ground level.
+            new Vector3f(0, (float) -diff.y / 16.0f + 0.5f, 0)
         );
 
         // Save model parts
@@ -238,7 +264,7 @@ public class TorqueAssets {
             double partScale = 1.0;
             if (partOriginalBlockSize > 3.0) {
                 partScale = 3.0 / partOriginalBlockSize;
-                partElements.scale(new Vector3d(scale), new Vector3d(8, 8, 8));
+                partElements.scale(new Vector3d(partScale), new Vector3d(8, 8, 8));
             }
             Path partPath = directory.resolve(partName + ".json");
             Files.writeString(partPath, GSON.toJson(partModel.getJson()));
@@ -249,7 +275,7 @@ public class TorqueAssets {
                 modelIdentifier,
                 (float) (1.0 / partScale),
                 // Convert model units ("pixels") to blocks by dividing by 16.
-                new Vector3f(partMovedBy).div(16).negate().sub(0, (float) centerOfMass.y / 16.0f, 0)
+                new Vector3f(partMovedBy).div(16).negate().add(primary.translation())
             ));
         }
 

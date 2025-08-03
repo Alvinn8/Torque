@@ -87,6 +87,9 @@ public class TorqueCommand {
                     });
                 }
             }
+            case 5 -> {
+                Debug.setInstance(null);
+            }
             case 6 -> {
                 Debug.setInstance(new Debug(this.torque));
             }
