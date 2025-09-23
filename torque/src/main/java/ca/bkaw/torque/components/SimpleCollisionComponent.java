@@ -18,7 +18,7 @@ import org.joml.Vector3dc;
 import org.joml.Vector3i;
 
 public class SimpleCollisionComponent implements VehicleComponent {
-    public static final VehicleComponentType TYPE = new VehicleComponentType(
+    public static final VehicleComponentType TYPE = VehicleComponentType.create(
         new Identifier("torque", "simple_collision"),
         SimpleCollisionComponent::new
     );

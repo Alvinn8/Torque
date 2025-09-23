@@ -18,6 +18,15 @@ public interface World {
     ItemDisplay spawnItemDisplay(@NotNull Vector3dc position);
 
     /**
+     * Spawn an interaction entity.
+     *
+     * @param position The position in the world to spawn the interaction entity.
+     * @return The interaction entity.
+     */
+    @NotNull
+    InteractionEntity spawnInteractionEntity(@NotNull Vector3dc position);
+
+    /**
      * Get the block state at the given position in the world.
      *
      * @param position The block coordinates.

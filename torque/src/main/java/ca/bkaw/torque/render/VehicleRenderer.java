@@ -1,10 +1,12 @@
 package ca.bkaw.torque.render;
 
 import ca.bkaw.torque.Torque;
+import ca.bkaw.torque.components.HitboxComponent;
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
 import ca.bkaw.torque.model.VehicleModelPart;
 import ca.bkaw.torque.platform.Identifier;
+import ca.bkaw.torque.platform.InteractionEntity;
 import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.Player;
 import ca.bkaw.torque.platform.World;
@@ -29,18 +31,19 @@ import java.util.Map;
 public class VehicleRenderer {
     private static final Quaternionf ROTATE_Y_180 = new Quaternionf().rotateAxis((float) Math.PI, 0, 1, 0);
 
+    public record RenderEntity(@NotNull ItemDisplay display, @NotNull Matrix4f transformation) {}
+
     private final @NotNull Vehicle vehicle;
     private final @NotNull RenderEntity primary;
     private final Map<VehicleModelPart, RenderEntity> partEntities = new HashMap<>();
     private final @Nullable SeatTags.Seat viewportSeat;
     private final Map<SeatTags.Seat, RenderEntity> seatEntities = new HashMap<>();
+    private final @Nullable InteractionEntity hitbox;
 
     // Cached from RigidBodyComponent
     private World vehicleWorld;
     private Vector3dc vehiclePosition;
     private Quaternionfc vehicleOrientation;
-
-    public record RenderEntity(@NotNull ItemDisplay display, @NotNull Matrix4f transformation) {}
 
     public VehicleRenderer(@NotNull Vehicle vehicle, ItemDisplay primaryEntity) {
         this.vehicle = vehicle;
@@ -66,6 +69,13 @@ public class VehicleRenderer {
 
         List<SeatTags.Seat> seats = vehicle.getType().model().getTagData(SeatTags.class).orElse(List.of());
         this.viewportSeat = seats.isEmpty() ? null : seats.getFirst();
+
+        this.hitbox = vehicle.getComponent(HitboxComponent.class).map(hitbox -> {
+            InteractionEntity hitboxEntity = primaryEntity.getWorld().spawnInteractionEntity(primaryEntity.getPosition());
+            HitboxComponent.HitboxConfig hitboxConfig = hitbox.getConfig();
+            hitboxEntity.setSize(hitboxConfig.width(), hitboxConfig.height());
+            return hitboxEntity;
+        }).orElse(null);
     }
 
     public void setup(@NotNull Torque torque) {
@@ -173,6 +183,11 @@ public class VehicleRenderer {
 
         // Perform seat rendering.
         this.vehicle.getComponent(SeatsComponent.class).ifPresent(this::renderSeats);
+
+        // Perform hitbox rendering.
+        if (this.hitbox != null) {
+            this.hitbox.setPosition(this.vehiclePosition);
+        }
     }
 
     private void renderSeats(SeatsComponent seats) {

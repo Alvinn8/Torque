@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImpulseCollisionComponent implements VehicleComponent {
-    public static final VehicleComponentType TYPE = new VehicleComponentType(
+    public static final VehicleComponentType TYPE = VehicleComponentType.create(
         new Identifier("torque", "impulse_collision"),
         ImpulseCollisionComponent::new
     );

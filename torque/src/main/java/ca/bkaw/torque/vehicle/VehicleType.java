@@ -60,9 +60,10 @@ public record VehicleType(
             if (vehicleComponentType == null) {
                 throw new IllegalArgumentException("Unknown vehicle component type: " + componentTypeIdentifier);
             }
+            Object componentConfig = vehicleComponentType.configParser().apply(componentJson);
             components.add(new ComponentConfiguration(
                 vehicleComponentType,
-                componentJson
+                componentConfig
             ));
         }
 
@@ -70,5 +71,4 @@ public record VehicleType(
 
         return new VehicleType(identifier, model, Collections.unmodifiableList(components), mass, localInertiaTensorInverse);
     }
-
 }

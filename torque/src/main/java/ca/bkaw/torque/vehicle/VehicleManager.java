@@ -2,6 +2,7 @@ package ca.bkaw.torque.vehicle;
 
 import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.assets.ResourcePack;
+import ca.bkaw.torque.components.HitboxComponent;
 import ca.bkaw.torque.components.ImpulseCollisionComponent;
 import ca.bkaw.torque.components.DragComponent;
 import ca.bkaw.torque.components.FloatComponent;
@@ -78,6 +79,7 @@ public class VehicleManager {
             DragComponent.TYPE,
             FloatComponent.TYPE,
             GravityComponent.TYPE,
+            HitboxComponent.TYPE,
             ImpulseCollisionComponent.TYPE,
             OrientationLockComponent.TYPE,
             RigidBodyComponent.TYPE,
@@ -248,7 +250,7 @@ public class VehicleManager {
     public void spawnVehicle(@NotNull VehicleType vehicleType, @NotNull World world, @NotNull Vector3dc position) {
         Vehicle vehicle = new Vehicle(this.torque, vehicleType);
         for (VehicleType.ComponentConfiguration configuration : vehicleType.components()) {
-            VehicleComponent vehicleComponent = configuration.type().constructor().apply(vehicle, DataInput.empty());
+            VehicleComponent vehicleComponent = configuration.type().constructor().createUnsafe(vehicle, configuration.configuration(), DataInput.empty());
             if (vehicleComponent instanceof RigidBodyComponent rbc) {
                 rbc.setWorld(world);
                 rbc.setPosition(position);
@@ -323,7 +325,7 @@ public class VehicleManager {
         DataInput componentsData = data.getDataInput("components");
         for (VehicleType.ComponentConfiguration component : vehicleType.components()) {
             DataInput componentData = componentsData.getDataInput(component.type().identifier().toString());
-            VehicleComponent vehicleComponent = component.type().constructor().apply(vehicle, componentData);
+            VehicleComponent vehicleComponent = component.type().constructor().createUnsafe(vehicle, component.configuration(), componentData);
             vehicle.addComponent(vehicleComponent);
             if (vehicleComponent instanceof RigidBodyComponent rbc) {
                 rbc.setWorld(primaryEntity.getWorld());
