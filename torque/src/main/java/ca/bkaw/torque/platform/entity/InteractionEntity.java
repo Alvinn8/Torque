@@ -1,8 +1,8 @@
-package ca.bkaw.torque.platform;
+package ca.bkaw.torque.platform.entity;
 
 import org.joml.Vector3dc;
 
-public interface InteractionEntity {
+public interface InteractionEntity extends Entity {
 
     /**
      * Set the world position of the item display.
@@ -18,4 +18,9 @@ public interface InteractionEntity {
      * @param height The height in the y direction.
      */
     void setSize(float width, float height);
+
+    /**
+     * Remove this interaction entity from the world.
+     */
+    void remove();
 }

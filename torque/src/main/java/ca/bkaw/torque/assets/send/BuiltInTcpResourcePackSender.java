@@ -3,7 +3,7 @@ package ca.bkaw.torque.assets.send;
 import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.assets.TorqueAssets;
 import ca.bkaw.torque.platform.Identifier;
-import ca.bkaw.torque.platform.Player;
+import ca.bkaw.torque.platform.entity.Player;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;

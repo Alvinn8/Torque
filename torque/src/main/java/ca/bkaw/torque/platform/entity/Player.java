@@ -1,5 +1,7 @@
-package ca.bkaw.torque.platform;
+package ca.bkaw.torque.platform.entity;
 
+import ca.bkaw.torque.platform.Input;
+import ca.bkaw.torque.platform.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
@@ -7,7 +9,7 @@ import org.joml.Vector3d;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 
-public interface Player {
+public interface Player extends Entity {
     /**
      * Send a resource pack to the player.
      *
@@ -52,4 +54,17 @@ public interface Player {
      */
     @NotNull Vector3d getPosition();
 
+    /**
+     * Get the world the player is currently in.
+     *
+     * @return The world.
+     */
+    @NotNull World getWorld();
+
+    /**
+     * Check if the player is in creative mode.
+     *
+     * @return True if the player is in creative mode, false otherwise.
+     */
+    boolean isInCreativeMode();
 }

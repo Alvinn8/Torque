@@ -3,7 +3,7 @@ package ca.bkaw.torque.fabric.platform;
 import ca.bkaw.torque.fabric.ItemDisplayAccessor;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
-import ca.bkaw.torque.platform.ItemDisplay;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
 import ca.bkaw.torque.platform.ItemStack;
 import ca.bkaw.torque.platform.World;
 import com.mojang.math.Transformation;

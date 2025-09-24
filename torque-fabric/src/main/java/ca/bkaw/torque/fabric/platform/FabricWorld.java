@@ -2,8 +2,8 @@ package ca.bkaw.torque.fabric.platform;
 
 import ca.bkaw.torque.platform.BlockState;
 import ca.bkaw.torque.platform.Identifier;
-import ca.bkaw.torque.platform.InteractionEntity;
-import ca.bkaw.torque.platform.ItemDisplay;
+import ca.bkaw.torque.platform.entity.InteractionEntity;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
 import ca.bkaw.torque.platform.World;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;

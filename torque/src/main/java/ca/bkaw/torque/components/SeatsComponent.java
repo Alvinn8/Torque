@@ -4,7 +4,7 @@ import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.Input;
 import ca.bkaw.torque.platform.DataInput;
-import ca.bkaw.torque.platform.Player;
+import ca.bkaw.torque.platform.entity.Player;
 import ca.bkaw.torque.render.VehicleRenderer;
 import ca.bkaw.torque.tags.SeatTags;
 import ca.bkaw.torque.vehicle.Vehicle;

@@ -1,8 +1,9 @@
 package ca.bkaw.torque.fabric.platform;
 
 import ca.bkaw.torque.platform.Input;
-import ca.bkaw.torque.platform.ItemDisplay;
-import ca.bkaw.torque.platform.Player;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
+import ca.bkaw.torque.platform.entity.Player;
+import ca.bkaw.torque.platform.World;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,5 +63,15 @@ public record FabricPlayer(ServerPlayer entity) implements Player {
     public @NotNull Vector3d getPosition() {
         Vec3 position = this.entity.position();
         return new Vector3d(position.x(), position.y(), position.z());
+    }
+
+    @Override
+    public @NotNull World getWorld() {
+        return new FabricWorld(this.entity.level());
+    }
+
+    @Override
+    public boolean isInCreativeMode() {
+        return this.entity.getAbilities().instabuild;
     }
 }

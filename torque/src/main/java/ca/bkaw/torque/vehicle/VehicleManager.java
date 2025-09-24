@@ -19,8 +19,9 @@ import ca.bkaw.torque.model.TagHandler;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
-import ca.bkaw.torque.platform.ItemDisplay;
-import ca.bkaw.torque.platform.Player;
+import ca.bkaw.torque.platform.entity.Entity;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
+import ca.bkaw.torque.platform.entity.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.render.VehicleRenderer;
 import ca.bkaw.torque.tags.LightTags;
@@ -62,7 +63,7 @@ public class VehicleManager {
     private final List<Vehicle> vehicles = new ArrayList<>();
     private final List<VehicleRenderer> vehicleRenderers = new ArrayList<>();
     private final Map<Player, Vehicle> currentVehicleMap = new HashMap<>();
-    private final Map<ItemDisplay, Vehicle> vehiclePartMap = new HashMap<>();
+    private final Map<Entity, Vehicle> vehiclePartMap = new HashMap<>();
 
     // Tick control
     private boolean tickingFrozen = false;
@@ -342,17 +343,17 @@ public class VehicleManager {
      * @return The vehicle, or null if the entity is not part of a vehicle.
      */
     @Nullable
-    public Vehicle getVehicleFromPart(@NotNull ItemDisplay entity) {
+    public Vehicle getVehicleFromPart(@NotNull Entity entity) {
         return this.vehiclePartMap.get(entity);
     }
 
     /**
-     * Set the vehicle that an item display entity is part of.
+     * Set the vehicle that an entity is part of.
      *
-     * @param entity The item display entity.
+     * @param entity The entity.
      * @param vehicle The vehicle.
      */
-    public void setVehiclePart(@NotNull ItemDisplay entity, @Nullable Vehicle vehicle) {
+    public void setVehiclePart(@NotNull Entity entity, @Nullable Vehicle vehicle) {
         if (vehicle == null) {
             this.vehiclePartMap.remove(entity);
             return;

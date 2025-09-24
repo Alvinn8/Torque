@@ -1,5 +1,9 @@
-package ca.bkaw.torque.platform;
+package ca.bkaw.torque.platform.entity;
 
+import ca.bkaw.torque.platform.DataInput;
+import ca.bkaw.torque.platform.DataOutput;
+import ca.bkaw.torque.platform.ItemStack;
+import ca.bkaw.torque.platform.World;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
@@ -8,7 +12,7 @@ import org.joml.Vector3dc;
 /**
  * An item display entity.
  */
-public interface ItemDisplay {
+public interface ItemDisplay extends Entity {
     /**
      * Set the item being displayed by this item display.
      *

@@ -2,7 +2,7 @@ package ca.bkaw.torque.util;
 
 import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.platform.Identifier;
-import ca.bkaw.torque.platform.ItemDisplay;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
 import ca.bkaw.torque.platform.World;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
