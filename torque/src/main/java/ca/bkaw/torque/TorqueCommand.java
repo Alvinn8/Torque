@@ -2,10 +2,8 @@ package ca.bkaw.torque;
 
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
-import ca.bkaw.torque.components.TestDriveComponent;
-import ca.bkaw.torque.model.VehicleModel;
 import ca.bkaw.torque.platform.Identifier;
-import ca.bkaw.torque.platform.Player;
+import ca.bkaw.torque.platform.entity.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.util.Debug;
 import ca.bkaw.torque.vehicle.Vehicle;
@@ -13,10 +11,8 @@ import ca.bkaw.torque.vehicle.VehicleManager;
 import ca.bkaw.torque.vehicle.VehicleType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3d;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
-import org.joml.Vector3dc;
 
 /**
  * A handler for the {@code /torque} command. Note that the platform performs the
@@ -37,16 +33,8 @@ public class TorqueCommand {
         this.torque.getVehicleManager().spawnVehicle(vehicleType, world, position);
     }
 
-    @Nullable
-    private Vehicle getClosestVehicle(Player player) {
-        Vector3d playerPosition = player.getPosition();
-        return this.torque.getVehicleManager().getVehicles().stream().min((a, b) -> {
-            Vector3dc aPos = a.getComponent(RigidBodyComponent.class).map(RigidBodyComponent::getPosition).orElse(new Vector3d());
-            Vector3dc bPos = b.getComponent(RigidBodyComponent.class).map(RigidBodyComponent::getPosition).orElse(new Vector3d());
-            double aDistance = aPos.distanceSquared(playerPosition);
-            double bDistance = bPos.distanceSquared(playerPosition);
-            return Double.compare(aDistance, bDistance);
-        }).orElse(null);
+    private @Nullable Vehicle getClosestVehicle(Player player) {
+        return this.torque.getVehicleManager().getClosestVehicle(player.getWorld(), player.getPosition());
     }
 
     public void test(Player player, int number) {
@@ -86,12 +74,6 @@ public class TorqueCommand {
                         ((Quaternionf) rbc.getOrientation()).rotateAxis((float) Math.PI / 4, 0, 1, 0); // 45 degrees in radians
                     });
                 }
-            }
-            case 5 -> {
-                Debug.setInstance(null);
-            }
-            case 6 -> {
-                Debug.setInstance(new Debug(this.torque));
             }
             case 7 -> {
                 Vehicle vehicle = this.getClosestVehicle(player);
@@ -152,5 +134,13 @@ public class TorqueCommand {
         } else {
             return "Ticking is running normally.";
         }
+    }
+
+    public void debugEnable() {
+        Debug.setInstance(new Debug(this.torque));
+    }
+
+    public void debugDisable() {
+        Debug.setInstance(null);
     }
 }

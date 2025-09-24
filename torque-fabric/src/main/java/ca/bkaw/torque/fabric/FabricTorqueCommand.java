@@ -121,6 +121,29 @@ public class FabricTorqueCommand {
                                 })
                         )
                 )
+                .then(
+                    Commands.literal("debug")
+                        .then(
+                            Commands.literal("enable")
+                                .executes(ctx -> {
+                                    this.handler().debugEnable();
+                                    ctx.getSource().sendSystemMessage(
+                                        net.minecraft.network.chat.Component.literal("Enabled debug mode.")
+                                    );
+                                    return 1;
+                                })
+                        )
+                        .then(
+                            Commands.literal("disable")
+                                .executes(ctx -> {
+                                    this.handler().debugDisable();
+                                    ctx.getSource().sendSystemMessage(
+                                        net.minecraft.network.chat.Component.literal("Disabled debug mode.")
+                                    );
+                                    return 1;
+                                })
+                        )
+                )
         );
     }
 }

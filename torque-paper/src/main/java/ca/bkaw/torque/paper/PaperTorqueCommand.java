@@ -118,6 +118,25 @@ public class PaperTorqueCommand {
                                 })
                         )
                 )
+                .then(
+                    Commands.literal("debug")
+                        .then(
+                            Commands.literal("enable")
+                                .executes(ctx -> {
+                                    this.handler().debugEnable();
+                                    ctx.getSource().getSender().sendMessage("Enabled debug mode.");
+                                    return 1;
+                                })
+                        )
+                        .then(
+                            Commands.literal("disable")
+                                .executes(ctx -> {
+                                    this.handler().debugDisable();
+                                    ctx.getSource().getSender().sendMessage("Disabled debug mode.");
+                                    return 1;
+                                })
+                        )
+                )
                 .build()
         );
     }
