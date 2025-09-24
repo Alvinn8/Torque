@@ -1,8 +1,12 @@
 package ca.bkaw.torque.platform;
 
+import ca.bkaw.torque.PlatformEvents;
 import ca.bkaw.torque.TorqueCommand;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
 import io.netty.channel.ChannelHandler;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 /**
  * An abstraction over the platform that the game runs on.
@@ -13,8 +17,9 @@ public interface Platform {
      * the {@code /torque} command is used.
      *
      * @param torqueCommand The command handler.
+     * @param eventHandler The instance to invoke event methods on.
      */
-    void setup(@NotNull TorqueCommand torqueCommand);
+    void setup(@NotNull TorqueCommand torqueCommand, @NotNull PlatformEvents eventHandler);
 
     /**
      * Create an item that renders as the specified model.
@@ -54,4 +59,11 @@ public interface Platform {
      * @param runnable The runnable to run each tick.
      */
     void runEachTick(@NotNull Runnable runnable);
+
+    /**
+     * Get all item display entities currently loaded in the server.
+     *
+     * @return The item display entities.
+     */
+    List<ItemDisplay> getAllItemDisplays();
 }

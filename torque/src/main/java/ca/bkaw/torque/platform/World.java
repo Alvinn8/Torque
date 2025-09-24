@@ -1,5 +1,7 @@
 package ca.bkaw.torque.platform;
 
+import ca.bkaw.torque.platform.entity.InteractionEntity;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3dc;
 import org.joml.Vector3ic;

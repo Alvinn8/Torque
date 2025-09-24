@@ -1,7 +1,7 @@
 package ca.bkaw.torque.assets.send;
 
 import ca.bkaw.torque.Torque;
-import ca.bkaw.torque.platform.Player;
+import ca.bkaw.torque.platform.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 

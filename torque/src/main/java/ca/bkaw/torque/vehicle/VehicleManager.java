@@ -35,6 +35,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
 import java.io.BufferedReader;
@@ -168,7 +169,14 @@ public class VehicleManager {
     }
 
     private void stopRendering(@NotNull Vehicle vehicle) {
-        this.vehicleRenderers.removeIf(renderer -> renderer.getVehicle().equals(vehicle));
+        Iterator<VehicleRenderer> iter = this.vehicleRenderers.iterator();
+        while (iter.hasNext()) {
+            VehicleRenderer vehicleRenderer = iter.next();
+            if (vehicleRenderer.getVehicle().equals(vehicle)) {
+                vehicleRenderer.stopRendering();
+                iter.remove();
+            }
+        }
     }
 
     /**
@@ -184,6 +192,17 @@ public class VehicleManager {
         } else {
             this.currentVehicleMap.remove(passenger);
         }
+    }
+
+    /**
+     * Get the vehicle that a player is currently in, or null if the player is not
+     * in a vehicle.
+     *
+     * @param passenger The player.
+     * @return The vehicle, or null if the player is not in a vehicle.
+     */
+    public @Nullable Vehicle getCurrentVehicle(@NotNull Player passenger) {
+        return this.currentVehicleMap.get(passenger);
     }
 
     /**
@@ -337,9 +356,26 @@ public class VehicleManager {
     }
 
     /**
-     * Get the vehicle that an item display entity is rendering.
+     * Destroy a vehicle, removing it from the world and deleting its data.
      *
-     * @param entity The item display entity.
+     * @param vehicle The vehicle to destroy.
+     */
+    public void destroyVehicle(@NotNull Vehicle vehicle) {
+        Iterator<VehicleRenderer> iter = this.vehicleRenderers.iterator();
+        while (iter.hasNext()) {
+            VehicleRenderer vehicleRenderer = iter.next();
+            if (vehicleRenderer.getVehicle().equals(vehicle)) {
+                vehicleRenderer.destroy();
+                iter.remove();
+            }
+        }
+        this.vehicles.remove(vehicle);
+    }
+
+    /**
+     * Get the vehicle that an entity is rendering.
+     *
+     * @param entity The entity.
      * @return The vehicle, or null if the entity is not part of a vehicle.
      */
     @Nullable
@@ -359,6 +395,32 @@ public class VehicleManager {
             return;
         }
         this.vehiclePartMap.put(entity, vehicle);
+    }
+
+    /**
+     * Get the closest loaded vehicle to a location in the world.
+     *
+     * @param world The world.
+     * @param position The coordinates in the world.
+     * @return The closest vehicle, or null if there are no vehicles in the world.
+     */
+    @Nullable
+    public Vehicle getClosestVehicle(@NotNull World world, @NotNull Vector3d position) {
+        return this.torque.getVehicleManager().getVehicles().stream().min((a, b) -> {
+            World aWorld = a.getComponent(RigidBodyComponent.class).map(RigidBodyComponent::getWorld).orElse(null);
+            World bWorld = b.getComponent(RigidBodyComponent.class).map(RigidBodyComponent::getWorld).orElse(null);
+            Vector3dc aPos = a.getComponent(RigidBodyComponent.class).map(RigidBodyComponent::getPosition).orElse(new Vector3d());
+            Vector3dc bPos = b.getComponent(RigidBodyComponent.class).map(RigidBodyComponent::getPosition).orElse(new Vector3d());
+            double aDistance = aPos.distanceSquared(position);
+            double bDistance = bPos.distanceSquared(position);
+            if (!world.equals(aWorld)) {
+                aDistance = Double.MAX_VALUE;
+            }
+            if (!world.equals(bWorld)) {
+                bDistance = Double.MAX_VALUE;
+            }
+            return Double.compare(aDistance, bDistance);
+        }).orElse(null);
     }
 
     /**

@@ -26,8 +26,9 @@ public class PaperPlatform implements Platform {
     }
 
     @Override
-    public void setup(@NotNull TorqueCommand torqueCommand) {
+    public void setup(@NotNull TorqueCommand torqueCommand, @NotNull PlatformEvents eventHandler) {
         this.torqueCommand = torqueCommand;
+        this.eventHandler = eventHandler;
     }
 
     public @Nullable TorqueCommand getTorqueCommand() {

@@ -1,11 +1,11 @@
 package ca.bkaw.torque.fabric.mixin;
 
+import ca.bkaw.torque.PlatformEvents;
 import ca.bkaw.torque.Torque;
 import ca.bkaw.torque.fabric.ItemDisplayAccessor;
 import ca.bkaw.torque.fabric.TorqueFabric;
 import ca.bkaw.torque.fabric.platform.FabricItemDisplay;
-import ca.bkaw.torque.vehicle.Vehicle;
-import ca.bkaw.torque.vehicle.VehicleManager;
+import ca.bkaw.torque.fabric.platform.FabricPlatform;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Display;
@@ -59,16 +59,19 @@ public class ItemDisplayMixin implements ItemDisplayAccessor {
         if (torqueFabric == null) {
             return;
         }
+        FabricPlatform platform = torqueFabric.getPlatform();
+        if (platform == null) {
+            return;
+        }
+        PlatformEvents eventHandler = platform.getEventHandler();
+        if (eventHandler == null) {
+            return;
+        }
         Torque torque = torqueFabric.getTorque();
         if (torque == null) {
             return;
         }
-        VehicleManager vehicleManager = torque.getVehicleManager();
-        Vehicle vehicle = vehicleManager.getVehicleFromPart(new FabricItemDisplay((Display.ItemDisplay) (Object) this));
-        if (vehicle == null) {
-            return;
-        }
-        vehicleManager.saveVehicle(vehicle);
+        eventHandler.onItemDisplaySave(new FabricItemDisplay((Display.ItemDisplay) (Object) this));
     }
 
     @Unique
@@ -77,12 +80,11 @@ public class ItemDisplayMixin implements ItemDisplayAccessor {
         if (torqueFabric == null) {
             return;
         }
-        Torque torque = torqueFabric.getTorque();
-        if (torque == null) {
+        PlatformEvents eventHandler = torqueFabric.getPlatform().getEventHandler();
+        if (eventHandler == null) {
             return;
         }
-        VehicleManager vehicleManager = torque.getVehicleManager();
-        vehicleManager.loadVehicle(new FabricItemDisplay((Display.ItemDisplay) (Object) this));
+        eventHandler.loadVehicleFromData(new FabricItemDisplay((Display.ItemDisplay) (Object) this));
     }
 
     @Override

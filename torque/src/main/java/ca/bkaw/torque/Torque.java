@@ -3,6 +3,7 @@ package ca.bkaw.torque;
 import ca.bkaw.torque.assets.ResourcePack;
 import ca.bkaw.torque.assets.TorqueAssets;
 import ca.bkaw.torque.platform.Platform;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
 import ca.bkaw.torque.vehicle.VehicleManager;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +22,7 @@ public class Torque {
 
     public Torque(@NotNull Platform platform) {
         this.platform = platform;
-        this.platform.setup(new TorqueCommand(this));
+        this.platform.setup(new TorqueCommand(this), new PlatformEvents(this));
         this.vehicleManager = new VehicleManager(this);
         this.reload();
     }
@@ -52,6 +53,9 @@ public class Torque {
             this.assets.save();
         } catch (IOException e) {
             throw new RuntimeException("Failed to set up Torque assets.", e);
+        }
+        for (ItemDisplay itemDisplay : this.platform.getAllItemDisplays()) {
+            this.getVehicleManager().loadVehicle(itemDisplay);
         }
     }
 }

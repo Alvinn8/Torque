@@ -6,9 +6,9 @@ import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
 import ca.bkaw.torque.model.VehicleModelPart;
 import ca.bkaw.torque.platform.Identifier;
-import ca.bkaw.torque.platform.InteractionEntity;
-import ca.bkaw.torque.platform.ItemDisplay;
-import ca.bkaw.torque.platform.Player;
+import ca.bkaw.torque.platform.entity.InteractionEntity;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
+import ca.bkaw.torque.platform.entity.Player;
 import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.tags.SeatTags;
 import ca.bkaw.torque.util.Debug;
@@ -72,6 +72,7 @@ public class VehicleRenderer {
 
         this.hitbox = vehicle.getComponent(HitboxComponent.class).map(hitbox -> {
             InteractionEntity hitboxEntity = primaryEntity.getWorld().spawnInteractionEntity(primaryEntity.getPosition());
+            vehicle.getTorque().getVehicleManager().setVehiclePart(hitboxEntity, vehicle);
             HitboxComponent.HitboxConfig hitboxConfig = hitbox.getConfig();
             hitboxEntity.setSize(hitboxConfig.width(), hitboxConfig.height());
             return hitboxEntity;
@@ -250,6 +251,35 @@ public class VehicleRenderer {
 
     public void passengerChanged(@NotNull SeatTags.Seat seat, @Nullable Player passenger) {
 
+    }
+
+    /**
+     * A method that removes all entities except the primary entity.
+     * <p>
+     * The {@link VehicleRenderer} instance is invalidated and may not be used after
+     * this method is called.
+     */
+    public void stopRendering() {
+        for (RenderEntity entity : this.partEntities.values()) {
+            entity.display.remove();
+        }
+        for (RenderEntity entity : this.seatEntities.values()) {
+            entity.display.remove();
+        }
+        if (this.hitbox != null) {
+            this.hitbox.remove();
+        }
+    }
+
+    /**
+     * Destroy the vehicle so that it stops rendering and the primary entity is
+     * removed.
+     * <p>
+     * This effectively removes the vehicle from the world.
+     */
+    public void destroy() {
+        this.stopRendering();
+        this.primary.display.remove();
     }
 
 }
