@@ -201,7 +201,7 @@ public class TorqueAssets {
         }
 
         // Perform extraction to get model parts.
-        Map<String, Model> modelParts = modelExtractor.executeExtractions();
+        List<ModelExtractor.ExtractedModel> extractedModels = modelExtractor.executeExtractions();
 
         // Save primary model
 
@@ -231,6 +231,7 @@ public class TorqueAssets {
 
         VehicleModelPart primary = new VehicleModelPart(
             "primary",
+            null,
             primaryModelIdentifier,
             // The vehicle model should scale up to the original size.
             (float) (1.0 / scale),
@@ -245,9 +246,9 @@ public class TorqueAssets {
 
         // Save model parts
         List<VehicleModelPart> vehicleModelParts = new ArrayList<>();
-        for (Map.Entry<String, Model> entry : modelParts.entrySet()) {
-            String partName = entry.getKey();
-            Model partModel = entry.getValue();
+        for (ModelExtractor.ExtractedModel extractedModel : extractedModels) {
+            String partName = extractedModel.name();
+            Model partModel = extractedModel.model();
             ModelElementList partElements = partModel.getAllElements();
             if (partElements == null) {
                 continue;
@@ -272,6 +273,7 @@ public class TorqueAssets {
             this.createItemModel(modelIdentifier);
             vehicleModelParts.add(new VehicleModelPart(
                 partName,
+                extractedModel.partData(),
                 modelIdentifier,
                 (float) (1.0 / partScale),
                 // Convert model units ("pixels") to blocks by dividing by 16.

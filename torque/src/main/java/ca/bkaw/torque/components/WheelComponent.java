@@ -3,11 +3,13 @@ package ca.bkaw.torque.components;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
+import ca.bkaw.torque.tags.WheelTags;
 import ca.bkaw.torque.vehicle.PartTransformationProvider;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
 /**
@@ -52,18 +54,20 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
     }
 
     @Override
-    public PartTransform getPartTransform(@NotNull String partName, @NotNull Vehicle vehicle) {
-        if (!partName.startsWith("wheel")) {
+    public PartTransform getPartTransform(@NotNull String partName, @Nullable Object partData, @NotNull Vehicle vehicle) {
+        if (!(partData instanceof WheelTags.Wheel wheel)) {
             return null;
         }
 
         Quaternionf rotation = new Quaternionf();
 
-        // First apply steering rotation around Y-axis (vertical steering)
-        vehicle.getComponent(SteeringWheelComponent.class).ifPresent(steeringWheel -> {
-            float steeringAngle = steeringWheel.getAngle() * 0.8f;
-            rotation.rotateY(-steeringAngle);
-        });
+        if (wheel.steerable()) {
+            // First, apply steering rotation around Y-axis (vertical steering)
+            vehicle.getComponent(SteeringWheelComponent.class).ifPresent(steeringWheel -> {
+                float steeringAngle = steeringWheel.getAngle() * 0.8f;
+                rotation.rotateY(-steeringAngle);
+            });
+        }
 
         // Then apply wheel spinning rotation around X-axis
         rotation.rotateX(-this.wheelRotation);

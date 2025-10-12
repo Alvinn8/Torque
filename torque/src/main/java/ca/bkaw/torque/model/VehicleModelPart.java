@@ -6,6 +6,7 @@ import org.joml.Vector3fc;
 
 public record VehicleModelPart(
     String name,
+    Object data,
     Identifier modelIdentifier,
     float scale,
     @NotNull Vector3fc translation

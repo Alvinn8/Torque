@@ -19,7 +19,7 @@ public class LightTags implements TagHandler<Set<String>> {
                 continue;
             }
             // Extract all elements in the group as a separate model.
-            modelExtractor.addExtraction("light_" + lightName, modelGroup.getAllElements());
+            modelExtractor.addExtraction("light_" + lightName, null, modelGroup.getAllElements());
         }
         return lightPartNames;
     }

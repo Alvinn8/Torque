@@ -40,7 +40,7 @@ public class TurnSignalComponent implements VehicleComponent, PartTransformation
     }
 
     @Override
-    public @Nullable PartTransform getPartTransform(@NotNull String partName, @NotNull Vehicle vehicle) {
+    public @Nullable PartTransform getPartTransform(@NotNull String partName, @Nullable Object partData, @NotNull Vehicle vehicle) {
         boolean glow = this.timeTicks % 20 < 10; // Toggle every second
         if (partName.equals("light_turn_signal_left")) {
             return new PartTransform(new Quaternionf(), new Vector3f(), this.left && glow, YELLOW);

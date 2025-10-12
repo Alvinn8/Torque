@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 public class ModelExtractor {
     private final Model model;
     private final List<ExtractionRequest> requests = new ArrayList<>();
+    private final Map<String, Object> partDataMap = new HashMap<>();
     private boolean executed = false;
 
     /**
@@ -38,6 +40,15 @@ public class ModelExtractor {
      */
     private record ElementMapping(String modelName, ModelElement element, int originalIndex) {}
 
+    /**
+     * A model that has been extracted, along with its name and any associated data.
+     *
+     * @param name The name of the model.
+     * @param model The model JSON.
+     * @param partData Metadata about the model part, or null if none was provided.
+     */
+    public record ExtractedModel(String name, Model model, @Nullable Object partData) {}
+
     public ModelExtractor(@NotNull Model model) {
         this.model = model;
     }
@@ -46,13 +57,15 @@ public class ModelExtractor {
      * Add an extraction request for a group of elements.
      * 
      * @param name A name to identify this extraction
+     * @param partData Metadata about the model part.
      * @param elementIndexes The indexes of elements to extract
      */
-    public void addExtraction(@NotNull String name, @NotNull IntList elementIndexes) {
+    public void addExtraction(@NotNull String name, @Nullable Object partData, @NotNull IntList elementIndexes) {
         if (this.executed) {
             throw new IllegalStateException("Cannot add extractions after execution.");
         }
         this.requests.add(new ExtractionRequest(name, new IntArrayList(elementIndexes)));
+        this.partDataMap.put(name, partData);
     }
     
     /**
@@ -60,12 +73,12 @@ public class ModelExtractor {
      * This method ensures that all extractions are performed correctly despite
      * changing indexes.
      * 
-     * @return A map from extraction name to the extracted model
+     * @return A list of extracted models.
      */
     @NotNull
-    public Map<String, Model> executeExtractions() {
+    public List<ExtractedModel> executeExtractions() {
         this.executed = true;
-        Map<String, Model> results = new HashMap<>();
+        List<ExtractedModel> results = new ArrayList<>();
         
         if (this.requests.isEmpty()) {
             return results;
@@ -121,8 +134,9 @@ public class ModelExtractor {
 
             // Copy textures
             extractedModel.setTextures(this.model.getTextures());
-            
-            results.put(request.name, extractedModel);
+
+            Object data = this.partDataMap.get(request.name);
+            results.add(new ExtractedModel(request.name, extractedModel, data));
         }
 
         // Remove groups since the indexes of elements have changed,

@@ -89,11 +89,11 @@ public class FabricPlatform implements Platform {
     public List<ItemDisplay> getAllItemDisplays() {
         TorqueFabric torqueFabric = TorqueFabric.getInstance();
         if (torqueFabric == null) {
-            throw new IllegalStateException("Server not started yet.");
+            return List.of();
         }
         MinecraftServer server = torqueFabric.getServer();
         if (server == null) {
-            throw new IllegalStateException("Server not started yet.");
+            return List.of();
         }
         List<ItemDisplay> list = new ArrayList<>();
         for (ServerLevel level : server.getAllLevels()) {

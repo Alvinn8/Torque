@@ -17,11 +17,12 @@ public interface PartTransformationProvider {
      * Get the transformation data for a specific model part.
      * 
      * @param partName The name of the model part
+     * @param partData The data associated with the model part
      * @param vehicle The vehicle instance
      * @return The transformation data to apply to the part, or null if this component doesn't control this part
      */
     @Nullable
-    PartTransform getPartTransform(@NotNull String partName, @NotNull Vehicle vehicle);
+    PartTransform getPartTransform(@NotNull String partName, @Nullable Object partData, @NotNull Vehicle vehicle);
 
     /**
      * Data class containing all transformation and visual effect data for a model part.

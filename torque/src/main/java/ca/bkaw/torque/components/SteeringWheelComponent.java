@@ -9,6 +9,7 @@ import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
 import ca.bkaw.torque.vehicle.VehicleComponentType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
 public class SteeringWheelComponent implements VehicleComponent, PartTransformationProvider {
@@ -52,7 +53,7 @@ public class SteeringWheelComponent implements VehicleComponent, PartTransformat
     }
 
     @Override
-    public PartTransform getPartTransform(@NotNull String partName, @NotNull Vehicle vehicle) {
+    public PartTransform getPartTransform(@NotNull String partName, @Nullable Object partData, @NotNull Vehicle vehicle) {
         // Check if this part name contains "steering_wheel" (case insensitive)
         if (partName.toLowerCase().contains("steering_wheel")) {
             // Rotate around Z-axis (negative Z is forward)

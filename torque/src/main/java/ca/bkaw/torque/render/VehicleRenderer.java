@@ -109,16 +109,18 @@ public class VehicleRenderer {
     }
 
     /**
-     * Get the transformation data for a specific model part by checking all PartTransformationProvider components.
+     * Get the transformation for a specific model part by checking all
+     * PartTransformationProvider components.
      * 
      * @param partName The name of the model part
-     * @return The combined transformation data to apply
+     * @param partData The data associated with the model part
+     * @return The combined transformation to apply
      */
     @NotNull
-    private PartTransformationProvider.PartTransform getPartTransform(@NotNull String partName) {
+    private PartTransformationProvider.PartTransform getPartTransform(@NotNull String partName, @Nullable Object partData) {
         for (VehicleComponent component : this.vehicle.getComponents()) {
             if (component instanceof PartTransformationProvider provider) {
-                PartTransformationProvider.PartTransform transform = provider.getPartTransform(partName, this.vehicle);
+                PartTransformationProvider.PartTransform transform = provider.getPartTransform(partName, partData, this.vehicle);
                 if (transform != null) {
                     return transform;
                 }
@@ -161,7 +163,7 @@ public class VehicleRenderer {
             RenderEntity partEntity = entry.getValue();
             
             // Get the rotation for this part from components
-            PartTransformationProvider.PartTransform partTransform = this.getPartTransform(modelPart.name());
+            PartTransformationProvider.PartTransform partTransform = this.getPartTransform(modelPart.name(), modelPart.data());
 
             partEntity.display.setGlowing(partTransform.isGlowing());
             Integer glowColor = partTransform.getGlowColor();

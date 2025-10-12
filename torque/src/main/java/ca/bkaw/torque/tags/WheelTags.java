@@ -8,8 +8,8 @@ import ca.bkaw.torque.model.TagString;
 import it.unimi.dsi.fastutil.ints.IntList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A tag handler that processes groups tagged with #wheel.
@@ -17,7 +17,7 @@ import java.util.Set;
  * This is a group-based handler that can handle multiple wheel groups
  * (e.g., 4 wheels in a car) and extracts them into separate models.
  */
-public class WheelTags implements TagHandler<Void> {
+public class WheelTags implements TagHandler<List<WheelTags.Wheel>> {
 
     public record Wheel(
         String partName,
@@ -28,8 +28,9 @@ public class WheelTags implements TagHandler<Void> {
     ) {}
 
     @Override
-    public Void process(@NotNull Model model, @NotNull ModelExtractor modelExtractor) {
+    public List<Wheel> process(@NotNull Model model, @NotNull ModelExtractor modelExtractor) {
         List<ModelGroup> wheelGroups = model.getGroupsByTag("wheel");
+        List<Wheel> wheels = new ArrayList<>();
 
         if (wheelGroups.isEmpty()) {
             return null;
@@ -39,13 +40,15 @@ public class WheelTags implements TagHandler<Void> {
         for (ModelGroup group : wheelGroups) {
             IntList elementIndexes = group.getAllElements();
             String name = "wheel" + (wheelIndex++);
-            modelExtractor.addExtraction(name, elementIndexes);
             TagString tags = group.getTags();
             boolean steerable = tags.hasTag("steerable");
             boolean driven = tags.hasTag("driven");
             boolean parkingBrake = tags.hasTag("parking_brake");
+            Wheel wheel = new Wheel(name, 0.5, steerable, driven, parkingBrake);
+            modelExtractor.addExtraction(name, wheel, elementIndexes);
+            wheels.add(wheel);
         }
 
-        return null;
+        return wheels;
     }
 }

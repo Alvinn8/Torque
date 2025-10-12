@@ -27,7 +27,7 @@ public class SteeringWheelTags implements TagHandler<Void> {
 
         for (ModelGroup group : steeringWheelGroups) {
             IntList elementIndexes = group.getAllElements();
-            modelExtractor.addExtraction("steering_wheel", elementIndexes);
+            modelExtractor.addExtraction("steering_wheel", null, elementIndexes);
         }
 
         return null;

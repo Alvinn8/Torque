@@ -1742,7 +1742,7 @@
 			]
 		},
 		{
-			"name": "#wheel",
+			"name": "#wheel #steerable",
 			"origin": [8, 8, 8],
 			"color": 0,
 			"children": [
@@ -1756,7 +1756,7 @@
 			]
 		},
 		{
-			"name": "#wheel",
+			"name": "#wheel #steerable",
 			"origin": [8, 8, 8],
 			"color": 0,
 			"children": [
