@@ -42,8 +42,8 @@ public class InertiaTensor {
             double elementVolume = getVolume(element); // Unit: m^3
             double elementMass = averageDensity * elementVolume; // Unit: kg
 
-            Vector3d extents = element.getTo().sub(element.getFrom()).absolute().div(16); // Unit: m
-            Vector3d elementCenter = element.getMiddle().div(16); // Unit: m
+            Vector3d extents = element.getTo().sub(element.getFrom()).absolute().div(Util.PIXELS_PER_BLOCK); // Unit: m
+            Vector3d elementCenter = element.getMiddle().div(Util.PIXELS_PER_BLOCK); // Unit: m
 
             // Calculate the inertia tensor in the local space of the element.
             // For a rectangular box: I_xx = (1/12) * m * (h² + d²), etc.
@@ -67,7 +67,7 @@ public class InertiaTensor {
                 }
 
                 // Move the center since it may move when rotating around the given origin.
-                Vector3d origin = rotation.getOrigin().div(16); // Unit: m
+                Vector3d origin = rotation.getOrigin().div(Util.PIXELS_PER_BLOCK); // Unit: m
                 // c_world = R(c_local - o) + o
                 Vector3d transformedCenter = elementCenter.sub(origin, new Vector3d()); // Unit: m
                 elementCenter = transformedCenter.mul(rotationMatrix).add(origin);
@@ -115,7 +115,7 @@ public class InertiaTensor {
      */
     private static double getVolume(ModelElement element) {
         // Convert units ("pixels") to meters by dividing by 16.
-        Vector3d boxLengths = element.getTo().sub(element.getFrom()).div(16).absolute();
+        Vector3d boxLengths = element.getTo().sub(element.getFrom()).div(Util.PIXELS_PER_BLOCK).absolute();
         return boxLengths.x * boxLengths.y * boxLengths.z;
     }
 
@@ -157,7 +157,7 @@ public class InertiaTensor {
                 continue;
             }
             double elementVolume = getVolume(element); // Unit: m^3
-            Vector3d elementCenter = element.getMiddle().div(16); // Unit: m
+            Vector3d elementCenter = element.getMiddle().div(Util.PIXELS_PER_BLOCK); // Unit: m
             centerOfMass.add(elementCenter.mul(elementVolume / volume));
         }
         return centerOfMass;

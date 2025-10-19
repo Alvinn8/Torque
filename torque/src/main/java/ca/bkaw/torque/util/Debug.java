@@ -32,6 +32,9 @@ public class Debug {
     }
 
     public static void setInstance(@Nullable Debug instance) {
+        if (Debug.instance != null) {
+            Debug.instance.remove();
+        }
         Debug.instance = instance;
     }
 
@@ -67,6 +70,12 @@ public class Debug {
         this.itemDisplayIndex = 0;
     }
 
+    private void remove() {
+        for (ItemDisplay display : this.itemDisplays) {
+            display.remove();
+        }
+    }
+
     public static void highlightFullBlock(World world, Vector3ic blockPos, String block) {
         if (instance == null) {
             return;
@@ -82,6 +91,15 @@ public class Debug {
             return;
         }
         Vector3d position = new Vector3d(blockPos).add(0.5, 0.5, 0.5);
+        ItemDisplay display = instance.getItemDisplay(world, position);
+        display.setItem(instance.torque.getPlatform().createModelItem(new Identifier("minecraft", block)));
+        display.setTransformation(new Matrix4f().scale(0.2f, 0.2f, 0.2f));
+    }
+
+    public static void highlightPositionSmall(World world, Vector3dc position, String block) {
+        if (instance == null) {
+            return;
+        }
         ItemDisplay display = instance.getItemDisplay(world, position);
         display.setItem(instance.torque.getPlatform().createModelItem(new Identifier("minecraft", block)));
         display.setTransformation(new Matrix4f().scale(0.2f, 0.2f, 0.2f));

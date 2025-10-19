@@ -18,7 +18,7 @@ public class SteeringWheelComponent implements VehicleComponent, PartTransformat
         SteeringWheelComponent::new
     );
 
-    private float angle;
+    private float angle; // unit: radians
 
     public SteeringWheelComponent(Vehicle vehicle, DataInput dataInput) {
         this.angle = dataInput.readFloat("angle", 0.0f);
@@ -40,7 +40,7 @@ public class SteeringWheelComponent implements VehicleComponent, PartTransformat
             .map(SeatsComponent::getDriverInput)
             .orElse(null);
 
-        this.angle *= 0.9f;
+        // this.angle *= 0.9f;
 
         if (driverInput != null) {
             if (driverInput.left) {
@@ -66,7 +66,7 @@ public class SteeringWheelComponent implements VehicleComponent, PartTransformat
     /**
      * Get the current steering angle in radians.
      * 
-     * @return The steering angle
+     * @return The steering angle. Unit: radians
      */
     public float getAngle() {
         return this.angle;
@@ -75,7 +75,7 @@ public class SteeringWheelComponent implements VehicleComponent, PartTransformat
     /**
      * Set the steering angle in radians.
      * 
-     * @param angle The new steering angle
+     * @param angle The new steering angle. Unit: radians
      */
     public void setAngle(float angle) {
         this.angle = angle;

@@ -71,7 +71,7 @@ public class TestDriveComponent implements VehicleComponent {
             double steerForce = 5_000; // Adjust for steering sensitivity
             double steerOffset = 2.0;  // Distance from center of mass
 
-            if (driverInput.left) {
+            if (driverInput.left && false) {
                 // Rightward force at front, leftward at rear
                 Vector3d front = new Vector3d(0, 0, steerOffset).rotate(new Quaterniond(rbc.getOrientation())).add(position, new Vector3d());
                 Vector3d rear = new Vector3d(0, 0, -steerOffset).rotate(new Quaterniond(rbc.getOrientation())).add(position, new Vector3d());
@@ -80,7 +80,7 @@ public class TestDriveComponent implements VehicleComponent {
                 rbc.addForce(right.mul(steerForce, new Vector3d()), front);
                 rbc.addForce(left.mul(steerForce, new Vector3d()), rear);
             }
-            if (driverInput.right) {
+            if (driverInput.right && false) {
                 // Leftward force at front, rightward at rear
                 Vector3d front = new Vector3d(0, 0, steerOffset).rotate(new Quaterniond(rbc.getOrientation())).add(position, new Vector3d());
                 Vector3d rear = new Vector3d(0, 0, -steerOffset).rotate(new Quaterniond(rbc.getOrientation())).add(position, new Vector3d());

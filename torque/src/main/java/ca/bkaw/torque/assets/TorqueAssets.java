@@ -10,8 +10,10 @@ import ca.bkaw.torque.model.TagHandler;
 import ca.bkaw.torque.model.VehicleModel;
 import ca.bkaw.torque.model.VehicleModelPart;
 import ca.bkaw.torque.platform.Identifier;
+import ca.bkaw.torque.util.Debug;
 import ca.bkaw.torque.util.InertiaTensor;
 import ca.bkaw.torque.util.Registry;
+import ca.bkaw.torque.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -137,7 +139,7 @@ public class TorqueAssets {
         // to blocks. 1 block = 16 pixels.
         // The model is centered around (8, 8, 8) in the model, so we need to find
         // the difference from that center.
-        return new Vector3d(modelPosition).sub(8, 8, 8).div(16);
+        return new Vector3d(modelPosition).sub(8, 8, 8).div(Util.PIXELS_PER_BLOCK);
     }
 
     /**
@@ -159,6 +161,7 @@ public class TorqueAssets {
         if (existing != null) {
             return existing;
         }
+        Debug.print("Creating vehicle model for " + identifier.toString());
 
         Path path = this.resourcePack.getPath(
             "assets/" + identifier.namespace() + "/models/" + identifier.key() + ".json"
@@ -182,8 +185,9 @@ public class TorqueAssets {
         // The center of mass is calculated in world space, so convert back to pixels by
         // multiplying by 16 because 16 pixels = 1 meter.
         // The center is at (8, 8, 8) in the model.
-        Vector3d diff = new Vector3d(8, 8, 8).sub(new Vector3d(centerOfMass).mul(16));
+        Vector3d diff = new Vector3d(8, 8, 8).sub(new Vector3d(centerOfMass).mul(Util.PIXELS_PER_BLOCK));
         elements.move(diff);
+        Debug.print("diff = " + diff);
 
         Model modelToKeep = model.deepCopy();
 
@@ -276,8 +280,7 @@ public class TorqueAssets {
                 extractedModel.partData(),
                 modelIdentifier,
                 (float) (1.0 / partScale),
-                // Convert model units ("pixels") to blocks by dividing by 16.
-                new Vector3f(partMovedBy).div(16).negate().add(primary.translation())
+                new Vector3f(partMovedBy).div(Util.PIXELS_PER_BLOCK).negate().add(primary.translation())
             ));
         }
 

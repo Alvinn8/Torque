@@ -2,6 +2,7 @@ package ca.bkaw.torque.vehicle;
 
 import ca.bkaw.torque.model.VehicleModel;
 import ca.bkaw.torque.platform.Identifier;
+import ca.bkaw.torque.util.Debug;
 import ca.bkaw.torque.util.InertiaTensor;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -47,7 +48,7 @@ public record VehicleType(
         }
 
         Matrix3d localInertiaTensor = InertiaTensor.calculateInertiaTensor(mass, model.getModel().getAllElements());
-        System.out.println("localInertiaTensor = \n" + localInertiaTensor);
+        Debug.print("localInertiaTensor = \n" + localInertiaTensor);
         Matrix3d localInertiaTensorInverse = new Matrix3d(localInertiaTensor).invert();
 
         ArrayList<ComponentConfiguration> components = new ArrayList<>();

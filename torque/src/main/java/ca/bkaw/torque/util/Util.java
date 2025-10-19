@@ -3,6 +3,11 @@ package ca.bkaw.torque.util;
 import org.joml.Vector3dc;
 
 public class Util {
+    /**
+     * Number of pixels/model units per block (1 block = 16x16x16 pixels).
+     */
+    public static final int PIXELS_PER_BLOCK = 16;
+
     public static String formatSi(String unit, double value) {
         if (value < 1000) {
             return String.format("%.2f %s", value, unit);

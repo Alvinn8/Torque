@@ -162,7 +162,7 @@ public class SimpleCollisionComponent implements VehicleComponent {
 
             // Stepping
             int currentY = (int) Math.floor(new Vector3d(center).fma(-halfSize.y(), up).y() + 0);
-            Debug.highlightFullBlock(world, new Vector3i((int) Math.floor(center.x()), currentY, (int) Math.floor(center.z())), "yellow_wool");
+            // Debug.highlightFullBlock(world, new Vector3i((int) Math.floor(center.x()), currentY, (int) Math.floor(center.z())), "yellow_wool");
             if (this.highestCollisionBlock != null && this.highestCollisionBlock.y() == currentY) {
                 // If the highest collision block is at the same height as the vehicle, we can step up
                 rbc.setPosition(new Vector3d(rbc.getPosition()).add(up)); // Not the spirit :(

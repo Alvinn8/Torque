@@ -1,7 +1,6 @@
 package ca.bkaw.torque.vehicle;
 
 import ca.bkaw.torque.Torque;
-import ca.bkaw.torque.model.VehicleModel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -30,10 +29,13 @@ public class Vehicle {
      * @param <T> The type of component.
      */
     public <T extends VehicleComponent> Optional<T> getComponent(@NotNull Class<T> type) {
-        return this.components.stream()
-            .filter(type::isInstance)
-            .map(type::cast)
-            .findFirst();
+        for (VehicleComponent component : this.components) {
+            if (type.isInstance(component)) {
+                T obj = type.cast(component);
+                return Optional.of(obj);
+            }
+        }
+        return Optional.empty();
     }
 
     /**
