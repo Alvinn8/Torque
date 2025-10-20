@@ -59,7 +59,7 @@ public class SimpleCollisionComponent implements VehicleComponent {
                 rbc.getOrientation()
             );
             World world = rbc.getWorld();
-            Debug.visualizeObb(world, this.obb, "glass");
+            // Debug.visualizeObb(world, this.obb, "glass");
 
             Vector3dc center = this.obb.getCenter();
             Vector3d velocity = rbc.getVelocity();

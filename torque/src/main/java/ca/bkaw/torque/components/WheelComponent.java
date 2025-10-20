@@ -32,6 +32,7 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
         private final WheelTags.Wheel wheel;
         private float rotation; // unit: rad
         private float speed; // unit: rad/s
+        private double steerAngle; // unit: rad
 
         public WheelData(WheelTags.Wheel wheel, float rotation, float speed) {
             this.wheel = wheel;
@@ -41,12 +42,24 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
     }
 
     private final List<WheelData> wheels = new ArrayList<>();
+    private final double wheelbase;
+    private final double backAxleOffset;
 
     public WheelComponent(Vehicle vehicle, JsonObject config, DataInput dataInput) {
         vehicle.getType().model().getTagData(WheelTags.class)
             .ifPresent(wheels -> wheels.forEach(wheel ->
                 this.wheels.add(new WheelData(wheel, 0, 0))
             ));
+        double minZ = Double.MAX_VALUE;
+        double maxZ = -Double.MAX_VALUE;
+        for (WheelData wheel : this.wheels) {
+            double z = wheel.wheel.contactPatch().z;
+            if (z < minZ) minZ = z;
+            if (z > maxZ) maxZ = z;
+        }
+        this.wheelbase = maxZ - minZ;
+        this.backAxleOffset = maxZ; // In model coordinates +Z is backwards
+        Debug.print("wheelbase = " + this.wheelbase + ", backAxleOffset = " + this.backAxleOffset);
     }
 
     @Override
@@ -63,40 +76,58 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
         if (rbc == null) {
             return;
         }
+        boolean print = Math.random() < 0.00;
         Vector3dc vehiclePosition = rbc.getPosition();
         Vector3d vehicleVelocity = rbc.getVelocity();
         Quaterniond orientation = new Quaterniond(rbc.getOrientation());
 
-        Vector3d forward = new Vector3d(0, 0, 1).rotate(orientation);
-        Vector3d right = new Vector3d(1, 0, 0).rotate(orientation);
-
-        double forwardSpeed = vehicleVelocity.dot(forward);
-        double lateralSpeed = vehicleVelocity.dot(right);
-
-        double defaultSlipAngle = Math.atan2(lateralSpeed, Math.abs(forwardSpeed) + 0.01);
+        Vector3d vehicleForward = new Vector3d(0, 0, 1).rotate(orientation);
+        Vector3d vehicleUp = new Vector3d(0, 1, 0).rotate(orientation);
 
         float steeringWheelAngle = vehicle.getComponent(SteeringWheelComponent.class)
             .map(SteeringWheelComponent::getAngle)
             .orElse(0.0f);
 
-        float steeringAngle = steeringWheelAngle * 0.8f;
+        // Ackermann steering geometry
+        float averageSteeringAngle = steeringWheelAngle * 0.8f;
 
-        boolean print = Math.random() < 0.01;
+        double turningRadius;
+        if (Math.abs(averageSteeringAngle) < 1e-6) {
+            turningRadius = Double.POSITIVE_INFINITY;
+        } else {
+            turningRadius = this.wheelbase * Math.tan(Math.PI / 2 - averageSteeringAngle);
+        }
+        if (print) Debug.print("turningRadius = " + turningRadius);
+        if (Double.isFinite(turningRadius) && Math.abs(turningRadius) < 30) Debug.highlightPositionSmall(rbc.getWorld(), new Vector3d(turningRadius, 0, this.backAxleOffset).rotate(orientation).add(vehiclePosition), "blue_wool");
+
         for (WheelData wheel : this.wheels) {
             wheel.rotation += wheel.speed * (float) RigidBodyComponent.DELTA_TIME;
-            double wheelDeltaAngle = wheel.wheel.steerable() ? steeringAngle : 0.0f;
+            Vector3dc wheelForward = vehicleForward;
+            if (wheel.wheel.steerable()) {
+                // Calculate angle from wheel to the instantaneous center of rotation
+                Vector3d cp = wheel.wheel.contactPatch();
+                wheel.steerAngle = Math.PI / 2 - Math.atan2(turningRadius - cp.x, this.backAxleOffset - cp.z);
+                wheelForward = new Vector3d(vehicleForward).rotateY(-wheel.steerAngle);
+            }
 
-            double slipAngle = defaultSlipAngle - wheelDeltaAngle;
+            Vector3d wheelRight = new Vector3d(vehicleUp).cross(wheelForward);
+
+            double forwardSpeed = vehicleVelocity.dot(wheelForward);
+            double lateralSpeed = vehicleVelocity.dot(wheelRight);
+
+            double slipAngle = Math.atan2(lateralSpeed, Math.abs(forwardSpeed) + 0.01);
+            slipAngle *= Math.min(1.0, Math.abs(forwardSpeed) / 3.0);
             if (print) Debug.print("slipAngle = " + slipAngle);
             double lateralForceMagnitude = -slipAngle * 15000;
 
-            Vector3d lateralForce = new Vector3d(right).mul(lateralForceMagnitude);
+            Vector3d lateralForce = new Vector3d(wheelRight).mul(lateralForceMagnitude);
             Vector3d worldContactPatch = new Vector3d(wheel.wheel.contactPatch())
                 .add(vehicle.getType().model().getPrimary().translation())
                 .rotate(orientation)
                 .add(vehiclePosition);
             rbc.addForce(lateralForce, worldContactPatch);
-            // Debug.visualizeVectorAt(rbc.getWorld(), worldContactPatch, new Vector3d(lateralForce).div(1000), "pink_wool");
+            Debug.visualizeVectorAt(rbc.getWorld(), worldContactPatch, new Vector3d(lateralForce).div(1000), "pink_wool");
+            // Debug.visualizeVectorAt(rbc.getWorld(), worldContactPatch, new Vector3d(wheelRight).mul(10), "white_wool");
             Debug.highlightPositionSmall(rbc.getWorld(), worldContactPatch, wheel.wheel.steerable() ? "purple_wool" : "yellow_wool");
         }
         if (print) Debug.print("---");
@@ -110,17 +141,12 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
 
         Quaternionf rotation = new Quaternionf();
 
-        if (wheel.steerable()) {
-            // First, apply steering rotation around Y-axis (vertical steering)
-            vehicle.getComponent(SteeringWheelComponent.class).ifPresent(steeringWheel -> {
-                float steeringAngle = steeringWheel.getAngle() * 0.8f;
-                rotation.rotateY(-steeringAngle);
-            });
-        }
-
         // Then apply wheel spinning rotation around X-axis
         for (WheelData wheelData : this.wheels) {
             if (wheelData.wheel == wheel) {
+                if (wheel.steerable()) {
+                    rotation.rotateY((float) -wheelData.steerAngle);
+                }
                 rotation.rotateX(-wheelData.rotation);
                 break;
             }

@@ -84,6 +84,14 @@ public class TorqueCommand {
                     });
                 }
             }
+            case 8 -> {
+                Vehicle vehicle = this.getClosestVehicle(player);
+                if (vehicle != null) {
+                    vehicle.getComponent(RigidBodyComponent.class).ifPresent(rbc -> {
+                        rbc.setVelocity(new Vector3d());
+                    });
+                }
+            }
         }
     }
 
