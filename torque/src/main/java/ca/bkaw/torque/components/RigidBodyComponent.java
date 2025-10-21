@@ -19,8 +19,8 @@ public class RigidBodyComponent implements VehicleComponent {
     public static final VehicleComponentType TYPE = VehicleComponentType.create(
         new Identifier("torque", "rigid_body"),
         RigidBodyComponent::new
-    );// one tick, unit: second
-    public static final double DELTA_TIME = 1 / 20.0;
+    );
+    public static final double DELTA_TIME = 1 / 20.0; // one tick, unit: second
 
     // All vectors are stored in world coordinates.
     // The position is at the center of mass.

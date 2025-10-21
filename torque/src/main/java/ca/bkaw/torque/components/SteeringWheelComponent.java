@@ -40,15 +40,22 @@ public class SteeringWheelComponent implements VehicleComponent, PartTransformat
             .map(SeatsComponent::getDriverInput)
             .orElse(null);
 
-        // this.angle *= 0.9f;
+        this.angle *= 0.95f;
 
         if (driverInput != null) {
             if (driverInput.left) {
-                this.angle -= 0.1f;
+                this.angle -= 0.5f;
             }
             if (driverInput.right) {
-                this.angle += 0.1f;
+                this.angle += 0.5f;
             }
+        }
+
+        if (this.angle > 12f) {
+            this.angle = 12f;
+        }
+        if (this.angle < -12f) {
+            this.angle = -12f;
         }
     }
 

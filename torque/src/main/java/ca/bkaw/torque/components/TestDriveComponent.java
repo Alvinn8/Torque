@@ -51,10 +51,10 @@ public class TestDriveComponent implements VehicleComponent {
             if (driverInput.sprint) {
                 magnitude *= 10;
             }
-            if (driverInput.forward) {
+            if (driverInput.forward && false) {
                 rbc.addForce(new Vector3d(0, 0, -magnitude).rotate(new Quaterniond(rbc.getOrientation())), position);
             }
-            if (driverInput.backward) {
+            if (driverInput.backward && false) {
                 rbc.addForce(new Vector3d(0, 0, magnitude).rotate(new Quaterniond(rbc.getOrientation())), position);
             }
             if (false) {
