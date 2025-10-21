@@ -59,12 +59,8 @@ public class SeatsComponent implements VehicleComponent {
 
     @Override
     public void save(Vehicle vehicle, DataOutput data) {
-        // Do not bother saving the passenger data. If there are passengers at this time,
-        // make them exit the vehicle.
-        for (PassengerData passengerData : this.passengerData.values()) {
-            passengerData.exitSeat();
-        }
-        this.passengerData.clear();
+        // Do not bother saving the passenger data. During reloads, passengers will
+        // be manually ejected.
     }
 
     @Override
@@ -206,6 +202,16 @@ public class SeatsComponent implements VehicleComponent {
         if (seat == null) return false;
         this.setPassenger(seat, passenger);
         return true;
+    }
+
+    /**
+     * Eject all passengers from the vehicle.
+     */
+    public void ejectAllPassengers() {
+        for (PassengerData passengerData : this.passengerData.values()) {
+            passengerData.exitSeat();
+        }
+        this.passengerData.clear();
     }
 
     /**

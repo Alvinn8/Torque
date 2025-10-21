@@ -323,6 +323,7 @@ public class VehicleManager {
         Iterator<Vehicle> iterator = this.vehicles.iterator();
         while (iterator.hasNext()) {
             Vehicle vehicle = iterator.next();
+            vehicle.getComponent(SeatsComponent.class).ifPresent(SeatsComponent::ejectAllPassengers);
             this.stopRendering(vehicle);
             iterator.remove();
         }
