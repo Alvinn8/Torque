@@ -98,8 +98,6 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
             return;
         }
         Vector3dc vehiclePosition = rbc.getPosition();
-        Vector3dc vehicleVelocity = rbc.getVelocity();
-        Vector3dc vehicleAngularVelocity = rbc.getAngularVelocity();
         Quaterniondc orientation = new Quaterniond(rbc.getOrientation());
 
         Input driverInput = vehicle.getComponent(SeatsComponent.class)
@@ -140,6 +138,19 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
         double normalForcePerWheel = vehicle.getType().mass() * GravityComponent.GRAVITATIONAL_ACCELERATION / this.wheels.size();
         double frictionForceLimit = TIRE_FRICTION_COEFFICIENT * normalForcePerWheel; // unit: Newton
 
+        // A wheel's lateral constraint affects the vehicle's angular velocity, which in
+        // turn changes what every other wheel's lateral constraint sees - e.g. one
+        // wheel correcting its slip can spin the car just enough to induce slip in a
+        // wheel on the other side. Solving each wheel's constraint independently
+        // against a single shared snapshot of velocity/angular velocity would miss
+        // that: it would compute the correction each wheel needs "if it were the only
+        // one acting", and summing several such corrections together can overshoot.
+        // So instead, gather all wheels' lateral constraints first and solve them
+        // together against shared scratch state, the same Gauss-Seidel approach as
+        // ImpulseCollisionComponent uses for multiple simultaneous collision contacts.
+        record LateralConstraint(VelocityConstraint constraint, Vector3d contactPatch, double maxImpulse) {}
+        List<LateralConstraint> lateralConstraints = new ArrayList<>(this.wheels.size());
+
         for (WheelData wheel : this.wheels) {
             // Calculate direction vectors and the contact patch position.
             Vector3dc wheelForward = vehicleForward;
@@ -177,14 +188,14 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
             // Update visual wheel rotation
             wheel.rotation += wheel.speed * (float) RigidBodyComponent.DELTA_TIME;
 
-            // Cornering (lateral) force: solve a velocity constraint that resists
-            // sideways slip at the contact patch, instead of a slip-angle spring that
-            // has to "catch up" after slip has already happened. The available
-            // lateral force is whatever traction the driving force above hasn't
-            // already used (a basic friction circle), so a wheel that is spinning or
-            // braking hard has less grip left over for cornering, and a wheel that
-            // demands more cornering force than the tire can provide will still slip
-            // sideways - the clamp is what decides that, not vehicle speed.
+            // Cornering (lateral) constraint: resists sideways slip at the contact
+            // patch, instead of a slip-angle spring that has to "catch up" after slip
+            // has already happened. The available lateral force is whatever traction
+            // the driving force above hasn't already used (a basic friction circle),
+            // so a wheel that is spinning or braking hard has less grip left over for
+            // cornering, and a wheel that demands more cornering force than the tire
+            // can provide will still slip sideways - the clamp is what decides that,
+            // not vehicle speed. It is solved below, together with every other wheel.
             double remainingLateralLimit = Math.sqrt(Math.max(0,
                 frictionForceLimit * frictionForceLimit - longitudinalForce * longitudinalForce));
             double maxLateralImpulse = remainingLateralLimit * RigidBodyComponent.DELTA_TIME;
@@ -193,13 +204,32 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
                 worldContactPatch, vehiclePosition, wheelRight,
                 1.0 / vehicle.getType().mass(), inertiaTensorInverse
             );
-            double impulse = lateralConstraint.solve(
-                vehicleVelocity, vehicleAngularVelocity, 0.0, -maxLateralImpulse, maxLateralImpulse
-            );
-            Vector3d lateralForce = new Vector3d(wheelRight).mul(impulse / RigidBodyComponent.DELTA_TIME);
-            rbc.addForce(lateralForce, worldContactPatch);
+            lateralConstraints.add(new LateralConstraint(lateralConstraint, worldContactPatch, maxLateralImpulse));
+        }
 
-            Debug.visualizeVectorAt(rbc.getWorld(), worldContactPatch, new Vector3d(lateralForce).div(1000), "pink_wool");
+        // Solve all wheels' lateral constraints together against shared scratch
+        // velocity/angular velocity, iterating so that the effect of correcting one
+        // wheel's slip is visible to every other wheel's constraint within this same
+        // tick, rather than only showing up a tick later once forces are integrated.
+        Vector3d workingVelocity = new Vector3d(rbc.getVelocity());
+        Vector3d workingAngularVelocity = new Vector3d(rbc.getAngularVelocity());
+        for (int iteration = 0; iteration < 8; iteration++) {
+            for (LateralConstraint lc : lateralConstraints) {
+                double impulse = lc.constraint().solve(
+                    workingVelocity, workingAngularVelocity, 0.0, -lc.maxImpulse(), lc.maxImpulse()
+                );
+                lc.constraint().applyImpulse(workingVelocity, workingAngularVelocity, impulse);
+            }
+        }
+
+        // Express each wheel's total resolved impulse as an equivalent average force
+        // over the tick, so it goes through the same addForce path as every other
+        // force acting on the vehicle, and remains visible/limitable there.
+        for (LateralConstraint lc : lateralConstraints) {
+            Vector3d lateralForce = new Vector3d(lc.constraint().getDirection())
+                .mul(lc.constraint().getTotalImpulse() / RigidBodyComponent.DELTA_TIME);
+            rbc.addForce(lateralForce, lc.contactPatch());
+            Debug.visualizeVectorAt(rbc.getWorld(), lc.contactPatch(), new Vector3d(lateralForce).div(1000), "pink_wool");
         }
     }
 
