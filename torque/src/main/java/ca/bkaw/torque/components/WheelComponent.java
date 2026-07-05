@@ -3,6 +3,7 @@ package ca.bkaw.torque.components;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
+import ca.bkaw.torque.physics.VelocityConstraint;
 import ca.bkaw.torque.platform.Input;
 import ca.bkaw.torque.tags.WheelTags;
 import ca.bkaw.torque.util.Debug;
@@ -13,6 +14,7 @@ import ca.bkaw.torque.vehicle.VehicleComponentType;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3d;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Quaternionf;
@@ -34,6 +36,12 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
      * The ratio between how much the wheels turn for each degree of the steering wheel.
      */
     public static final float STEERING_WHEEL_RATIO = 1f / 10f;
+
+    /**
+     * Approximate coefficient of friction between tires and the ground, shared as one
+     * traction budget between longitudinal (driving) and lateral (cornering) force.
+     */
+    private static final double TIRE_FRICTION_COEFFICIENT = 1.0;
 
     private static final class WheelData {
         private final WheelTags.Wheel wheel;
@@ -126,6 +134,12 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
             Debug.highlightPositionSmall(rbc.getWorld(), new Vector3d(turningRadius, 0, this.backAxleOffset).rotate(orientation).add(vehiclePosition), "blue_wool");
         }
 
+        // Shared across wheels since we assume the vehicle's weight is spread evenly
+        // across them (no suspension/load-transfer model yet).
+        Matrix3d inertiaTensorInverse = rbc.getInertiaTensorInverse(vehicle);
+        double normalForcePerWheel = vehicle.getType().mass() * GravityComponent.GRAVITATIONAL_ACCELERATION / this.wheels.size();
+        double frictionForceLimit = TIRE_FRICTION_COEFFICIENT * normalForcePerWheel; // unit: Newton
+
         for (WheelData wheel : this.wheels) {
             // Calculate direction vectors and the contact patch position.
             Vector3dc wheelForward = vehicleForward;
@@ -148,9 +162,14 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
                 .rotate(orientation)
                 .add(vehiclePosition);
 
-            // Apply driving force from engine to driven wheels
+            // Apply driving force from engine to driven wheels, limited by available
+            // traction. If the requested force exceeds what the tire can transmit,
+            // the wheel spins instead (the excess is simply not applied).
+            double longitudinalForce = 0;
             if (wheel.wheel.driven()) {
-                Vector3d drivingForce = new Vector3d(wheelForward).mul(driveMagnitude / this.numberOfDrivenWheels);
+                double requestedForce = driveMagnitude / this.numberOfDrivenWheels;
+                longitudinalForce = Math.max(-frictionForceLimit, Math.min(frictionForceLimit, requestedForce));
+                Vector3d drivingForce = new Vector3d(wheelForward).mul(longitudinalForce);
                 rbc.addForce(drivingForce, worldContactPatch);
                 Debug.visualizeVectorAt(rbc.getWorld(), worldContactPatch, new Vector3d(drivingForce).div(1000), "red_wool");
             }
@@ -158,23 +177,26 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
             // Update visual wheel rotation
             wheel.rotation += wheel.speed * (float) RigidBodyComponent.DELTA_TIME;
 
-            // Get the local velocity of the wheel, with the effect of angular velocity
-            Vector3d velocity = new Vector3d(vehicleAngularVelocity).cross(new Vector3d(worldContactPatch).sub(vehiclePosition)).add(vehicleVelocity);
+            // Cornering (lateral) force: solve a velocity constraint that resists
+            // sideways slip at the contact patch, instead of a slip-angle spring that
+            // has to "catch up" after slip has already happened. The available
+            // lateral force is whatever traction the driving force above hasn't
+            // already used (a basic friction circle), so a wheel that is spinning or
+            // braking hard has less grip left over for cornering, and a wheel that
+            // demands more cornering force than the tire can provide will still slip
+            // sideways - the clamp is what decides that, not vehicle speed.
+            double remainingLateralLimit = Math.sqrt(Math.max(0,
+                frictionForceLimit * frictionForceLimit - longitudinalForce * longitudinalForce));
+            double maxLateralImpulse = remainingLateralLimit * RigidBodyComponent.DELTA_TIME;
 
-            // Cornering force (lateral force)
-            // Firstly, we need to calculate the slip angle.
-            double forwardSpeed = velocity.dot(wheelForward);
-            double lateralSpeed = velocity.dot(wheelRight);
-
-            double slipAngle = Math.atan2(lateralSpeed, Math.abs(forwardSpeed) + 0.01);
-
-            // At low velocities, limit the slip angle to avoid oscillations.
-            slipAngle *= Math.min(1.0, Math.abs(forwardSpeed) / 3.0);
-
-            // Simple formula with a hard-coded cornering stiffness
-            double lateralForceMagnitude = -slipAngle * 15000;
-
-            Vector3d lateralForce = new Vector3d(wheelRight).mul(lateralForceMagnitude);
+            VelocityConstraint lateralConstraint = new VelocityConstraint(
+                worldContactPatch, vehiclePosition, wheelRight,
+                1.0 / vehicle.getType().mass(), inertiaTensorInverse
+            );
+            double impulse = lateralConstraint.solve(
+                vehicleVelocity, vehicleAngularVelocity, 0.0, -maxLateralImpulse, maxLateralImpulse
+            );
+            Vector3d lateralForce = new Vector3d(wheelRight).mul(impulse / RigidBodyComponent.DELTA_TIME);
             rbc.addForce(lateralForce, worldContactPatch);
 
             Debug.visualizeVectorAt(rbc.getWorld(), worldContactPatch, new Vector3d(lateralForce).div(1000), "pink_wool");
