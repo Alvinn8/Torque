@@ -18,6 +18,7 @@ dependencies {
     compileOnly("io.netty:netty-transport:${project.property("netty_version")}")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.joml:joml:${project.property("joml_version")}")
 }
 
 tasks.test {
