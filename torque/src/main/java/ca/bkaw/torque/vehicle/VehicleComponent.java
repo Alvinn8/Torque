@@ -26,8 +26,26 @@ public interface VehicleComponent {
 
     /**
      * Called each tick when the vehicle is being simulated.
+     * <p>
+     * This is the phase where components accumulate forces
+     * ({@link ca.bkaw.torque.components.RigidBodyComponent#addForce}) and register
+     * velocity constraints
+     * ({@link ca.bkaw.torque.components.RigidBodyComponent#addConstraint}). Nothing is
+     * integrated yet, so the order components tick in does not affect the physics.
      *
      * @param vehicle The vehicle this component belongs to.
      */
     void tick(Vehicle vehicle);
+
+    /**
+     * Called each tick after all components have {@link #tick ticked}.
+     * <p>
+     * This is where {@link ca.bkaw.torque.components.RigidBodyComponent} solves the
+     * registered constraints and integrates the accumulated forces, guaranteeing that
+     * everything registered during the tick phase - regardless of component order -
+     * takes effect in the same tick.
+     *
+     * @param vehicle The vehicle this component belongs to.
+     */
+    default void postTick(Vehicle vehicle) {}
 }

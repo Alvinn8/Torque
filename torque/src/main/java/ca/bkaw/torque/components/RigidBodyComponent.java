@@ -1,5 +1,6 @@
 package ca.bkaw.torque.components;
 
+import ca.bkaw.torque.physics.VelocityConstraint;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.DataInput;
@@ -15,12 +16,23 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RigidBodyComponent implements VehicleComponent {
     public static final VehicleComponentType TYPE = VehicleComponentType.create(
         new Identifier("torque", "rigid_body"),
         RigidBodyComponent::new
     );
     public static final double DELTA_TIME = 1 / 20.0; // one tick, unit: second
+
+    /**
+     * The number of Gauss-Seidel iterations used to solve the registered velocity
+     * constraints each tick. Because constraint impulses are clamped, running out of
+     * iterations before convergence degrades into slight residual slip/penetration
+     * rather than instability.
+     */
+    public static final int SOLVER_ITERATIONS = 8;
 
     // All vectors are stored in world coordinates.
     // The position is at the center of mass.
@@ -35,6 +47,7 @@ public class RigidBodyComponent implements VehicleComponent {
     // Accumulated each frame
     private final Vector3d netForce; // unit: Newton
     private final Vector3d netTorque; // unit: Newton-meter
+    private final List<VelocityConstraint> constraints = new ArrayList<>();
 
     public RigidBodyComponent(Vehicle vehicle, DataInput data) {
         // The world is not serialized. Use the world of the entity.
@@ -62,19 +75,64 @@ public class RigidBodyComponent implements VehicleComponent {
 
     @Override
     public void tick(Vehicle vehicle) {
+        // Forces and constraints are accumulated during the tick phase and integrated
+        // in postTick, after all components have ticked, so that the component order
+        // does not decide whether a force takes effect this tick or the next.
+    }
 
-        // Apply linear motion.
+    /**
+     * Register a velocity constraint to be solved this tick.
+     * <p>
+     * All constraints registered during the tick phase are solved together in
+     * {@link #postTick} with iterative sequential impulses, so constraints that
+     * affect each other (wheels, collision contacts) negotiate within the tick
+     * instead of fighting across ticks.
+     *
+     * @param constraint The constraint.
+     */
+    public void addConstraint(@NotNull VelocityConstraint constraint) {
+        this.constraints.add(constraint);
+    }
+
+    @Override
+    public void postTick(Vehicle vehicle) {
+        // 1. Integrate external forces into velocity. This is the predicted velocity
+        // the constraint solver corrects: constraints see the effect of this tick's
+        // gravity, engine force, drag, etc. instead of last tick's.
         Vector3d acceleration = this.netForce.div(vehicle.getType().mass()); // unit: meter/second^2
         this.velocity.add(acceleration.mul(DELTA_TIME));
-        vehicle.getComponent(SimpleCollisionComponent.class).ifPresent(simpleCollision -> simpleCollision.run(vehicle));
-        this.position.add(this.velocity.mul(DELTA_TIME, new Vector3d()));
         this.netForce.zero();
 
-        // Apply angular motion.
         Matrix3d worldInertiaTensorInverse = this.getInertiaTensorInverse(vehicle); // unit: (kg m^2)^-1
         Vector3d angularAcceleration = this.netTorque.mul(worldInertiaTensorInverse); // unit: radians/second^2
         this.angularVelocity.add(angularAcceleration.mul(DELTA_TIME));
-        // Update orientation based on angular velocity.
+        this.netTorque.zero();
+
+        // 2. Warm start: apply each constraint's impulse from last tick up front, so
+        // a fixed number of iterations starts near the previous solution instead of
+        // from zero.
+        for (VelocityConstraint constraint : this.constraints) {
+            double warmStartImpulse = constraint.getTotalImpulse();
+            if (warmStartImpulse != 0) {
+                constraint.applyImpulse(this.velocity, this.angularVelocity, warmStartImpulse);
+            }
+        }
+
+        // 3. Solve all constraints together with sequential impulses (projected
+        // Gauss-Seidel), so each constraint sees the corrections of the others.
+        for (int i = 0; i < SOLVER_ITERATIONS; i++) {
+            for (VelocityConstraint constraint : this.constraints) {
+                constraint.solveIteration(this.velocity, this.angularVelocity);
+            }
+        }
+        this.constraints.clear();
+
+        // 4. Block collision handling that directly clamps velocity.
+        vehicle.getComponent(SimpleCollisionComponent.class).ifPresent(simpleCollision -> simpleCollision.run(vehicle));
+
+        // 5. Integrate velocity into position and orientation.
+        this.position.add(this.velocity.mul(DELTA_TIME, new Vector3d()));
+
         float angle = (float) (this.angularVelocity.length() * DELTA_TIME); // unit: radians
         if (angle > 1e-6) {
             Quaternionf deltaOrientation = new Quaternionf().rotateAxis(
@@ -83,10 +141,8 @@ public class RigidBodyComponent implements VehicleComponent {
             );
             this.orientation.mul(deltaOrientation).normalize();
         }
-        this.netTorque.zero();
 
         // Dampen angular velocity to prevent jitter.
-        // this.angularVelocity.mul(0.8);
         if (this.angularVelocity.lengthSquared() < 1e-2) {
             this.angularVelocity.zero();
         }

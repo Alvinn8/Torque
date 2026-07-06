@@ -61,10 +61,18 @@ public class Vehicle {
 
     /**
      * Called each tick.
+     * <p>
+     * Runs in two phases: first all components {@link VehicleComponent#tick tick}
+     * (accumulating forces and registering constraints), then all components
+     * {@link VehicleComponent#postTick post-tick} (where the rigid body solves the
+     * constraints and integrates).
      */
     public void tick() {
         for (VehicleComponent component : this.components) {
             component.tick(this);
+        }
+        for (VehicleComponent component : this.components) {
+            component.postTick(this);
         }
     }
 }
