@@ -33,6 +33,9 @@
             "type": "torque:turn_signal"
         },
         {
+            "type": "torque:guide_lines"
+        },
+        {
             "type": "torque:hitbox",
             "width": 2.3,
             "height": 2.0

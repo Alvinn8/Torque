@@ -1,6 +1,7 @@
 package ca.bkaw.torque.render;
 
 import ca.bkaw.torque.Torque;
+import ca.bkaw.torque.components.GuideLinesComponent;
 import ca.bkaw.torque.components.HitboxComponent;
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
@@ -24,6 +25,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,11 @@ public class VehicleRenderer {
     private final @Nullable SeatTags.Seat viewportSeat;
     private final Map<SeatTags.Seat, RenderEntity> seatEntities = new HashMap<>();
     private final @Nullable InteractionEntity hitbox;
+
+    // Guide line displays, one per segment, reused between ticks. The item
+    // currently set on each display is tracked so it is only sent when it changes.
+    private final List<ItemDisplay> guideLineDisplays = new ArrayList<>();
+    private final List<Identifier> guideLineDisplayItems = new ArrayList<>();
 
     // Cached from RigidBodyComponent
     private World vehicleWorld;
@@ -187,9 +194,61 @@ public class VehicleRenderer {
         // Perform seat rendering.
         this.vehicle.getComponent(SeatsComponent.class).ifPresent(this::renderSeats);
 
+        // Perform guide line rendering.
+        this.vehicle.getComponent(GuideLinesComponent.class).ifPresent(this::renderGuideLines);
+
         // Perform hitbox rendering.
         if (this.hitbox != null) {
             this.hitbox.setPosition(this.vehiclePosition);
+        }
+    }
+
+    /**
+     * Render the guide lines computed by the {@link GuideLinesComponent} as thin
+     * boxes on the ground, one item display per segment.
+     */
+    private void renderGuideLines(@NotNull GuideLinesComponent guideLines) {
+        final float lineThickness = 0.02f;
+        // Stretch segments slightly so consecutive segments overlap on curves
+        // instead of leaving gaps where they meet at an angle.
+        final float lengthMargin = 1.1f;
+
+        List<GuideLinesComponent.Segment> segments = guideLines.getSegments();
+        for (int i = 0; i < segments.size(); i++) {
+            GuideLinesComponent.Segment segment = segments.get(i);
+            Vector3d middle = segment.start().add(segment.end(), new Vector3d()).mul(0.5);
+
+            ItemDisplay display;
+            if (i < this.guideLineDisplays.size()) {
+                display = this.guideLineDisplays.get(i);
+            } else {
+                display = this.vehicleWorld.spawnItemDisplay(middle);
+                display.setTeleportDuration(1);
+                display.setInterpolationDuration(1);
+                this.guideLineDisplays.add(display);
+                this.guideLineDisplayItems.add(null);
+            }
+
+            if (!segment.item().equals(this.guideLineDisplayItems.get(i))) {
+                display.setItem(this.vehicle.getTorque().getPlatform().createModelItem(segment.item()));
+                this.guideLineDisplayItems.set(i, segment.item());
+            }
+
+            Vector3d direction = segment.end().sub(segment.start(), new Vector3d());
+            Quaternionf rotation = new Quaternionf()
+                .rotationTo(new Vector3f(0, 0, 1), new Vector3f(direction));
+            display.setTransformation(new Matrix4f()
+                .rotate(rotation)
+                .scale((float) segment.width(), lineThickness, (float) direction.length() * lengthMargin)
+            );
+            display.setPosition(middle);
+            display.setStartInterpolation(0);
+        }
+
+        // Remove displays for segments that no longer exist.
+        while (this.guideLineDisplays.size() > segments.size()) {
+            this.guideLineDisplays.removeLast().remove();
+            this.guideLineDisplayItems.removeLast();
         }
     }
 
@@ -268,6 +327,11 @@ public class VehicleRenderer {
         for (RenderEntity entity : this.seatEntities.values()) {
             entity.display.remove();
         }
+        for (ItemDisplay display : this.guideLineDisplays) {
+            display.remove();
+        }
+        this.guideLineDisplays.clear();
+        this.guideLineDisplayItems.clear();
         if (this.hitbox != null) {
             this.hitbox.remove();
         }

@@ -7,6 +7,7 @@ import ca.bkaw.torque.components.ImpulseCollisionComponent;
 import ca.bkaw.torque.components.DragComponent;
 import ca.bkaw.torque.components.FloatComponent;
 import ca.bkaw.torque.components.GravityComponent;
+import ca.bkaw.torque.components.GuideLinesComponent;
 import ca.bkaw.torque.components.OrientationLockComponent;
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
@@ -81,6 +82,7 @@ public class VehicleManager {
             DragComponent.TYPE,
             FloatComponent.TYPE,
             GravityComponent.TYPE,
+            GuideLinesComponent.TYPE,
             HitboxComponent.TYPE,
             ImpulseCollisionComponent.TYPE,
             OrientationLockComponent.TYPE,

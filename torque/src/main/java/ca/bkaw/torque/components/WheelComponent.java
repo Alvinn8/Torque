@@ -127,13 +127,7 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
             .orElse(0.0f);
 
         // Ackermann steering geometry
-        float averageSteeringAngle = steeringWheelAngle * STEERING_WHEEL_RATIO;
-        double turningRadius;
-        if (Math.abs(averageSteeringAngle) < 1e-6) {
-            turningRadius = Double.POSITIVE_INFINITY;
-        } else {
-            turningRadius = this.wheelbase * Math.tan(Math.PI / 2 - averageSteeringAngle);
-        }
+        double turningRadius = this.getTurningRadius(steeringWheelAngle);
         if (Double.isFinite(turningRadius) && Math.abs(turningRadius) < 30) {
             Debug.highlightPositionSmall(rbc.getWorld(), new Vector3d(turningRadius, 0, this.backAxleOffset).rotate(orientation).add(vehiclePosition), "blue_wool");
         }
@@ -214,6 +208,37 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
             rbc.addConstraint(lateralConstraint);
             wheel.lateralConstraint = lateralConstraint;
         }
+    }
+
+    /**
+     * Get the turning radius that the vehicle follows for the given steering wheel
+     * angle, according to the Ackermann steering geometry.
+     * <p>
+     * The turning circle's center is located at {@code (turningRadius, 0, backAxleOffset)}
+     * in model coordinates, so a positive radius means the center is on the right
+     * side of the vehicle (a right turn) and a negative radius means a left turn.
+     *
+     * @param steeringWheelAngle The steering wheel angle. Unit: radians.
+     * @return The signed turning radius, or {@link Double#POSITIVE_INFINITY} when
+     * driving straight. Unit: meters.
+     */
+    public double getTurningRadius(float steeringWheelAngle) {
+        float averageSteeringAngle = steeringWheelAngle * STEERING_WHEEL_RATIO;
+        if (Math.abs(averageSteeringAngle) < 1e-6) {
+            return Double.POSITIVE_INFINITY;
+        }
+        return this.wheelbase * Math.tan(Math.PI / 2 - averageSteeringAngle);
+    }
+
+    /**
+     * Get the z coordinate of the back axle in model coordinates.
+     * <p>
+     * In model coordinates +Z is backwards.
+     *
+     * @return The offset. Unit: meters.
+     */
+    public double getBackAxleOffset() {
+        return this.backAxleOffset;
     }
 
     @Override
