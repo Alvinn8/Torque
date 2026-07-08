@@ -3,6 +3,7 @@ package ca.bkaw.torque.components;
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
+import ca.bkaw.torque.tags.LightTags;
 import ca.bkaw.torque.vehicle.PartTransformationProvider;
 import ca.bkaw.torque.vehicle.Vehicle;
 import ca.bkaw.torque.vehicle.VehicleComponent;
@@ -41,12 +42,14 @@ public class TurnSignalComponent implements VehicleComponent, PartTransformation
 
     @Override
     public @Nullable PartTransform getPartTransform(@NotNull String partName, @Nullable Object partData, @NotNull Vehicle vehicle) {
-        boolean glow = this.timeTicks % 20 < 10; // Toggle every second
-        if (partName.equals("light_turn_signal_left")) {
-            return new PartTransform(new Quaternionf(), new Vector3f(), this.left && glow, YELLOW);
-        } else if (partName.equals("light_turn_signal_right")) {
-            return new PartTransform(new Quaternionf(), new Vector3f(), this.right && glow, YELLOW);
+        if (!(partData instanceof LightTags.Light light)) {
+            return null;
         }
-        return null;
+        boolean glow = this.timeTicks % 20 < 10; // Toggle every second
+        return switch (light.name()) {
+            case "turn_signal_left" -> new PartTransform(new Quaternionf(), new Vector3f(), this.left && glow, YELLOW);
+            case "turn_signal_right" -> new PartTransform(new Quaternionf(), new Vector3f(), this.right && glow, YELLOW);
+            default -> null;
+        };
     }
 }

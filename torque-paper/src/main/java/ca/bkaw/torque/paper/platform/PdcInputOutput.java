@@ -47,6 +47,16 @@ public class PdcInputOutput implements DataInput, DataOutput {
     }
 
     @Override
+    public String readString(String key, String defaultValue) {
+        return this.pdc.getOrDefault(this.makeKey(key), PersistentDataType.STRING, defaultValue);
+    }
+
+    @Override
+    public void writeString(String key, String value) {
+        this.pdc.set(this.makeKey(key), PersistentDataType.STRING, value);
+    }
+
+    @Override
     public float readFloat(String key, float defaultValue) {
         return this.pdc.getOrDefault(this.makeKey(key), PersistentDataType.FLOAT, defaultValue);
     }

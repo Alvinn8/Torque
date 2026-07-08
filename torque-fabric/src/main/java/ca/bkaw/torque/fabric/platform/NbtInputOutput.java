@@ -62,6 +62,16 @@ public class NbtInputOutput implements DataInput, DataOutput {
     }
 
     @Override
+    public String readString(String key, String defaultValue) {
+        return this.nbt.getStringOr(makeKey(key), defaultValue);
+    }
+
+    @Override
+    public void writeString(String key, String value) {
+        this.nbt.putString(makeKey(key), value);
+    }
+
+    @Override
     public float readFloat(String key, float defaultValue) {
         return this.nbt.getFloatOr(makeKey(key), defaultValue);
     }

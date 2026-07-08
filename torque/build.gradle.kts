@@ -19,6 +19,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.joml:joml:${project.property("joml_version")}")
+    testImplementation("com.google.code.gson:gson:${project.property("gson_version")}")
 }
 
 tasks.test {

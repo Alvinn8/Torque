@@ -1,0 +1,126 @@
+{
+    "model": "torque:vehicle/police_car",
+    "mass_kg": 1800,
+    "components": [
+        {
+            "type": "torque:test_drive"
+        },
+        {
+            "type": "torque:drag"
+        },
+        {
+            "type": "torque:gravity"
+        },
+        {
+            "type": "torque:orientation_lock"
+        },
+        {
+            "type": "torque:simple_collision"
+        },
+        {
+            "type": "torque:rigid_body"
+        },
+        {
+            "type": "torque:seats"
+        },
+        {
+            "type": "torque:steering_wheel"
+        },
+        {
+            "type": "torque:wheel"
+        },
+        {
+            "type": "torque:signal_lights",
+            "default": "emergency",
+            "patterns": {
+                "emergency": {
+                    "tracks": [
+                        {
+                            "lights": ["beacon_blue_left"],
+                            "color": "#2E5BFF",
+                            "sequence": [3, 3, 3, 11],
+                            "phase": 0
+                        },
+                        {
+                            "lights": ["beacon_blue_right"],
+                            "color": "#2E5BFF",
+                            "sequence": [3, 3, 3, 11],
+                            "phase": 10
+                        },
+                        {
+                            "lights": ["rear_amber_left"],
+                            "color": "#FFB300",
+                            "sequence": [9, 15],
+                            "phase": 0
+                        },
+                        {
+                            "lights": ["rear_amber_right"],
+                            "color": "#FFB300",
+                            "sequence": [9, 15],
+                            "phase": 12
+                        }
+                    ]
+                },
+                "stop_signal": {
+                    "tracks": [
+                        {
+                            "lights": ["beacon_blue_left"],
+                            "color": "#2E5BFF",
+                            "sequence": [2, 2],
+                            "phase": 0
+                        },
+                        {
+                            "lights": ["beacon_blue_right"],
+                            "color": "#2E5BFF",
+                            "sequence": [2, 2],
+                            "phase": 2
+                        },
+                        {
+                            "lights": ["rear_amber_left", "rear_amber_right"],
+                            "color": "#FF3020",
+                            "sequence": [1]
+                        }
+                    ]
+                },
+                "traffic_director": {
+                    "tracks": [
+                        {
+                            "lights": ["rear_amber_left"],
+                            "color": "#FFB300",
+                            "sequence": [12, 12],
+                            "phase": 0
+                        },
+                        {
+                            "lights": ["rear_amber_right"],
+                            "color": "#FFB300",
+                            "sequence": [12, 12],
+                            "phase": 12
+                        },
+                        {
+                            "lights": ["beacon_blue_left", "beacon_blue_right"],
+                            "color": "#2E5BFF",
+                            "sequence": [2, 2, 2, 34]
+                        }
+                    ]
+                },
+                "hazard": {
+                    "tracks": [
+                        {
+                            "lights": ["turn_signal_left", "turn_signal_right"],
+                            "color": "#FFB300",
+                            "sequence": [10, 10]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "torque:turn_signal"
+        },
+        {
+            "type": "torque:hitbox",
+            "width": 2.3,
+            "height": 2.2
+        }
+    ]
+}

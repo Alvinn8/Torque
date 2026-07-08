@@ -10,6 +10,7 @@ import ca.bkaw.torque.components.GravityComponent;
 import ca.bkaw.torque.components.OrientationLockComponent;
 import ca.bkaw.torque.components.RigidBodyComponent;
 import ca.bkaw.torque.components.SeatsComponent;
+import ca.bkaw.torque.components.SignalLightsComponent;
 import ca.bkaw.torque.components.SimpleCollisionComponent;
 import ca.bkaw.torque.components.SteeringWheelComponent;
 import ca.bkaw.torque.components.TestDriveComponent;
@@ -86,6 +87,7 @@ public class VehicleManager {
             OrientationLockComponent.TYPE,
             RigidBodyComponent.TYPE,
             SeatsComponent.TYPE,
+            SignalLightsComponent.TYPE,
             SimpleCollisionComponent.TYPE,
             SteeringWheelComponent.TYPE,
             TestDriveComponent.TYPE,
