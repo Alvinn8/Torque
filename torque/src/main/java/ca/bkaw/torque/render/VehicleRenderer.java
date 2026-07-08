@@ -175,6 +175,7 @@ public class VehicleRenderer {
                 .translate(viewportTranslation)
                 .rotate(this.vehicleOrientation)
                 .translate(modelPart.translation())
+                .translate(partTransform.getTranslation()) // Component-controlled translation (body-local, e.g. suspension travel)
                 .scale(modelPart.scale())
                 .rotate(partTransform.getRotation()) // Apply component-controlled rotation
                 .rotate(ROTATE_Y_180)
