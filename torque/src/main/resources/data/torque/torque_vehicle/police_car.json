@@ -1,0 +1,113 @@
+{
+    "model": "torque:vehicle/police_car",
+    "mass_kg": 1800,
+    "components": [
+        {
+            "type": "torque:test_drive"
+        },
+        {
+            "type": "torque:drag"
+        },
+        {
+            "type": "torque:gravity"
+        },
+        {
+            "type": "torque:orientation_lock"
+        },
+        {
+            "type": "torque:simple_collision"
+        },
+        {
+            "type": "torque:rigid_body"
+        },
+        {
+            "type": "torque:seats"
+        },
+        {
+            "type": "torque:steering_wheel"
+        },
+        {
+            "type": "torque:wheel"
+        },
+        {
+            "type": "torque:turn_signal"
+        },
+        {
+            "type": "torque:warning_lights",
+            "active": "emergency",
+            "modes": {
+                "emergency": {
+                    "tracks": [
+                        {
+                            "lights": ["lightbar_1", "lightbar_2", "lightbar_3"],
+                            "color": "blue",
+                            "sequence": [2, 2, 2, 14]
+                        },
+                        {
+                            "lights": ["lightbar_4", "lightbar_5", "lightbar_6"],
+                            "color": "blue",
+                            "sequence": [2, 2, 2, 14],
+                            "phase": 10
+                        },
+                        {
+                            "lights": ["lightbar_1", "lightbar_6"],
+                            "color": "blue",
+                            "sequence": [1, 12]
+                        },
+                        {
+                            "lights": ["front_flash_left"],
+                            "color": "white",
+                            "sequence": [1, 6]
+                        },
+                        {
+                            "lights": ["front_flash_right"],
+                            "color": "white",
+                            "sequence": [1, 6],
+                            "phase": 3
+                        }
+                    ]
+                },
+                "scene": {
+                    "tracks": [
+                        { "lights": ["lightbar_1"], "color": "blue", "sequence": [1, 1, 1, 1, 1, 8] },
+                        { "lights": ["lightbar_2"], "color": "blue", "sequence": [1, 1, 1, 1, 1, 10], "phase": 3 },
+                        { "lights": ["lightbar_3"], "color": "blue", "sequence": [1, 1, 1, 1, 1, 12], "phase": 6 },
+                        { "lights": ["lightbar_4"], "color": "blue", "sequence": [1, 1, 1, 1, 1, 14], "phase": 9 },
+                        { "lights": ["lightbar_5"], "color": "blue", "sequence": [1, 1, 1, 1, 1, 18], "phase": 12 },
+                        { "lights": ["lightbar_6"], "color": "blue", "sequence": [1, 1, 1, 1, 1, 24], "phase": 15 }
+                    ]
+                },
+                "road_block": {
+                    "tracks": [
+                        { "lights": ["lightbar_1"], "color": "amber", "sequence": [3, 15] },
+                        { "lights": ["lightbar_2"], "color": "amber", "sequence": [3, 15], "phase": 3 },
+                        { "lights": ["lightbar_3"], "color": "amber", "sequence": [3, 15], "phase": 6 },
+                        { "lights": ["lightbar_4"], "color": "amber", "sequence": [3, 15], "phase": 9 },
+                        { "lights": ["lightbar_5"], "color": "amber", "sequence": [3, 15], "phase": 12 },
+                        { "lights": ["lightbar_6"], "color": "amber", "sequence": [3, 15], "phase": 15 }
+                    ]
+                },
+                "stop_signal": {
+                    "tracks": [
+                        {
+                            "lights": ["lightbar_3"],
+                            "color": "red",
+                            "sequence": [10, 10]
+                        },
+                        {
+                            "lights": ["lightbar_4"],
+                            "color": "red",
+                            "sequence": [10, 10],
+                            "phase": 10
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "torque:hitbox",
+            "width": 2.3,
+            "height": 2.0
+        }
+    ]
+}

@@ -1695,7 +1695,7 @@
 			"children": [18, 19]
 		},
 		{
-			"name": "#light=turn_singal_right",
+			"name": "#light=turn_signal_right",
 			"origin": [6, 9.39, 8],
 			"color": 0,
 			"children": [20, 21]
