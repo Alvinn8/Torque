@@ -5,6 +5,7 @@ import ca.bkaw.torque.platform.DataOutput;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.physics.VelocityConstraint;
 import ca.bkaw.torque.platform.Input;
+import ca.bkaw.torque.platform.World;
 import ca.bkaw.torque.tags.WheelTags;
 import ca.bkaw.torque.terrain.TerrainSampler;
 import ca.bkaw.torque.util.Debug;
@@ -241,6 +242,10 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
                 restContact.y - TERRAIN_RELIEF_BELOW
             );
 
+            if (Debug.getInstance() != null) {
+                this.debugVisualizeSurface(rbc.getWorld(), terrain, restContact);
+            }
+
             // How far the ground is above (+, compressing) or below (-, drooping)
             // the wheel's rest position.
             double groundOffset = ground != null ? ground.height() - restContact.y : Double.NEGATIVE_INFINITY;
@@ -341,6 +346,36 @@ public class WheelComponent implements VehicleComponent, PartTransformationProvi
                 .warmStart(previousImpulse);
             rbc.addConstraint(lateralConstraint);
             wheel.lateralConstraint = lateralConstraint;
+        }
+    }
+
+    /**
+     * Render a grid of small planes showing the smoothed terrain surface around a
+     * wheel, so the surface the wheel rides on (and its normals) can be inspected
+     * in game. Only called while debug is enabled, since the grid costs a full
+     * terrain sample per point.
+     */
+    private void debugVisualizeSurface(World world, TerrainSampler terrain, Vector3dc restContact) {
+        final double spacing = 0.4;
+        final int gridExtent = 2; // 5x5 planes per wheel
+        for (int gridX = -gridExtent; gridX <= gridExtent; gridX++) {
+            for (int gridZ = -gridExtent; gridZ <= gridExtent; gridZ++) {
+                double x = restContact.x() + gridX * spacing;
+                double z = restContact.z() + gridZ * spacing;
+                TerrainSampler.GroundSample sample = terrain.sample(
+                    x, z,
+                    restContact.y() + TERRAIN_RELIEF_ABOVE,
+                    restContact.y() - TERRAIN_RELIEF_BELOW
+                );
+                if (sample == null) {
+                    continue;
+                }
+                Debug.visualizePlane(
+                    world,
+                    new Vector3d(x, sample.height(), z), sample.normal(),
+                    spacing * 0.9, "light_blue_stained_glass"
+                );
+            }
         }
     }
 

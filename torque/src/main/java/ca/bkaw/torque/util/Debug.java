@@ -120,6 +120,30 @@ public class Debug {
         );
     }
 
+    /**
+     * Draw a small, thin plane centered at the given position, oriented so that it
+     * faces along the given normal. Useful for visualizing sampled surfaces, e.g.
+     * the smoothed terrain that wheels ride on.
+     *
+     * @param world The world.
+     * @param position The center of the plane.
+     * @param normal The surface normal the plane should face along.
+     * @param size The side length of the plane. Unit: meter.
+     * @param block The block to render the plane as.
+     */
+    public static void visualizePlane(World world, Vector3dc position, Vector3dc normal, double size, String block) {
+        if (instance == null) {
+            return;
+        }
+        Quaternionf orientation = new Quaternionf().rotationTo(new Vector3f(0, 1, 0), new Vector3f(normal));
+        OBB obb = new OBB(
+            new Vector3d(position),
+            new Vector3d(size / 2, 0.01, size / 2),
+            orientation
+        );
+        visualizeObb(world, obb, block);
+    }
+
     public static void visualizeVectorAt(World world, Vector3dc position, Vector3dc vector, String block) {
         if (instance == null) {
             return;
