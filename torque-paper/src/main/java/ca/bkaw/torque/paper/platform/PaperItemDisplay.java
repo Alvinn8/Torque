@@ -2,7 +2,6 @@ package ca.bkaw.torque.paper.platform;
 
 import ca.bkaw.torque.platform.DataInput;
 import ca.bkaw.torque.platform.DataOutput;
-import ca.bkaw.torque.platform.ItemDisplay;
 import ca.bkaw.torque.platform.ItemStack;
 import ca.bkaw.torque.platform.World;
 import io.papermc.paper.entity.TeleportFlag;
@@ -16,7 +15,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
-public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements ca.bkaw.torque.platform.ItemDisplay {
+public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements ca.bkaw.torque.platform.entity.ItemDisplay {
     public static final NamespacedKey PDC_VEHICLE_KEY = new NamespacedKey("torque", "vehicle");
 
     @Override
@@ -95,7 +94,7 @@ public record PaperItemDisplay(org.bukkit.entity.ItemDisplay entity) implements 
     }
 
     @Override
-    public void mountVehicle(@NotNull ItemDisplay entity) {
+    public void mountVehicle(@NotNull ca.bkaw.torque.platform.entity.ItemDisplay entity) {
         ((PaperItemDisplay) entity).entity().addPassenger(this.entity);
     }
 

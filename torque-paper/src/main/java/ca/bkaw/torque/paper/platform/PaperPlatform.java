@@ -1,25 +1,32 @@
 package ca.bkaw.torque.paper.platform;
 
+import ca.bkaw.torque.PlatformEvents;
 import ca.bkaw.torque.TorqueCommand;
 import ca.bkaw.torque.assets.send.BuiltInTcpResourcePackSender;
 import ca.bkaw.torque.paper.TorquePaper;
 import ca.bkaw.torque.platform.Identifier;
 import ca.bkaw.torque.platform.ItemStack;
 import ca.bkaw.torque.platform.Platform;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
 import io.netty.channel.Channel;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PaperPlatform implements Platform {
     private final TorquePaper plugin;
     private @Nullable TorqueCommand torqueCommand;
+    private @Nullable PlatformEvents eventHandler;
 
     public PaperPlatform(TorquePaper plugin) {
         this.plugin = plugin;
@@ -82,5 +89,18 @@ public class PaperPlatform implements Platform {
     @Override
     public void runEachTick(@NotNull Runnable runnable) {
         Bukkit.getScheduler().runTaskTimer(this.plugin, runnable, 1L, 1L);
+    }
+
+    @Override
+    public List<ItemDisplay> getAllItemDisplays() {
+        List<ItemDisplay> itemDisplays = new ArrayList<>();
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                if (entity instanceof org.bukkit.entity.ItemDisplay itemDisplay) {
+                    itemDisplays.add(new PaperItemDisplay(itemDisplay));
+                }
+            }
+        }
+        return itemDisplays;
     }
 }

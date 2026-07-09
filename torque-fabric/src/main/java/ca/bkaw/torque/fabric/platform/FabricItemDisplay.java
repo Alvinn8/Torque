@@ -90,7 +90,7 @@ public record FabricItemDisplay(Display.ItemDisplay entity) implements ItemDispl
 
     @Override
     public void mountVehicle(@NotNull ItemDisplay entity) {
-        this.entity.startRiding(((FabricItemDisplay) entity).entity(), true);
+        this.entity.startRiding(((FabricItemDisplay) entity).entity(), true, true);
     }
 
     @Override

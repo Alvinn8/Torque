@@ -1,6 +1,6 @@
 package ca.bkaw.torque.paper.platform;
 
-import ca.bkaw.torque.platform.InteractionEntity;
+import ca.bkaw.torque.platform.entity.InteractionEntity;
 import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.Location;
 import org.bukkit.entity.Interaction;
@@ -20,5 +20,10 @@ public record PaperInteractionEntity(Interaction entity) implements InteractionE
     public void setSize(float width, float height) {
         this.entity.setInteractionWidth(width);
         this.entity.setInteractionHeight(height);
+    }
+
+    @Override
+    public void remove() {
+        this.entity.remove();
     }
 }

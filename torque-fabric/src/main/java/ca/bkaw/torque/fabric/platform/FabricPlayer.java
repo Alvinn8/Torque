@@ -51,7 +51,7 @@ public record FabricPlayer(ServerPlayer entity) implements Player {
 
     @Override
     public void mountVehicle(ItemDisplay entity) {
-        this.entity.startRiding(((FabricItemDisplay) entity).entity(), true);
+        this.entity.startRiding(((FabricItemDisplay) entity).entity(), true, true);
     }
 
     @Override

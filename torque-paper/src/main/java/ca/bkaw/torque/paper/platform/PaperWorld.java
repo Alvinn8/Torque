@@ -2,8 +2,8 @@ package ca.bkaw.torque.paper.platform;
 
 import ca.bkaw.torque.platform.BlockState;
 import ca.bkaw.torque.platform.Identifier;
-import ca.bkaw.torque.platform.InteractionEntity;
-import ca.bkaw.torque.platform.ItemDisplay;
+import ca.bkaw.torque.platform.entity.InteractionEntity;
+import ca.bkaw.torque.platform.entity.ItemDisplay;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.jetbrains.annotations.NotNull;
