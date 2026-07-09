@@ -14,6 +14,8 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 
+import java.util.Set;
+
 /**
  * A handler for the {@code /torque} command. Note that the platform performs the
  * registration of the command and simply calls methods on this class.
@@ -25,12 +27,30 @@ public class TorqueCommand {
         this.torque = torque;
     }
 
-    public void summon(World world, Vector3d position) {
-        VehicleType vehicleType = this.torque.getVehicleManager().getVehicleTypeRegistry().get(new Identifier("torque", "car"));
+    /**
+     * Summon a vehicle of the given type.
+     *
+     * @param world The world to summon the vehicle in.
+     * @param position The position to summon the vehicle at.
+     * @param vehicleTypeIdentifier The identifier of the vehicle type to summon.
+     * @return True if the vehicle was summoned, false if the vehicle type does not exist.
+     */
+    public boolean summon(World world, Vector3d position, Identifier vehicleTypeIdentifier) {
+        VehicleType vehicleType = this.torque.getVehicleManager().getVehicleTypeRegistry().get(vehicleTypeIdentifier);
         if (vehicleType == null) {
-            throw new IllegalArgumentException("Vehicle type not found.");
+            return false;
         }
         this.torque.getVehicleManager().spawnVehicle(vehicleType, world, position);
+        return true;
+    }
+
+    /**
+     * Get the identifiers of all registered vehicle types.
+     *
+     * @return The identifiers.
+     */
+    public Set<Identifier> getVehicleTypeIdentifiers() {
+        return this.torque.getVehicleManager().getVehicleTypeRegistry().getIdentifiers();
     }
 
     private @Nullable Vehicle getClosestVehicle(Player player) {

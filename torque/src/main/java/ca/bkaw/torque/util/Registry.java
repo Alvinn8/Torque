@@ -4,8 +4,10 @@ import ca.bkaw.torque.platform.Identifier;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class Registry<T> {
@@ -36,6 +38,15 @@ public class Registry<T> {
      */
     public void clear() {
         this.map.clear();
+    }
+
+    /**
+     * Get the identifiers of all registered values.
+     *
+     * @return An unmodifiable view of the registered identifiers.
+     */
+    public Set<Identifier> getIdentifiers() {
+        return Collections.unmodifiableSet(this.map.keySet());
     }
 
     @Contract("null -> null")

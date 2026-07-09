@@ -4,10 +4,13 @@ import ca.bkaw.torque.TorqueCommand;
 import ca.bkaw.torque.paper.platform.PaperPlatform;
 import ca.bkaw.torque.paper.platform.PaperPlayer;
 import ca.bkaw.torque.paper.platform.PaperWorld;
+import ca.bkaw.torque.platform.Identifier;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
@@ -32,14 +35,39 @@ public class PaperTorqueCommand {
             Commands.literal("torque")
                 .then(
                     Commands.literal("summon")
-                        .executes(ctx -> {
-                            Location location = ctx.getSource().getLocation();
-                            this.handler().summon(
-                                new PaperWorld(location.getWorld()),
-                                new Vector3d(location.getX(), location.getY(), location.getZ())
-                            );
-                            return 1;
-                        })
+                        .then(
+                            Commands.argument("vehicle", ArgumentTypes.namespacedKey())
+                                .suggests((ctx, builder) -> {
+                                    String remaining = builder.getRemainingLowerCase();
+                                    for (Identifier identifier : this.handler().getVehicleTypeIdentifiers()) {
+                                        if (identifier.toString().startsWith(remaining) || identifier.key().startsWith(remaining)) {
+                                            builder.suggest(identifier.toString());
+                                        }
+                                    }
+                                    return builder.buildFuture();
+                                })
+                                .executes(ctx -> {
+                                    NamespacedKey key = ctx.getArgument("vehicle", NamespacedKey.class);
+                                    Identifier identifier;
+                                    try {
+                                        identifier = new Identifier(key.getNamespace(), key.getKey());
+                                    } catch (IllegalArgumentException e) {
+                                        ctx.getSource().getSender().sendMessage("Unknown vehicle type: " + key);
+                                        return 0;
+                                    }
+                                    Location location = ctx.getSource().getLocation();
+                                    boolean success = this.handler().summon(
+                                        new PaperWorld(location.getWorld()),
+                                        new Vector3d(location.getX(), location.getY(), location.getZ()),
+                                        identifier
+                                    );
+                                    if (!success) {
+                                        ctx.getSource().getSender().sendMessage("Unknown vehicle type: " + identifier);
+                                        return 0;
+                                    }
+                                    return 1;
+                                })
+                        )
                 )
                 .then(
                     Commands.literal("test")

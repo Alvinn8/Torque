@@ -4,10 +4,14 @@ import ca.bkaw.torque.TorqueCommand;
 import ca.bkaw.torque.fabric.platform.FabricPlatform;
 import ca.bkaw.torque.fabric.platform.FabricPlayer;
 import ca.bkaw.torque.fabric.platform.FabricWorld;
+import ca.bkaw.torque.platform.Identifier;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
@@ -32,14 +36,39 @@ public class FabricTorqueCommand {
             Commands.literal("torque")
                 .then(
                     Commands.literal("summon")
-                        .executes(ctx -> {
-                            Vec3 position = ctx.getSource().getPosition();
-                            this.handler().summon(
-                                new FabricWorld(ctx.getSource().getLevel()),
-                                new Vector3d(position.x(), position.y(), position.z())
-                            );
-                            return 1;
-                        })
+                        .then(
+                            Commands.argument("vehicle", ResourceLocationArgument.id())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
+                                    this.handler().getVehicleTypeIdentifiers().stream()
+                                        .map(identifier -> ResourceLocation.fromNamespaceAndPath(identifier.namespace(), identifier.key())),
+                                    builder
+                                ))
+                                .executes(ctx -> {
+                                    ResourceLocation id = ResourceLocationArgument.getId(ctx, "vehicle");
+                                    Identifier identifier;
+                                    try {
+                                        identifier = new Identifier(id.getNamespace(), id.getPath());
+                                    } catch (IllegalArgumentException e) {
+                                        ctx.getSource().sendFailure(
+                                            net.minecraft.network.chat.Component.literal("Unknown vehicle type: " + id)
+                                        );
+                                        return 0;
+                                    }
+                                    Vec3 position = ctx.getSource().getPosition();
+                                    boolean success = this.handler().summon(
+                                        new FabricWorld(ctx.getSource().getLevel()),
+                                        new Vector3d(position.x(), position.y(), position.z()),
+                                        identifier
+                                    );
+                                    if (!success) {
+                                        ctx.getSource().sendFailure(
+                                            net.minecraft.network.chat.Component.literal("Unknown vehicle type: " + identifier)
+                                        );
+                                        return 0;
+                                    }
+                                    return 1;
+                                })
+                        )
                 )
                 .then(
                     Commands.literal("test")
