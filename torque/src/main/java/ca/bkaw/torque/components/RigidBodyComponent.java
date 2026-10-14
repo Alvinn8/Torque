@@ -81,7 +81,10 @@ public class RigidBodyComponent implements VehicleComponent {
                 angle,
                 (float) this.angularVelocity.x(), (float) this.angularVelocity.y(), (float) this.angularVelocity.z()
             );
-            this.orientation.mul(deltaOrientation).normalize();
+            // The angular velocity is in world coordinates, so the delta rotation must
+            // be applied in world space, which means it is multiplied from the left.
+            // orientation = deltaOrientation * orientation
+            this.orientation.premul(deltaOrientation).normalize();
         }
         this.netTorque.zero();
 
