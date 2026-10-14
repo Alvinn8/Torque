@@ -17,8 +17,8 @@ public class InertiaTensor {
     private InertiaTensor() {}
 
     /**
-     * Calculate the inertia tensor for a set of model elements at the origin
-     * of the model.
+     * Calculate the inertia tensor for a set of model elements around their
+     * center of mass.
      *
      * @param mass The total mass of the model. Unit: kg
      * @param elements The elements.
@@ -33,6 +33,10 @@ public class InertiaTensor {
         double volume = getVolume(elements); // Unit: m^3
         double averageDensity = mass / volume; // Unit: kg/m^3
 
+        // The rigid body rotates around its center of mass, so the inertia tensor
+        // must be calculated around the center of mass.
+        Vector3d centerOfMass = getCenterOfMass(elements); // Unit: m
+
         for (ModelElement element : elements.getElements()) {
             String name = element.getName();
             if (name != null && name.startsWith(".")) {
@@ -43,7 +47,8 @@ public class InertiaTensor {
             double elementMass = averageDensity * elementVolume; // Unit: kg
 
             Vector3d extents = element.getTo().sub(element.getFrom()).absolute().div(Util.PIXELS_PER_BLOCK); // Unit: m
-            Vector3d elementCenter = element.getMiddle().div(Util.PIXELS_PER_BLOCK); // Unit: m
+            // The center of the element relative to the center of mass.
+            Vector3d elementCenter = getElementCenter(element).sub(centerOfMass); // Unit: m
 
             // Calculate the inertia tensor in the local space of the element.
             // For a rectangular box: I_xx = (1/12) * m * (h² + d²), etc.
@@ -53,34 +58,19 @@ public class InertiaTensor {
                 .m22(extents.x * extents.x + extents.y * extents.y)
                 .scale((1.0 / 12) * elementMass); // Unit: kg*m^2
 
-            // If we have rotation, we need to calculate where the center ends up after
-            // rotation, and we need to rotate the inertia tensor.
+            // If we have rotation, we need to rotate the inertia tensor.
             ModelElementRotation rotation = element.getRotation();
             if (rotation != null) {
-                // Find rotation matrix.
-                Matrix3d rotationMatrix = new Matrix3d().identity();
-                double angleRad = Math.toRadians(rotation.getAngle()); // Unit: rad
-                switch (rotation.getAxis()) {
-                    case X -> rotationMatrix.rotateX(angleRad);
-                    case Y -> rotationMatrix.rotateY(angleRad);
-                    case Z -> rotationMatrix.rotateZ(angleRad);
-                }
-
-                // Move the center since it may move when rotating around the given origin.
-                Vector3d origin = rotation.getOrigin().div(Util.PIXELS_PER_BLOCK); // Unit: m
-                // c_world = R(c_local - o) + o
-                Vector3d transformedCenter = elementCenter.sub(origin, new Vector3d()); // Unit: m
-                elementCenter = transformedCenter.mul(rotationMatrix).add(origin);
-
+                Matrix3d rotationMatrix = getRotationMatrix(rotation);
                 // Rotate the inertia tensor. Store result in elementInertiaTensor.
                 rotationMatrix.mul(elementInertiaTensor, elementInertiaTensor).mul(rotationMatrix.transpose());
             }
 
             // We now need to move the inertia tensor from the local space of the element
-            // to the world space. We use the parallel axis theorem for this. Move by
-            // the center of the element.
-            // I_world = I_local + m * ( (r^2 * I) - r * r^T )
-            // Where in our case, r = the center of the element in world space.
+            // to be around the center of mass. We use the parallel axis theorem for this.
+            // Move by the center of the element.
+            // I_com = I_local + m * ( (r^2 * I) - r * r^T )
+            // Where in our case, r = the center of the element relative to the center of mass.
             // And I = the 3x3 identity matrix.
             elementInertiaTensor = elementInertiaTensor.add(
                  (new Matrix3d().identity().scale(elementCenter.lengthSquared()) // r^2 * I
@@ -157,9 +147,47 @@ public class InertiaTensor {
                 continue;
             }
             double elementVolume = getVolume(element); // Unit: m^3
-            Vector3d elementCenter = element.getMiddle().div(Util.PIXELS_PER_BLOCK); // Unit: m
+            Vector3d elementCenter = getElementCenter(element); // Unit: m
             centerOfMass.add(elementCenter.mul(elementVolume / volume));
         }
         return centerOfMass;
+    }
+
+    /**
+     * Get the center of an element in world space, taking the element's rotation
+     * into account.
+     *
+     * @param element The element.
+     * @return The center of the element. Unit: m
+     */
+    private static Vector3d getElementCenter(ModelElement element) {
+        Vector3d elementCenter = element.getMiddle().div(Util.PIXELS_PER_BLOCK); // Unit: m
+
+        // If we have rotation, the center may move when rotating around the given origin.
+        ModelElementRotation rotation = element.getRotation();
+        if (rotation != null) {
+            Matrix3d rotationMatrix = getRotationMatrix(rotation);
+            Vector3d origin = rotation.getOrigin().div(Util.PIXELS_PER_BLOCK); // Unit: m
+            // c_world = R(c_local - o) + o
+            elementCenter.sub(origin).mul(rotationMatrix).add(origin);
+        }
+        return elementCenter;
+    }
+
+    /**
+     * Get the rotation matrix of an element rotation.
+     *
+     * @param rotation The element rotation.
+     * @return The rotation matrix.
+     */
+    private static Matrix3d getRotationMatrix(ModelElementRotation rotation) {
+        Matrix3d rotationMatrix = new Matrix3d().identity();
+        double angleRad = Math.toRadians(rotation.getAngle()); // Unit: rad
+        switch (rotation.getAxis()) {
+            case X -> rotationMatrix.rotateX(angleRad);
+            case Y -> rotationMatrix.rotateY(angleRad);
+            case Z -> rotationMatrix.rotateZ(angleRad);
+        }
+        return rotationMatrix;
     }
 }
